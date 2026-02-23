@@ -1,0 +1,32 @@
+/* Variables CSS para diseño moderno premium (Dark Mode estricto en este caso) */
+:root {
+  /* Colors */
+  --bg-dark: #0a0b16;
+  /* Dark blue/purple background */
+  --bg-dark-accent: #11111e;
+
+  --primary: #6366f1;
+  /* Indigo premium */
+  --primary-glow: rgba(99, 102, 241, 0.4);
+  --primary-hover: #4f46e5;
+
+  --text-light: #f8fafc;
+  --text-muted: #8b8d9b;
+  /* Softer text color */
+
+  --danger: #ef4444;
+  --success: #10b981;
+
+  /* Glassmorphism settings */
+  --glass-bg: rgba(255, 255, 255, 0.02);
+  --glass-border: rgba(255, 255, 255, 0.06);
+  --glass-blur: blur(20px);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+
+  /* Typography */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  /* Layout */
+  --max-width: 1200px;
+  --transition-smooth: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
