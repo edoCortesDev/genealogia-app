@@ -1,0 +1,9 @@
+# WebStorm / IntelliJ
+.idea/
+
+# Mac / Windows (Archivos ocultos del sistema)
+.DS_Store
+Thumbs.db
+
+# Caché general
+*.log
