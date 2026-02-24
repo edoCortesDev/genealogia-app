@@ -160,7 +160,8 @@
 }
 
 .modern-form input,
-.modern-form select {
+.modern-form select,
+.modern-form textarea {
     width: 100%;
     padding: 0.75rem 1rem;
     background: rgba(0, 0, 0, 0.2);
@@ -170,10 +171,12 @@
     font-family: inherit;
     font-size: 1rem;
     transition: var(--transition-smooth);
+    resize: vertical;
 }
 
 .modern-form input:focus,
-.modern-form select:focus {
+.modern-form select:focus,
+.modern-form textarea:focus {
     outline: none;
     border-color: var(--primary);
     box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
