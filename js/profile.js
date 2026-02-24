@@ -1,9 +1,9 @@
 // profile.js
-// Lógica para gestionar el perfil del usuario utilizando Supabase
+// LÃ³gica para gestionar el perfil del usuario utilizando Supabase
 
-import { getSupabase } from './config.js';
-import { checkAuth } from './auth.js';
-import { showLoader, hideLoader } from './ui.js';
+import {getSupabase} from './config.js';
+import {checkAuth} from './auth.js';
+import {showLoader, hideLoader} from './ui.js';
 
 let currentUser = null;
 
@@ -30,7 +30,7 @@ async function loadProfileData() {
     const supabase = getSupabase();
     showLoader();
 
-    const { data: profile, error } = await supabase
+    const {data: profile, error} = await supabase
         .from('profiles')
         .select('*')
         .eq('id', currentUser.id)
@@ -64,7 +64,7 @@ async function saveProfileData() {
 
     showLoader();
 
-    const { error } = await supabase
+    const {error} = await supabase
         .from('profiles')
         .update({
             first_name: firstName,
@@ -86,7 +86,7 @@ async function saveProfileData() {
 
         // Efecto visual de guardado exitoso (glow extra temporal)
         const btn = document.querySelector('#profile-form button[type="submit"]');
-        btn.textContent = "¡Guardado!";
+        btn.textContent = "Â¡Guardado!";
         btn.classList.add('btn-glow');
         btn.style.boxShadow = "0 0 20px var(--success)";
         setTimeout(() => {

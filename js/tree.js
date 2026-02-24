@@ -1,5 +1,5 @@
 // tree.js
-// Lógica para dibujar el árbol genealógico en el DOM
+// Lógica de Renderizado Híbrido (HTML + SVG) con Algoritmo de Linaje Directo
 
 const FLAGS = {
     "CL": "🇨🇱", "AR": "🇦🇷", "PE": "🇵🇪", "CO": "🇨🇴", "VE": "🇻🇪", "EC": "🇪🇨",
@@ -16,114 +16,353 @@ function getFlagEmoji(code) {
 
 class FamilyTree {
     constructor(containerId) {
-        this.container = document.getElementById(containerId);
+        this.wrapper = document.getElementById('tree-canvas-wrapper');
+        this.transformLayer = document.getElementById('tree-transform-layer');
+        this.svgLayer = document.getElementById('tree-svg-layer');
+        this.htmlLayer = document.getElementById('tree-html-layer');
+
         this.nodesMap = new Map();
-        this.adjacency = new Map();
+        this.nodes = [];
+        this.links = [];
+
+        // Cámara
+        this.zoom = 1;
+        this.panX = 0;
+        this.panY = 0;
+        this.isDragging = false;
+        this.startX = 0;
+        this.startY = 0;
+
+        this.init();
+    }
+
+    init() {
+        if (!this.wrapper) return;
+        this.centerCamera();
+        this.setupEvents();
+    }
+
+    resize() {
+        if (this.panX === 0 && this.panY === 0) {
+            this.centerCamera();
+        }
+    }
+
+    centerCamera() {
+        if (!this.wrapper) return;
+        const width = this.wrapper.clientWidth;
+        const height = this.wrapper.clientHeight;
+        this.panX = width / 2;
+        this.panY = height / 2; // Centrar al medio de la pantalla
+        this.zoom = 1;
+        this.applyTransform();
+    }
+
+    applyTransform() {
+        if (this.transformLayer) {
+            this.transformLayer.style.transform = `translate(${this.panX}px, ${this.panY}px) scale(${this.zoom})`;
+        }
+    }
+
+    setupEvents() {
+        const viewTree = document.getElementById('view-tree');
+        if (!viewTree) return;
+
+        viewTree.addEventListener('mousedown', (e) => {
+            if (e.target.closest('button') || e.target.closest('.glass-panel')) return;
+            this.isDragging = true;
+            this.startX = e.clientX - this.panX;
+            this.startY = e.clientY - this.panY;
+            viewTree.style.cursor = 'grabbing';
+        });
+
+        window.addEventListener('mouseup', () => {
+            this.isDragging = false;
+            if (viewTree) viewTree.style.cursor = 'grab';
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!this.isDragging) return;
+            this.panX = e.clientX - this.startX;
+            this.panY = e.clientY - this.startY;
+            this.applyTransform();
+        });
+
+        const btnIn = document.getElementById('btn-zoom-in');
+        const btnOut = document.getElementById('btn-zoom-out');
+        const btnReset = document.getElementById('btn-zoom-reset');
+
+        if (btnIn) btnIn.addEventListener('click', () => {
+            this.zoom *= 1.2;
+            this.applyTransform();
+        });
+        if (btnOut) btnOut.addEventListener('click', () => {
+            this.zoom /= 1.2;
+            this.applyTransform();
+        });
+        if (btnReset) btnReset.addEventListener('click', () => {
+            this.centerCamera();
+        });
     }
 
     updateData(dbMembers) {
-        if (!this.container) return;
-        this.container.innerHTML = '';
+        this.nodes = [];
+        this.links = [];
 
         if (!dbMembers || dbMembers.length === 0) {
-            this.container.innerHTML = '<p class="text-muted">No hay familiares registrados.</p>';
+            this.renderDOM();
             return;
         }
 
-        // Build adjacency map
-        this.nodesMap.clear();
-        this.adjacency.clear();
+        const xSpacing = 150;
+        const ySpacing = 300;
+
+        // 1. Mapeo de Relaciones Estrictas
+        const nodesMap = new Map();
+        dbMembers.forEach(m => {
+            nodesMap.set(m.id, {
+                ...m,
+                parents: [], children: [], spouses: [], siblings: [],
+                x: 0, y: 0
+            });
+        });
 
         dbMembers.forEach(m => {
-            this.nodesMap.set(m.id, m);
-            if (!this.adjacency.has(m.id)) this.adjacency.set(m.id, []);
-            if (m.related_to && !this.adjacency.has(m.related_to)) this.adjacency.set(m.related_to, []);
+            if (!m.related_to || m.relationship_type === 'self') return;
+            const source = nodesMap.get(m.id);
+            const target = nodesMap.get(m.related_to);
+            if (!source || !target) return;
 
-            if (m.related_to) {
-                // Bidireccional
-                this.adjacency.get(m.id).push({ id: m.related_to, rel: m.relationship_type, dir: 'up' });
-                this.adjacency.get(m.related_to).push({ id: m.id, rel: m.relationship_type, dir: 'down' });
+            if (m.relationship_type === 'parent') {
+                source.children.push(target.id);
+                target.parents.push(source.id);
+                this.links.push({source: source.id, target: target.id, type: 'parent-child'});
+            } else if (m.relationship_type === 'child') {
+                source.parents.push(target.id);
+                target.children.push(source.id);
+                this.links.push({source: target.id, target: source.id, type: 'parent-child'});
+            } else if (m.relationship_type === 'spouse') {
+                source.spouses.push(target.id);
+                target.spouses.push(source.id);
+                if (!this.links.some(l => l.type === 'spouse' && l.target === source.id)) {
+                    this.links.push({source: source.id, target: target.id, type: 'spouse'});
+                }
+            } else if (m.relationship_type === 'sibling') {
+                source.siblings.push(target.id);
+                target.siblings.push(source.id);
+                if (!this.links.some(l => l.type === 'sibling' && l.target === source.id)) {
+                    this.links.push({source: source.id, target: target.id, type: 'sibling'});
+                }
             }
         });
 
-        // Encontrar raíz (self)
-        const selfMem = dbMembers.find(m => m.relationship_type === 'self' || !m.related_to) || dbMembers[0];
-        const visited = new Set(); // Prevenir loops
+        const root = dbMembers.find(m => m.relationship_type === 'self') || dbMembers[0];
+        let positioned = new Set();
 
-        const treeHtml = `<ul>${this.buildNode(selfMem, visited)}</ul>`;
-        this.container.innerHTML = treeHtml;
+        // 2. Funciones Algoritmo de Linaje
 
-        // Auto center scroll
-        setTimeout(() => {
-            const wrapper = this.container.parentElement;
-            if (wrapper) {
-                const s = (this.container.scrollWidth - wrapper.clientWidth) / 2;
-                const topScroll = (this.container.scrollHeight - wrapper.clientHeight); // scroll to bottom to see root si crece arriba
-                if (s > 0) wrapper.scrollLeft = s;
-                if (topScroll > 0) wrapper.scrollTop = topScroll;
-            }
-        }, 50);
-    }
-
-    buildNode(p, visited) {
-        if (!p || visited.has(p.id)) return '';
-        visited.add(p.id);
-
-        const n1 = (p.first_name || "").split(' ')[0];
-        const s1 = (p.last_name || "").split(' ')[0];
-
-        let bY = p.birth_date ? p.birth_date.substring(0, 4) : "";
-        let dY = p.death_date ? p.death_date.substring(0, 4) : "";
-        const dd = dY ? `${bY} - ${dY}` : bY;
-
-        const isDead = p.death_date ? true : false;
-        const crossSymbol = isDead ? `<span style="color:#ccc; margin-right:3px; font-weight:normal;">†</span>` : '';
-
-        const flag = getFlagEmoji(p.nationality);
-        const flagHTML = flag ? `<span style="font-size:0.8rem; margin-left:4px;">${flag}</span>` : '';
-
-        const photo = p.photo_url || `img/default.jpg`;
-
-        let h = `<li>
-            <a href="#" onclick="if(window.openPersonDetails){window.openPersonDetails('${p.id}');} return false;" class="tree-node">
-                <img src="${photo}" onerror="this.src='https://ui-avatars.com/api/?name=${n1}+${s1}&background=random'">
-                <span class="name" style="margin-top:0.5rem; display:block;">${crossSymbol}${n1} ${s1}${flagHTML}</span>
-                <span class="role" style="font-size:0.8rem;opacity:0.8; display:block;">${dd}</span>
-            </a>`;
-
-        // Find parents
-        const neighbors = this.adjacency.get(p.id) || [];
-        const parents = [];
-
-        neighbors.forEach(n => {
-            let resolvedRole = '';
-            // Si yo apunto a X como PADRE (dir=up, rel=parent), X es mi Parent.
-            // Si X me apunta a mi como HIJO (dir=down, rel=child), X es mi Parent.
-            if (n.dir === 'up') {
-                if (n.rel === 'parent') resolvedRole = 'child'; // Subiendo hacia un hijo? Espera.
-                else if (n.rel === 'child') resolvedRole = 'parent';
-                else resolvedRole = n.rel;
-            } else {
-                if (n.rel === 'parent') resolvedRole = 'parent';
-                else if (n.rel === 'child') resolvedRole = 'child';
-                else resolvedRole = n.rel;
-            }
-
-            // CORRECCION SIMPLE: 
-            // Si la db dice que p.id is child of n.id (meaning n is parent), then n is parent.
-            if (resolvedRole === 'parent' && !visited.has(n.id)) {
-                const parMem = this.nodesMap.get(n.id);
-                if (parMem) parents.push(parMem);
-            }
-        });
-
-        if (parents.length > 0) {
-            h += '<ul>';
-            parents.forEach(par => h += this.buildNode(par, new Set(visited))); // pass a clone of visited so branches don't block each other
-            h += '</ul>';
+        // Calcula qué tan lejos llegan los ancestros para asignar el ancho matemático perfecto
+        function getAncestorDepth(nodeId) {
+            const node = nodesMap.get(nodeId);
+            if (!node || !node.parents || node.parents.length === 0) return 0;
+            return 1 + Math.max(...node.parents.map(pId => getAncestorDepth(pId)));
         }
 
-        h += '</li>';
-        return h;
+        const actualDepth = root ? getAncestorDepth(root.id) : 0;
+        const maxAncDepth = Math.min(actualDepth, 5); // Tope de seguridad
+
+        // Dibuja hacia ARRIBA de forma binaria (Padres, Abuelos)
+        function positionAncestors(nodeId, x, y, level) {
+            const node = nodesMap.get(nodeId);
+            if (!node || positioned.has(nodeId)) return;
+
+            node.x = x;
+            node.y = y;
+            positioned.add(nodeId);
+
+            if (node.parents && node.parents.length > 0) {
+                let parents = node.parents.map(id => nodesMap.get(id)).filter(Boolean);
+                let p1 = parents.find(p => p.gender === 'M') || parents[0]; // Padre idealmente a la izquierda
+                let p2 = parents.find(p => p.gender === 'F') || parents[1]; // Madre idealmente a la derecha
+                if (p1 === p2 && parents.length > 1) p2 = parents[1];
+
+                // El espacio horizontal se divide por la mitad en cada generación más vieja
+                const currentSpacing = (xSpacing / 1.5) * Math.pow(2, maxAncDepth - level - 1);
+
+                if (p1) positionAncestors(p1.id, x - currentSpacing, y - ySpacing, level + 1);
+                if (p2 && p2 !== p1) positionAncestors(p2.id, x + currentSpacing, y - ySpacing, level + 1);
+            }
+        }
+
+        // Dibuja hacia ABAJO (Hijos) y LATERAL (Hermanos/Cónyuges)
+        function positionDescendants(nodeId, x, y, level) {
+            const node = nodesMap.get(nodeId);
+            if (!node || positioned.has(nodeId)) return;
+
+            node.x = x;
+            node.y = y;
+            positioned.add(nodeId);
+
+            // Cónyuges a la derecha
+            if (node.spouses && node.spouses.length > 0) {
+                node.spouses.forEach((spId, i) => {
+                    const spNode = nodesMap.get(spId);
+                    if (spNode && !positioned.has(spId)) {
+                        spNode.x = x + (xSpacing * (i + 1));
+                        spNode.y = y;
+                        positioned.add(spId);
+                    }
+                });
+            }
+
+            // Hermanos a la izquierda (Solo si es el root para no distorsionar)
+            if (level === 0 && node.siblings && node.siblings.length > 0) {
+                node.siblings.forEach((sibId, i) => {
+                    const sibNode = nodesMap.get(sibId);
+                    if (sibNode && !positioned.has(sibId)) {
+                        sibNode.x = x - (xSpacing * (i + 1));
+                        sibNode.y = y;
+                        positioned.add(sibId);
+                    }
+                });
+            }
+
+            // Hijos hacia abajo, centrados
+            if (node.children && node.children.length > 0) {
+                const totalChildren = node.children.length;
+                const startX = x - ((totalChildren - 1) * xSpacing) / 2;
+
+                node.children.forEach((childId, i) => {
+                    positionDescendants(childId, startX + (i * xSpacing), y + ySpacing, level + 1);
+                });
+            }
+        }
+
+        // 3. Ejecutar posicionamiento empezando por el ROOT (Yo)
+        if (root) {
+            positionAncestors(root.id, 0, 0, 0);
+            positioned.delete(root.id); // Remover del tracking para procesar sus hijos
+            positionDescendants(root.id, 0, 0, 0);
+        }
+
+        // 4. Mapear datos limpios
+        Array.from(nodesMap.values()).forEach(mem => {
+            const fName = mem.first_name ? mem.first_name.split(' ')[0] : '';
+            const lName = mem.last_name ? mem.last_name.split(' ')[0] : '';
+
+            // Si quedó alguien "huérfano" lo ponemos lejos para que no rompa el diseño
+            if (!positioned.has(mem.id)) {
+                mem.x = (this.nodes.length + 1) * xSpacing;
+                mem.y = ySpacing * 2;
+            }
+
+            this.nodes.push({
+                id: mem.id,
+                x: mem.x,
+                y: mem.y,
+                name: `${fName} ${lName}`.trim(),
+                photo: mem.photo_url || null,
+                birthDate: mem.birth_date,
+                deathDate: mem.death_date,
+                nationality: mem.nationality,
+                gender: mem.gender
+            });
+        });
+
+        this.renderDOM();
+    }
+
+    renderDOM() {
+        if (!this.svgLayer || !this.htmlLayer) return;
+
+        this.svgLayer.innerHTML = '';
+        this.htmlLayer.innerHTML = '';
+
+        const offsetX = 5000;
+        const offsetY = 5000;
+
+        // 1. Dibujar Líneas Vectoriales
+        let svgContent = '';
+        this.links.forEach(link => {
+            const source = this.nodes.find(n => n.id === link.source);
+            const target = this.nodes.find(n => n.id === link.target);
+            if (!source || !target) return;
+
+            if (link.type === 'spouse' || link.type === 'sibling') {
+                const isLeft = source.x > target.x;
+                const sEdge = source.x + (isLeft ? -80 : 80) + offsetX;
+                const tEdge = target.x + (isLeft ? 80 : -80) + offsetX;
+                const sY = source.y + offsetY;
+                const tY = target.y + offsetY;
+
+                // Línea punteada de color distinto para hermanos/esposos
+                svgContent += `<line x1="${sEdge}" y1="${sY}" x2="${tEdge}" y2="${tY}" stroke="rgba(168, 85, 247, 0.5)" stroke-width="2" stroke-dasharray="5,5" />`;
+            } else if (link.type === 'parent-child') {
+                // Siempre asume que el source es el Padre (está arriba, Y menor)
+                let parent = source;
+                let child = target;
+                if (source.y > target.y) {
+                    parent = target;
+                    child = source;
+                }
+
+                const sY = parent.y + 70 + offsetY; // Base del padre
+                const tY = child.y - 70 + offsetY; // Tope del hijo
+                const midY = (sY + tY) / 2;
+                const sX = parent.x + offsetX;
+                const tX = child.x + offsetX;
+
+                // Línea Ortogonal Perfecta (Codos)
+                svgContent += `<path d="M ${sX} ${sY} L ${sX} ${midY} L ${tX} ${midY} L ${tX} ${tY}" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2" stroke-linejoin="round"/>`;
+            }
+        });
+        this.svgLayer.innerHTML = svgContent;
+
+// 2. Dibujar Tarjetas
+        let htmlContent = '';
+        this.nodes.forEach(node => {
+            const isDead = node.deathDate ? true : false;
+            const crossSymbol = isDead ? `<span style="color:#ccc; margin-right:3px; font-weight:normal;">†</span>` : '';
+
+            // MODIFICACIÓN: Ahora la bandera es un bloque independiente con su propio margen
+            const flagHTML = getFlagEmoji(node.nationality)
+                ? `<span style="display: block; font-size: 1.1rem; margin-top: 4px; margin-bottom: 2px;">${getFlagEmoji(node.nationality)}</span>`
+                : '';
+
+            const photoSrc = node.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(node.name)}&background=random`;
+
+            let bY = node.birthDate ? node.birthDate.substring(0, 4) : "";
+            let dY = node.deathDate ? node.deathDate.substring(0, 4) : "";
+            const dateStr = (bY || dY) ? `${bY || '?'} - ${dY || 'Presente'}` : "Sin fecha";
+
+            let borderColor = 'rgba(255,255,255,0.15)';
+            if (node.gender === 'F') borderColor = '#ec4899';
+            else if (node.gender === 'M') borderColor = '#06b6d4';
+
+            htmlContent += `
+                <div class="glass-panel" 
+                     style="position: absolute; left: ${node.x}px; top: ${node.y}px; transform: translate(-50%, -50%); width: 160px; padding: 15px; text-align: center; cursor: pointer; border-color: ${borderColor}; transition: var(--transition-smooth);" 
+                     onmouseover="this.style.transform='translate(-50%, -50%) scale(1.05)'; this.style.boxShadow='0 0 20px var(--primary-glow)';" 
+                     onmouseout="this.style.transform='translate(-50%, -50%) scale(1)'; this.style.boxShadow='var(--glass-shadow)';"
+                     onclick="if(window.openPersonDetails){window.openPersonDetails('${node.id}');}">
+                    
+                    <img src="${photoSrc}" style="width: 70px; height: 70px; border-radius: 50%; border: 3px solid ${borderColor}; object-fit: cover; margin-bottom: 10px; background: #333;">
+                    
+                    <span style="display: block; font-weight: 600; font-size: 0.95rem; color: var(--text-light); line-height: 1.2;">${crossSymbol}${node.name}</span>
+                    
+                    ${flagHTML}
+                    
+                    <span style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">${dateStr}</span>
+                    
+                </div>
+            `;
+        });
+        this.htmlLayer.innerHTML = htmlContent;
     }
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (document.getElementById('view-tree')) {
+        window.familyTree = new FamilyTree('tree-canvas-wrapper');
+    }
+});

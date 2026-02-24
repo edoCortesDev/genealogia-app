@@ -1,11 +1,11 @@
 // auth.js
-import { getSupabase } from './config.js';
+import {getSupabase} from './config.js';
 
 export const checkAuth = async () => {
     const supabase = getSupabase();
     if (!supabase) return null;
 
-    const { data: { session }, error } = await supabase.auth.getSession();
+    const {data: {session}, error} = await supabase.auth.getSession();
     if (error) {
         console.error("Auth check error:", error);
         return null;
@@ -23,16 +23,16 @@ export const logout = async () => {
 
 export const loginUsuario = async (email, password) => {
     const supabase = getSupabase();
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const {data, error} = await supabase.auth.signInWithPassword({
         email,
         password
     });
-    return { data, error };
+    return {data, error};
 };
 
 export const registrarUsuario = async (email, password, firstName, lastName) => {
     const supabase = getSupabase();
-    const { data, error } = await supabase.auth.signUp({
+    const {data, error} = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -42,5 +42,5 @@ export const registrarUsuario = async (email, password, firstName, lastName) => 
             }
         }
     });
-    return { data, error };
+    return {data, error};
 };

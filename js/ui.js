@@ -1,5 +1,5 @@
 // ui.js
-import { checkAuth, logout, loginUsuario, registrarUsuario } from './auth.js';
+import {checkAuth, logout, loginUsuario, registrarUsuario} from './auth.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
 
@@ -7,14 +7,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (document.body.classList.contains('landing-page')) {
         setupLandingModals();
 
-        // Si ya está logueado, redirigir a app.html
+        // Si ya estÃ¡ logueado, redirigir a app.html
         const user = await checkAuth();
         if (user) {
             window.location.href = 'app.html';
         }
     }
 
-    // Si estamos en la página de la aplicación, verificamos auth y configuramos UI
+    // Si estamos en la pÃ¡gina de la aplicaciÃ³n, verificamos auth y configuramos UI
     if (document.body.classList.contains('app-page')) {
         const user = await checkAuth();
         if (!user) {
@@ -79,7 +79,7 @@ function setupLandingModals() {
             errorEl.classList.add('hidden');
             showLoader();
 
-            const { data, error } = await loginUsuario(email, password);
+            const {data, error} = await loginUsuario(email, password);
             hideLoader();
 
             if (error) {
@@ -108,14 +108,14 @@ function setupLandingModals() {
             successEl.classList.add('hidden');
             showLoader();
 
-            const { data, error } = await registrarUsuario(email, password, firstName, lastName);
+            const {data, error} = await registrarUsuario(email, password, firstName, lastName);
             hideLoader();
 
             if (error) {
                 errorEl.textContent = error.message;
                 errorEl.classList.remove('hidden');
             } else {
-                successEl.textContent = "¡Registro exitoso! Iniciando sesión...";
+                successEl.textContent = "Â¡Registro exitoso! Iniciando sesiÃ³n...";
                 successEl.classList.remove('hidden');
                 setTimeout(() => window.location.href = 'app.html', 1500);
             }
@@ -187,11 +187,11 @@ function setupViewRouter() {
         const dropdown = document.getElementById('user-dropdown');
         if (dropdown) dropdown.classList.add('hidden');
 
-        // Ocultar menú móvil tras navegar
+        // Ocultar menÃº mÃ³vil tras navegar
         const mobileMenu = document.getElementById('nav-links-wrapper');
         if (mobileMenu) mobileMenu.classList.remove('active');
 
-        // Si es el árbol, necesitamos decirle que se redimensione para que el canvas pinte bien
+        // Si es el Ã¡rbol, necesitamos decirle que se redimensione para que el canvas pinte bien
         if (viewId === 'tree' && window.familyTree) {
             window.familyTree.resize();
         }
@@ -205,7 +205,7 @@ function setupViewRouter() {
     const btnTimeline = document.getElementById('menu-timeline');
     const logo = document.querySelector('.logo');
 
-    // Menú móvil (Kebab) toggle
+    // MenÃº mÃ³vil (Kebab) toggle
     const btnMobileToggle = document.getElementById('mobile-menu-toggle');
     const mobileMenu = document.getElementById('nav-links-wrapper');
     if (btnMobileToggle && mobileMenu) {
@@ -216,15 +216,33 @@ function setupViewRouter() {
     }
 
     // Asignar listeners
-    if (btnHome) btnHome.addEventListener('click', (e) => { e.preventDefault(); switchView('dashboard'); });
-    if (logo) logo.addEventListener('click', (e) => { e.preventDefault(); switchView('dashboard'); });
+    if (btnHome) btnHome.addEventListener('click', (e) => {
+        e.preventDefault();
+        switchView('dashboard');
+    });
+    if (logo) logo.addEventListener('click', (e) => {
+        e.preventDefault();
+        switchView('dashboard');
+    });
 
-    if (btnTree) btnTree.addEventListener('click', (e) => { e.preventDefault(); switchView('tree'); });
-    if (btnTimeline) btnTimeline.addEventListener('click', (e) => { e.preventDefault(); switchView('timeline'); });
-    if (btnFamily) btnFamily.addEventListener('click', (e) => { e.preventDefault(); switchView('manage'); });
-    if (btnProfile) btnProfile.addEventListener('click', (e) => { e.preventDefault(); switchView('profile'); });
+    if (btnTree) btnTree.addEventListener('click', (e) => {
+        e.preventDefault();
+        switchView('tree');
+    });
+    if (btnTimeline) btnTimeline.addEventListener('click', (e) => {
+        e.preventDefault();
+        switchView('timeline');
+    });
+    if (btnFamily) btnFamily.addEventListener('click', (e) => {
+        e.preventDefault();
+        switchView('manage');
+    });
+    if (btnProfile) btnProfile.addEventListener('click', (e) => {
+        e.preventDefault();
+        switchView('profile');
+    });
 
-    // Botón volver del detalle
+    // BotÃ³n volver del detalle
     const btnBack = document.getElementById('btn-back-dashboard');
     if (btnBack) btnBack.addEventListener('click', () => switchView('dashboard'));
 }

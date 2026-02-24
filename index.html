@@ -3,130 +3,177 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
     <title>Genealogía Moderna - Descubre tus raíces</title>
     <!-- Google Fonts: Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect"
+          href="https://fonts.googleapis.com">
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet">
 
     <!-- CSS -->
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet"
+          href="css/style.css">
 </head>
 
 <body class="landing-page dark-mode">
 
-    <!-- Header Navigation -->
-    <header class="glass-header">
-        <div class="container nav-container">
-            <div class="logo">
-                <div class="logo-icon"></div>
-                <span>Genealogía Moderna</span>
-            </div>
-            <nav class="auth-nav">
-                <button class="btn btn-ghost" id="btn-login">Iniciar
-                    Sesión</button>
-                <button class="btn btn-primary" id="btn-signup">Crear
-                    Cuenta</button>
-            </nav>
+<!-- Header Navigation -->
+<header class="glass-header">
+    <div class="container nav-container">
+        <div class="logo">
+            <div class="logo-icon"></div>
+            <span>Genealogía Moderna</span>
         </div>
-    </header>
+        <nav class="auth-nav">
+            <button class="btn btn-ghost"
+                    id="btn-login">Iniciar
+                                   Sesión
+            </button>
+            <button class="btn btn-primary"
+                    id="btn-signup">Crear
+                                    Cuenta
+            </button>
+        </nav>
+    </div>
+</header>
 
-    <!-- Hero Section -->
-    <main>
-        <section class="hero-section">
-            <div class="hero-content">
-                <h1 class="hero-title">Preserva el legado de tu <span class="text-gradient">familia</span> para siempre.
-                </h1>
-                <p class="hero-subtitle">Una plataforma visualmente asombrosa para construir, gestionar y explorar tu
-                    árbol genealógico en tiempo real con total privacidad.</p>
-                <div class="hero-actions">
-                    <button class="btn btn-primary btn-large" id="btn-hero-start">Empezar
-                        Ahora</button>
-                    <button class="btn btn-outline btn-large">Ver Demo</button>
+<!-- Hero Section -->
+<main>
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">Preserva el legado de tu
+                <span class="text-gradient">familia</span> para siempre.
+            </h1>
+            <p class="hero-subtitle">Una plataforma visualmente asombrosa para construir, gestionar
+                                     y explorar tu
+                                     árbol genealógico en tiempo real con total privacidad.</p>
+            <div class="hero-actions">
+                <button class="btn btn-primary btn-large"
+                        id="btn-hero-start">Empezar
+                                            Ahora
+                </button>
+                <button class="btn btn-outline btn-large">Ver Demo</button>
+            </div>
+        </div>
+        <div class="hero-graphics">
+            <!-- Abstract visual representation of a network/tree for the landing page -->
+            <div class="abstract-node n1"></div>
+            <div class="abstract-node n2"></div>
+            <div class="abstract-node n3"></div>
+            <div class="abstract-line l1"></div>
+            <div class="abstract-line l2"></div>
+        </div>
+    </section>
+
+    <section class="features-section container">
+        <!-- Features details to be filled later -->
+    </section>
+</main>
+
+<!-- Auth Modals -->
+<!-- Login Modal -->
+<div id="modal-login"
+     class="modal hidden">
+    <div class="modal-overlay"></div>
+    <div class="modal-content glass-panel">
+        <button class="btn-close">&times;</button>
+        <h2 class="mb-2">Iniciar Sesión</h2>
+        <form id="form-login"
+              class="modern-form">
+            <div class="form-group">
+                <label for="login-email">Correo Electrónico</label>
+                <input type="email"
+                       id="login-email"
+                       required>
+            </div>
+            <div class="form-group">
+                <label for="login-password">Contraseña</label>
+                <input type="password"
+                       id="login-password"
+                       required>
+            </div>
+            <div id="login-error"
+                 class="text-danger mb-1 hidden"
+                 style="font-size: 0.9rem;"></div>
+            <button type="submit"
+                    class="btn btn-primary btn-glow"
+                    style="width: 100%">Entrar
+            </button>
+            <div class="mt-1"
+                 style="text-align: center; font-size: 0.9rem; color: var(--text-muted);">
+                ¿No tienes cuenta? <a href="#"
+                                      id="link-to-register">Regístrate aquí</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Register Modal -->
+<div id="modal-register"
+     class="modal hidden">
+    <div class="modal-overlay"></div>
+    <div class="modal-content glass-panel">
+        <button class="btn-close">&times;</button>
+        <h2 class="mb-2">Crear Cuenta</h2>
+        <form id="form-register"
+              class="modern-form">
+            <div class="form-row"
+                 style="display: flex; gap: 1rem;">
+                <div class="form-group flex-1">
+                    <label for="reg-firstname">Nombre</label>
+                    <input type="text"
+                           id="reg-firstname"
+                           required>
+                </div>
+                <div class="form-group flex-1">
+                    <label for="reg-lastname">Apellido</label>
+                    <input type="text"
+                           id="reg-lastname"
+                           required>
                 </div>
             </div>
-            <div class="hero-graphics">
-                <!-- Abstract visual representation of a network/tree for the landing page -->
-                <div class="abstract-node n1"></div>
-                <div class="abstract-node n2"></div>
-                <div class="abstract-node n3"></div>
-                <div class="abstract-line l1"></div>
-                <div class="abstract-line l2"></div>
+            <div class="form-group">
+                <label for="reg-email">Correo Electrónico</label>
+                <input type="email"
+                       id="reg-email"
+                       required>
             </div>
-        </section>
-
-        <section class="features-section container">
-            <!-- Features details to be filled later -->
-        </section>
-    </main>
-
-    <!-- Auth Modals -->
-    <!-- Login Modal -->
-    <div id="modal-login" class="modal hidden">
-        <div class="modal-overlay"></div>
-        <div class="modal-content glass-panel">
-            <button class="btn-close">&times;</button>
-            <h2 class="mb-2">Iniciar Sesión</h2>
-            <form id="form-login" class="modern-form">
-                <div class="form-group">
-                    <label for="login-email">Correo Electrónico</label>
-                    <input type="email" id="login-email" required>
-                </div>
-                <div class="form-group">
-                    <label for="login-password">Contraseña</label>
-                    <input type="password" id="login-password" required>
-                </div>
-                <div id="login-error" class="text-danger mb-1 hidden" style="font-size: 0.9rem;"></div>
-                <button type="submit" class="btn btn-primary btn-glow" style="width: 100%">Entrar</button>
-                <div class="mt-1" style="text-align: center; font-size: 0.9rem; color: var(--text-muted);">
-                    ¿No tienes cuenta? <a href="#" id="link-to-register">Regístrate aquí</a>
-                </div>
-            </form>
-        </div>
+            <div class="form-group">
+                <label for="reg-password">Contraseña</label>
+                <input type="password"
+                       id="reg-password"
+                       required
+                       minlength="6">
+            </div>
+            <div id="reg-error"
+                 class="text-danger mb-1 hidden"
+                 style="font-size: 0.9rem;"></div>
+            <div id="reg-success"
+                 class="text-success mb-1 hidden"
+                 style="font-size: 0.9rem; color: var(--success);"></div>
+            <button type="submit"
+                    class="btn btn-primary btn-glow"
+                    style="width: 100%">Registrarse
+            </button>
+        </form>
     </div>
+</div>
 
-    <!-- Register Modal -->
-    <div id="modal-register" class="modal hidden">
-        <div class="modal-overlay"></div>
-        <div class="modal-content glass-panel">
-            <button class="btn-close">&times;</button>
-            <h2 class="mb-2">Crear Cuenta</h2>
-            <form id="form-register" class="modern-form">
-                <div class="form-row" style="display: flex; gap: 1rem;">
-                    <div class="form-group flex-1">
-                        <label for="reg-firstname">Nombre</label>
-                        <input type="text" id="reg-firstname" required>
-                    </div>
-                    <div class="form-group flex-1">
-                        <label for="reg-lastname">Apellido</label>
-                        <input type="text" id="reg-lastname" required>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="reg-email">Correo Electrónico</label>
-                    <input type="email" id="reg-email" required>
-                </div>
-                <div class="form-group">
-                    <label for="reg-password">Contraseña</label>
-                    <input type="password" id="reg-password" required minlength="6">
-                </div>
-                <div id="reg-error" class="text-danger mb-1 hidden" style="font-size: 0.9rem;"></div>
-                <div id="reg-success" class="text-success mb-1 hidden"
-                    style="font-size: 0.9rem; color: var(--success);"></div>
-                <button type="submit" class="btn btn-primary btn-glow" style="width: 100%">Registrarse</button>
-            </form>
-        </div>
-    </div>
+<!-- Global Full Page Loader -->
+<div id="global-loader"
+     class="global-loader hidden">
+    <div class="spinner"></div>
+</div>
 
-    <!-- Global Full Page Loader -->
-    <div id="global-loader" class="global-loader hidden">
-        <div class="spinner"></div>
-    </div>
-
-    <!-- Supabase JS Library -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/ui.js" type="module"></script>
+<!-- Supabase JS Library -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/ui.js"
+        type="module"></script>
 </body>
 
 </html>

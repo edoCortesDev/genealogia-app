@@ -1,9 +1,9 @@
 // family.js
-// Lógica para gestionar la familia utilizando Supabase
+// LÃ³gica para gestionar la familia utilizando Supabase
 
-import { getSupabase } from './config.js';
-import { checkAuth } from './auth.js';
-import { showLoader, hideLoader } from './ui.js';
+import {getSupabase} from './config.js';
+import {checkAuth} from './auth.js';
+import {showLoader, hideLoader} from './ui.js';
 
 let currentUser = null;
 let familyMembers = []; // Cache local
@@ -58,7 +58,10 @@ function setupUIEvents() {
             dropArea.addEventListener(eventName, preventDefaults, false);
         });
 
-        function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
 
         ['dragenter', 'dragover'].forEach(eventName => {
             dropArea.addEventListener(eventName, () => dropArea.classList.add('drag-over'), false);
@@ -88,7 +91,7 @@ function setupUIEvents() {
         }
     }
 
-    // Funcionalidad de Búsqueda en el Dashboard
+    // Funcionalidad de BÃºsqueda en el Dashboard
     const searchInput = document.getElementById('search-person');
     const resultsContainer = document.getElementById('search-results-container');
 
@@ -175,15 +178,15 @@ window.openPersonDetails = function (id) {
     addRow('Fallecimiento', mem.death_date ? `${mem.death_date} ${mem.death_place ? 'en ' + mem.death_place : ''}` : null);
     addRow('RUT', mem.rut);
     addRow('Nacionalidad', mem.nationality);
-    addRow('Profesión', mem.profession);
+    addRow('ProfesiÃ³n', mem.profession);
     addRow('Sexo', mem.gender === 'M' ? 'Masculino' : (mem.gender === 'F' ? 'Femenino' : mem.gender));
-    addRow('Relación familiar', getRelStr);
+    addRow('RelaciÃ³n familiar', getRelStr);
 
     let bioHtml = '';
     if (mem.bio) {
         bioHtml = `
         <div class="mt-2" style="background: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: 12px;">
-            <h4 style="color: var(--primary); margin-bottom: 0.5rem; font-size: 0.95rem;">Biografía e Historia</h4>
+            <h4 style="color: var(--primary); margin-bottom: 0.5rem; font-size: 0.95rem;">BiografÃ­a e Historia</h4>
             <p style="color: var(--text-light); line-height: 1.6; white-space: pre-wrap;">${mem.bio}</p>
         </div>`;
     }
@@ -212,7 +215,7 @@ function updateRelatedToDropdown() {
     const select = document.getElementById('mem-related-to');
     if (!select) return;
 
-    // Mantener la opción "Yo"
+    // Mantener la opciÃ³n "Yo"
     let optionsHtml = '<option value="self">Yo (Yo mismo)</option>';
 
     familyMembers.forEach(mem => {
@@ -235,10 +238,10 @@ export async function loadFamilyMembers() {
         <div class="skeleton-row"></div>
     `;
 
-    const { data: members, error } = await supabase
+    const {data: members, error} = await supabase
         .from('family_members')
         .select('*')
-        .order('created_at', { ascending: true });
+        .order('created_at', {ascending: true});
 
     if (error) {
         console.error("Error loading family members:", error);
@@ -251,12 +254,12 @@ export async function loadFamilyMembers() {
     updateRelatedToDropdown();
     updateDashboardStats(familyMembers);
 
-    // Avisar al árbol que los datos se actualizaron y debe repintarse
+    // Avisar al Ã¡rbol que los datos se actualizaron y debe repintarse
     if (window.familyTree) {
         window.familyTree.updateData(familyMembers);
     }
 
-    // Construir línea de tiempo
+    // Construir lÃ­nea de tiempo
     buildTimeline(familyMembers);
 }
 
@@ -292,18 +295,18 @@ function buildTimeline(members) {
     });
 
     if (events.length === 0) {
-        container.innerHTML = '<p class="text-muted text-center" style="padding: 2rem;">No hay eventos registrados (fechas de nacimiento/defunción) para construir la línea de tiempo.</p>';
+        container.innerHTML = '<p class="text-muted text-center" style="padding: 2rem;">No hay eventos registrados (fechas de nacimiento/defunciÃ³n) para construir la lÃ­nea de tiempo.</p>';
         return;
     }
 
-    // Ordenar cronológicamente (más antiguo primero)
+    // Ordenar cronolÃ³gicamente (mÃ¡s antiguo primero)
     events.sort((a, b) => a.date - b.date);
 
     let html = '';
 
     events.forEach((ev, index) => {
         const isLeft = index % 2 === 0;
-        const icon = ev.type === 'birth' ? '🌟' : '✝️';
+        const icon = ev.type === 'birth' ? 'ðŸŒŸ' : 'âœï¸';
         const colorClass = ev.type === 'birth' ? 'text-primary' : 'text-muted';
 
         const avatarHtml = ev.photo
@@ -338,7 +341,7 @@ function updateDashboardStats(members) {
     let hombres = members.filter(m => m.gender === 'M').length;
     let mujeres = members.filter(m => m.gender === 'F').length;
 
-    // Simplificación: Unidades familiares (simuladas por ahora)
+    // SimplificaciÃ³n: Unidades familiares (simuladas por ahora)
     let familias = new Set(members.map(m => m.last_name.split(' ')[0])).size;
 
     elPersonas.textContent = members.length;
@@ -354,7 +357,7 @@ function renderMembersList() {
     listContainer.innerHTML = '';
 
     if (familyMembers.length === 0) {
-        listContainer.innerHTML = '<p class="text-muted" style="text-align:center; padding: 2rem;">Aún no has agregado familiares. ¡Sé el primero!</p>';
+        listContainer.innerHTML = '<p class="text-muted" style="text-align:center; padding: 2rem;">AÃºn no has agregado familiares. Â¡SÃ© el primero!</p>';
         return;
     }
 
@@ -399,7 +402,7 @@ function renderMembersList() {
     document.querySelectorAll('.btn-delete-mem').forEach(btn => {
         btn.addEventListener('click', async (e) => {
             const id = e.target.dataset.id;
-            if (confirm("¿Estás seguro de eliminar a este familiar? Se eliminará del árbol.")) {
+            if (confirm("Â¿EstÃ¡s seguro de eliminar a este familiar? Se eliminarÃ¡ del Ã¡rbol.")) {
                 await deleteMember(id);
             }
         });
@@ -444,7 +447,7 @@ function getRelationshipString(type) {
         'parent': 'Padre/Madre',
         'child': 'Hijo/Hija',
         'sibling': 'Hermano/Hermana',
-        'spouse': 'Cónyuge'
+        'spouse': 'CÃ³nyuge'
     };
     return map[type] || type;
 }
@@ -455,14 +458,14 @@ async function uploadPhoto(file) {
     const fileName = `${Math.random()}.${fileExt}`;
     const filePath = `${currentUser.id}/${fileName}`;
 
-    const { data, error } = await supabase.storage
+    const {data, error} = await supabase.storage
         .from('family_photos')
         .upload(filePath, file);
 
     if (error) throw error;
 
     // Obtener public URL
-    const { data: { publicUrl } } = supabase.storage
+    const {data: {publicUrl}} = supabase.storage
         .from('family_photos')
         .getPublicUrl(filePath);
 
@@ -543,7 +546,7 @@ async function saveMember() {
         // Reset form UI y ocultar
         memberForm.reset();
         memberForm.removeAttribute('data-edit-id');
-        document.querySelector('.file-msg').textContent = "Arrastra una foto aquí o haz clic";
+        document.querySelector('.file-msg').textContent = "Arrastra una foto aquÃ­ o haz clic";
         document.getElementById('member-form-panel').classList.add('hidden');
 
         // Recargar la lista
@@ -561,7 +564,7 @@ async function deleteMember(id) {
     const supabase = getSupabase();
     showLoader();
 
-    const { error } = await supabase
+    const {error} = await supabase
         .from('family_members')
         .delete()
         .eq('id', id);

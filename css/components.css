@@ -624,6 +624,16 @@
     }
 
     .tree-toolbar {
+        top: 15px;
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
+        padding: 0.8rem;
+        /* Slightly larger padding */
+        z-index: 50;
+        /* Ensure it stays above canvas */
+        display: flex;
+        justify-content: center;
         width: max-content;
     }
 
@@ -715,141 +725,4 @@
     .nav-links-wrapper .btn {
         width: 100%;
     }
-}
-
-/* =========================================
-   Tree Diagram Layout (Org Chart Style)
-========================================= */
-.tree {
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-    /* Nodos de ancestros crecen hacia arriba, root abajo */
-    width: 100%;
-}
-
-.tree ul {
-    position: relative;
-    padding-bottom: 20px;
-    /* Space for downward connectors */
-    display: flex;
-    justify-content: center;
-    transition: all 0.5s;
-    margin: 0;
-    padding-left: 0;
-}
-
-.tree li {
-    float: left;
-    text-align: center;
-    list-style-type: none;
-    position: relative;
-    padding: 0 5px 20px 5px;
-    /* Padding for lines */
-    transition: all 0.5s;
-}
-
-/* Connectors using ::before and ::after */
-.tree li::before,
-.tree li::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    right: 50%;
-    /* Lines at bottom going up */
-    border-bottom: 2px solid #5c5c6b;
-    width: 50%;
-    height: 20px;
-}
-
-.tree li::after {
-    right: auto;
-    left: 50%;
-    border-left: 2px solid #5c5c6b;
-}
-
-/* Remove side connectors from elements without siblings */
-.tree li:only-child::after,
-.tree li:only-child::before {
-    display: none;
-}
-
-/* Remove space from the bottom of single children */
-.tree li:only-child {
-    padding-bottom: 0;
-}
-
-/* Remove left connector from first child and right connector from last child */
-.tree li:first-child::before,
-.tree li:last-child::after {
-    border: 0 none;
-}
-
-/* Add back the vertical connector to the last nodes */
-.tree li:last-child::before {
-    border-right: 2px solid #5c5c6b;
-    border-radius: 0 0 5px 0;
-    /* Curve */
-}
-
-.tree li:first-child::after {
-    border-radius: 0 0 0 5px;
-}
-
-/* Downward connectors from parents */
-.tree ul ul::before {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    border-left: 2px solid #5c5c6b;
-    width: 0;
-    height: 20px;
-}
-
-/* Node Cards */
-.tree li a.tree-node {
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 15px;
-    text-decoration: none;
-    color: var(--text);
-    display: inline-block;
-    border-radius: 16px;
-    background: rgba(10, 10, 15, 0.6);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    transition: all 0.3s;
-    width: 140px;
-    /* Fixed width to match Canvas feel */
-}
-
-/* Glassmorphism Hover */
-.tree li a.tree-node:hover,
-.tree li a.tree-node:hover+ul li a.tree-node {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid var(--primary);
-    box-shadow: 0 0 15px var(--primary);
-}
-
-/* Highlight connecting lines on hover */
-.tree li a.tree-node:hover+ul li::after,
-.tree li a.tree-node:hover+ul li::before,
-.tree li a.tree-node:hover+ul::before,
-.tree li a.tree-node:hover+ul ul::before {
-    border-color: var(--primary);
-}
-
-.tree li a.tree-node img {
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    border: 3px solid var(--secondary);
-    object-fit: cover;
-    margin-bottom: 10px;
-    background: #fff;
-}
-
-.tree li a.tree-node:hover img {
-    border-color: var(--primary);
-    box-shadow: 0 0 10px var(--primary);
 }
