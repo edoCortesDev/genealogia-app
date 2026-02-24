@@ -64,6 +64,64 @@ class FamilyTree {
         }
     }
 
+    flyToNode(nodeId) {
+        const node = this.nodes.find(n => n.id === nodeId);
+        if (!node || !this.wrapper) return;
+
+        const width = this.wrapper.clientWidth;
+        const height = this.wrapper.clientHeight;
+
+        // Objetivo: Centrar el nodo con un zoom perfecto (ej: 1.2x)
+        const targetZoom = 1.2;
+        const targetPanX = (width / 2) - (node.x * targetZoom);
+        const targetPanY = (height / 2) - (node.y * targetZoom);
+
+        // Variables de animación
+        const duration = 800; // 0.8 segundos de vuelo
+        const startPanX = this.panX;
+        const startPanY = this.panY;
+        const startZoom = this.zoom;
+        const startTime = performance.now();
+
+        // Bucle de animación suave (Curva Ease Out)
+        const animate = (currentTime) => {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+
+            // Función matemática para que desacelere al llegar
+            const ease = 1 - Math.pow(1 - progress, 3);
+
+            this.panX = startPanX + (targetPanX - startPanX) * ease;
+            this.panY = startPanY + (targetPanY - startPanY) * ease;
+            this.zoom = startZoom + (targetZoom - startZoom) * ease;
+
+            this.applyTransform();
+
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                // Al aterrizar, hacemos brillar la tarjeta
+                const nodes = Array.from(this.htmlLayer.children);
+                const targetEl = nodes.find(el => el.style.left === `${node.x}px` && el.style.top === `${node.y}px`);
+
+                if (targetEl) {
+                    targetEl.style.transition = 'all 0.3s';
+                    targetEl.style.boxShadow = '0 0 50px rgba(168, 85, 247, 0.8), inset 0 0 0 2px #a855f7';
+                    targetEl.style.transform = 'translate(-50%, -50%) scale(1.1)';
+                    targetEl.style.zIndex = '20';
+
+                    // Apagar el brillo después de 2 segundos
+                    setTimeout(() => {
+                        targetEl.style.boxShadow = '0 8px 32px 0 rgba(0, 0, 0, 0.4)';
+                        targetEl.style.transform = 'translate(-50%, -50%) scale(1)';
+                        targetEl.style.zIndex = '1';
+                    }, 2000);
+                }
+            }
+        };
+        requestAnimationFrame(animate);
+    }
+
     setupEvents() {
         const viewTree = document.getElementById('view-tree');
         if (!viewTree) return;
@@ -127,6 +185,68 @@ class FamilyTree {
         if (btnReset) btnReset.addEventListener('click', () => {
             this.centerCamera();
         });
+
+        // --- CONTROLES DE BÚSQUEDA Y VUELO ---
+        const searchBtn = document.getElementById('btn-tree-search');
+        const searchInput = document.getElementById('tree-search-input');
+        const searchResults = document.getElementById('tree-search-results');
+
+        if (searchBtn && searchInput && searchResults) {
+            // Desplegar/Ocultar el input
+            searchBtn.addEventListener('click', () => {
+                const isClosed = searchInput.style.width === '0px' || searchInput.style.width === '';
+                if (isClosed) {
+                    searchInput.style.width = '200px';
+                    searchInput.style.opacity = '1';
+                    searchInput.style.padding = '0.3rem 1rem';
+                    searchInput.focus();
+                } else {
+                    searchInput.style.width = '0';
+                    searchInput.style.opacity = '0';
+                    searchInput.style.padding = '0';
+                    searchResults.classList.add('hidden');
+                    searchInput.value = '';
+                }
+            });
+
+            // Filtrar resultados al escribir
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase().trim();
+                searchResults.innerHTML = '';
+
+                if (query.length < 2) {
+                    searchResults.classList.add('hidden');
+                    return;
+                }
+
+                const matches = this.nodes.filter(n => n.name.toLowerCase().includes(query));
+
+                if (matches.length > 0) {
+                    searchResults.classList.remove('hidden');
+                    matches.forEach(match => {
+                        const div = document.createElement('div');
+                        div.innerHTML = `<span style="font-size: 0.8rem; opacity: 0.5; margin-right: 5px;">👤</span> ${match.name}`;
+                        div.style.cssText = 'padding: 0.6rem 1rem; cursor: pointer; color: var(--text-light); font-size: 0.9rem; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s;';
+                        div.onmouseover = () => div.style.background = 'rgba(255,255,255,0.05)';
+                        div.onmouseout = () => div.style.background = 'transparent';
+
+                        // ¡El clic activa el vuelo!
+                        div.addEventListener('click', () => {
+                            this.flyToNode(match.id);
+                            // Cerrar el buscador
+                            searchResults.classList.add('hidden');
+                            searchInput.style.width = '0';
+                            searchInput.style.opacity = '0';
+                            searchInput.style.padding = '0';
+                            searchInput.value = '';
+                        });
+                        searchResults.appendChild(div);
+                    });
+                } else {
+                    searchResults.classList.add('hidden');
+                }
+            });
+        }
     }
 
     updateData(dbMembers) {
@@ -361,8 +481,13 @@ class FamilyTree {
 
             let borderColor = 'rgba(255,255,255,0.1)';
             let glowColor = 'rgba(255,255,255,0.1)';
-            if (node.gender === 'F') { borderColor = 'rgba(236, 72, 153, 0.5)'; glowColor = 'rgba(236, 72, 153, 0.2)'; }
-            else if (node.gender === 'M') { borderColor = 'rgba(6, 182, 212, 0.5)'; glowColor = 'rgba(6, 182, 212, 0.2)'; }
+            if (node.gender === 'F') {
+                borderColor = 'rgba(236, 72, 153, 0.5)';
+                glowColor = 'rgba(236, 72, 153, 0.2)';
+            } else if (node.gender === 'M') {
+                borderColor = 'rgba(6, 182, 212, 0.5)';
+                glowColor = 'rgba(6, 182, 212, 0.2)';
+            }
 
             // Lógica de Foco en Hover
             const hoverScript = `
