@@ -68,6 +68,7 @@ class FamilyTree {
         const viewTree = document.getElementById('view-tree');
         if (!viewTree) return;
 
+        // --- EVENTOS DE RATÓN (ESCRITORIO) ---
         viewTree.addEventListener('mousedown', (e) => {
             if (e.target.closest('button') || e.target.closest('.glass-panel')) return;
             this.isDragging = true;
@@ -88,6 +89,29 @@ class FamilyTree {
             this.applyTransform();
         });
 
+        // --- EVENTOS TÁCTILES (MÓVILES) ---
+        viewTree.addEventListener('touchstart', (e) => {
+            if (e.target.closest('button') || e.target.closest('.glass-panel')) return;
+            if (e.touches.length === 1) {
+                this.isDragging = true;
+                this.startX = e.touches[0].clientX - this.panX;
+                this.startY = e.touches[0].clientY - this.panY;
+            }
+        }, {passive: false});
+
+        window.addEventListener('touchend', () => {
+            this.isDragging = false;
+        });
+
+        window.addEventListener('touchmove', (e) => {
+            if (!this.isDragging) return;
+            e.preventDefault(); // Evita que la pantalla entera haga scroll nativo al arrastrar
+            this.panX = e.touches[0].clientX - this.startX;
+            this.panY = e.touches[0].clientY - this.startY;
+            this.applyTransform();
+        }, {passive: false});
+
+        // --- CONTROLES DE ZOOM ---
         const btnIn = document.getElementById('btn-zoom-in');
         const btnOut = document.getElementById('btn-zoom-out');
         const btnReset = document.getElementById('btn-zoom-reset');

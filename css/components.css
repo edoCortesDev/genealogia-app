@@ -613,30 +613,6 @@
         margin: 0 !important;
     }
 
-    #view-tree {
-        top: 130px;
-        /* Adjust if header is taller */
-        height: calc(100vh - 130px);
-        position: fixed;
-        /* Keep it fixed so it doesn't scroll away */
-        z-index: 10;
-        width: 100vw;
-    }
-
-    .tree-toolbar {
-        top: 15px;
-        left: 50%;
-        right: auto;
-        transform: translateX(-50%);
-        padding: 0.8rem;
-        /* Slightly larger padding */
-        z-index: 50;
-        /* Ensure it stays above canvas */
-        display: flex;
-        justify-content: center;
-        width: max-content;
-    }
-
     .zoom-controls {
         display: flex;
         gap: 0.8rem;
