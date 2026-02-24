@@ -21,6 +21,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 function setupUIEvents() {
     const btnAdd = document.getElementById('btn-add-member');
     const formPanel = document.getElementById('member-form-panel');
+    const btnAddDoc = document.getElementById('btn-add-document');
+    if (btnAddDoc) {
+        btnAddDoc.addEventListener('click', () => window.addDocumentRow());
+    }
     const btnCancel = document.getElementById('btn-cancel-member');
     const memberForm = document.getElementById('member-form');
 
@@ -201,6 +205,36 @@ window.openPersonDetails = function (id) {
         </div>`;
     }
 
+// --- NUEVO: Sección de Documentos Dinámicos ---
+    let docsHtml = '';
+    if (mem.document_links) {
+        try {
+            const docs = JSON.parse(mem.document_links);
+            if (docs.length > 0) {
+                let listItems = docs.map(d => {
+                    const isLink = d.url.startsWith('http');
+                    const linkContent = isLink
+                        ? `<a href="${d.url}" target="_blank" style="color: #a855f7; text-decoration: none; font-weight: 500;">${d.url}</a>`
+                        : `<span style="color: var(--text-muted);">${d.url}</span>`;
+
+                    return `
+                    <div style="display: flex; flex-direction: column; padding: 0.8rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 0.5rem;">
+                        <strong style="color: var(--text-light); font-size: 0.95rem;">📄 ${d.title || 'Documento sin título'}</strong>
+                        <div style="font-size: 0.85rem; margin-top: 0.2rem; word-break: break-all;">${linkContent}</div>
+                    </div>`;
+                }).join('');
+
+                docsHtml = `
+                <div class="mt-2" style="background: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: 12px;">
+                    <h4 style="color: var(--primary); margin-bottom: 1rem; font-size: 0.95rem;">📁 Documentos y Evidencias</h4>
+                    ${listItems}
+                </div>`;
+            }
+        } catch (e) {
+            // Ignorar errores de parseo si hay texto viejo
+        }
+    }
+
     detailContainer.innerHTML = `
         <div style="text-align: center; margin-bottom: 2rem;">
             ${avatarHtml}
@@ -213,6 +247,7 @@ window.openPersonDetails = function (id) {
         </div>
         
         ${bioHtml}
+        ${docsHtml}
     `;
 
     // Si UI switchView existe en scope global:
@@ -443,6 +478,16 @@ function openEditForm(id) {
     document.getElementById('mem-death-place').value = mem.death_place || '';
 
     document.getElementById('mem-bio').value = mem.bio || '';
+// Limpiar contenedor actual y poblar con los guardados
+    document.getElementById('document-list-container').innerHTML = '';
+    if (mem.document_links) {
+        try {
+            const docs = JSON.parse(mem.document_links);
+            docs.forEach(doc => window.addDocumentRow(doc.title, doc.url));
+        } catch (e) {
+            console.warn("Formato antiguo de documentos detectado.");
+        }
+    }
 
     // Set to Edit Mode
     memberForm.setAttribute('data-edit-id', id);
@@ -519,7 +564,15 @@ async function saveMember() {
     const deathPlace = document.getElementById('mem-death-place').value;
 
     const bio = document.getElementById('mem-bio').value;
-    const documentLinks = document.getElementById('mem-documents').value;
+    // Recopilar todos los documentos dinámicos
+    const docRows = document.querySelectorAll('.doc-row');
+    const docsArray = [];
+    docRows.forEach(row => {
+        const title = row.querySelector('.doc-title').value.trim();
+        const url = row.querySelector('.doc-url').value.trim();
+        if (title || url) docsArray.push({title, url});
+    });
+    const documentLinks = JSON.stringify(docsArray); // Lo convertimos a texto para Supabase
 
     const editId = memberForm.getAttribute('data-edit-id');
     let relatedToId = relatedToVal === 'self' ? null : relatedToVal;
@@ -629,4 +682,51 @@ async function deleteMember(id) {
         }
         await loadFamilyMembers();
     }
+}
+
+// Variable global para el arrastre de documentos
+let draggedDocRow = null;
+
+window.addDocumentRow = function (title = '', url = '') {
+    const container = document.getElementById('document-list-container');
+    const row = document.createElement('div');
+    row.className = 'doc-row';
+    row.draggable = true;
+    row.style.cssText = 'display: flex; gap: 1rem; align-items: center; background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); cursor: grab;';
+
+    row.innerHTML = `
+        <div class="drag-handle" style="color: var(--text-muted); padding: 0 0.5rem;">≡</div>
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 0.5rem;">
+            <input type="text" class="doc-title modern-form form-control" placeholder="Título del Documento (ej: Partida de Nacimiento)" value="${title}">
+            <input type="text" class="doc-url modern-form form-control" placeholder="Enlace (iCloud, Drive) o Ubicación" value="${url}">
+        </div>
+        <button type="button" class="btn-remove-doc" style="background: var(--danger); color: white; border: none; border-radius: 8px; width: 40px; height: 40px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">×</button>
+    `;
+
+    // Evento para borrar la fila
+    row.querySelector('.btn-remove-doc').addEventListener('click', () => row.remove());
+
+    // Eventos Drag & Drop para reordenar
+    row.addEventListener('dragstart', function () {
+        draggedDocRow = row;
+        setTimeout(() => row.style.opacity = '0.4', 0);
+    });
+    row.addEventListener('dragend', function () {
+        setTimeout(() => {
+            row.style.opacity = '1';
+            draggedDocRow = null;
+        }, 0);
+    });
+    row.addEventListener('dragover', (e) => e.preventDefault());
+    row.addEventListener('drop', function () {
+        if (draggedDocRow !== this) {
+            const allRows = Array.from(container.querySelectorAll('.doc-row'));
+            const draggedIndex = allRows.indexOf(draggedDocRow);
+            const droppedIndex = allRows.indexOf(this);
+            if (draggedIndex < droppedIndex) this.after(draggedDocRow);
+            else this.before(draggedDocRow);
+        }
+    });
+
+    container.appendChild(row);
 }
