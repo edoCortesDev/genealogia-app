@@ -1,5 +1,5 @@
 // tree.js
-// Lógica de Renderizado Híbrido (HTML + SVG) con Algoritmo de Linaje Directo
+// Lógica de Renderizado Híbrido (HTML + SVG) con Algoritmo de Linaje Directo Bidireccional
 
 const FLAGS = {
     "CL": "🇨🇱", "AR": "🇦🇷", "PE": "🇵🇪", "CO": "🇨🇴", "VE": "🇻🇪", "EC": "🇪🇨",
@@ -71,24 +71,19 @@ class FamilyTree {
         const width = this.wrapper.clientWidth;
         const height = this.wrapper.clientHeight;
 
-        // Objetivo: Centrar el nodo con un zoom perfecto (ej: 1.2x)
         const targetZoom = 1.2;
         const targetPanX = (width / 2) - (node.x * targetZoom);
         const targetPanY = (height / 2) - (node.y * targetZoom);
 
-        // Variables de animación
-        const duration = 800; // 0.8 segundos de vuelo
+        const duration = 800;
         const startPanX = this.panX;
         const startPanY = this.panY;
         const startZoom = this.zoom;
         const startTime = performance.now();
 
-        // Bucle de animación suave (Curva Ease Out)
         const animate = (currentTime) => {
             const elapsed = currentTime - startTime;
             const progress = Math.min(elapsed / duration, 1);
-
-            // Función matemática para que desacelere al llegar
             const ease = 1 - Math.pow(1 - progress, 3);
 
             this.panX = startPanX + (targetPanX - startPanX) * ease;
@@ -100,7 +95,6 @@ class FamilyTree {
             if (progress < 1) {
                 requestAnimationFrame(animate);
             } else {
-                // Al aterrizar, hacemos brillar la tarjeta
                 const nodes = Array.from(this.htmlLayer.children);
                 const targetEl = nodes.find(el => el.style.left === `${node.x}px` && el.style.top === `${node.y}px`);
 
@@ -110,7 +104,6 @@ class FamilyTree {
                     targetEl.style.transform = 'translate(-50%, -50%) scale(1.1)';
                     targetEl.style.zIndex = '20';
 
-                    // Apagar el brillo después de 2 segundos
                     setTimeout(() => {
                         targetEl.style.boxShadow = '0 8px 32px 0 rgba(0, 0, 0, 0.4)';
                         targetEl.style.transform = 'translate(-50%, -50%) scale(1)';
@@ -126,7 +119,6 @@ class FamilyTree {
         const viewTree = document.getElementById('view-tree');
         if (!viewTree) return;
 
-        // --- EVENTOS DE RATÓN (ESCRITORIO) ---
         viewTree.addEventListener('mousedown', (e) => {
             if (e.target.closest('button') || e.target.closest('.glass-panel')) return;
             this.isDragging = true;
@@ -147,7 +139,6 @@ class FamilyTree {
             this.applyTransform();
         });
 
-        // --- EVENTOS TÁCTILES (MÓVILES) ---
         viewTree.addEventListener('touchstart', (e) => {
             if (e.target.closest('button') || e.target.closest('.glass-panel')) return;
             if (e.touches.length === 1) {
@@ -163,13 +154,12 @@ class FamilyTree {
 
         window.addEventListener('touchmove', (e) => {
             if (!this.isDragging) return;
-            e.preventDefault(); // Evita que la pantalla entera haga scroll nativo al arrastrar
+            e.preventDefault();
             this.panX = e.touches[0].clientX - this.startX;
             this.panY = e.touches[0].clientY - this.startY;
             this.applyTransform();
         }, {passive: false});
 
-        // --- CONTROLES DE ZOOM ---
         const btnIn = document.getElementById('btn-zoom-in');
         const btnOut = document.getElementById('btn-zoom-out');
         const btnReset = document.getElementById('btn-zoom-reset');
@@ -186,13 +176,11 @@ class FamilyTree {
             this.centerCamera();
         });
 
-        // --- CONTROLES DE BÚSQUEDA Y VUELO ---
         const searchBtn = document.getElementById('btn-tree-search');
         const searchInput = document.getElementById('tree-search-input');
         const searchResults = document.getElementById('tree-search-results');
 
         if (searchBtn && searchInput && searchResults) {
-            // Desplegar/Ocultar el input
             searchBtn.addEventListener('click', () => {
                 const isClosed = searchInput.style.width === '0px' || searchInput.style.width === '';
                 if (isClosed) {
@@ -209,7 +197,6 @@ class FamilyTree {
                 }
             });
 
-            // Filtrar resultados al escribir
             searchInput.addEventListener('input', (e) => {
                 const query = e.target.value.toLowerCase().trim();
                 searchResults.innerHTML = '';
@@ -230,10 +217,8 @@ class FamilyTree {
                         div.onmouseover = () => div.style.background = 'rgba(255,255,255,0.05)';
                         div.onmouseout = () => div.style.background = 'transparent';
 
-                        // ¡El clic activa el vuelo!
                         div.addEventListener('click', () => {
                             this.flyToNode(match.id);
-                            // Cerrar el buscador
                             searchResults.classList.add('hidden');
                             searchInput.style.width = '0';
                             searchInput.style.opacity = '0';
@@ -258,10 +243,10 @@ class FamilyTree {
             return;
         }
 
-        const xSpacing = 150;
+        const xSpacing = 160;
         const ySpacing = 300;
 
-        // 1. Mapeo de Relaciones Estrictas
+        // 1. Mapeo de Relaciones Estrictas (NUEVO SISTEMA ID CRUZADOS)
         const nodesMap = new Map();
         dbMembers.forEach(m => {
             nodesMap.set(m.id, {
@@ -272,40 +257,74 @@ class FamilyTree {
         });
 
         dbMembers.forEach(m => {
-            if (!m.related_to || m.relationship_type === 'self') return;
-            const source = nodesMap.get(m.id);
-            const target = nodesMap.get(m.related_to);
-            if (!source || !target) return;
+            const node = nodesMap.get(m.id);
+            if (!node) return;
 
-            if (m.relationship_type === 'parent') {
-                source.children.push(target.id);
-                target.parents.push(source.id);
-                this.links.push({source: source.id, target: target.id, type: 'parent-child'});
-            } else if (m.relationship_type === 'child') {
-                source.parents.push(target.id);
-                target.children.push(source.id);
-                this.links.push({source: target.id, target: source.id, type: 'parent-child'});
-            } else if (m.relationship_type === 'spouse') {
-                source.spouses.push(target.id);
-                target.spouses.push(source.id);
-                if (!this.links.some(l => l.type === 'spouse' && l.target === source.id)) {
-                    this.links.push({source: source.id, target: target.id, type: 'spouse'});
+            // Procesar Padre
+            if (m.father_id && nodesMap.has(m.father_id)) {
+                if (!node.parents.includes(m.father_id)) node.parents.push(m.father_id);
+                const father = nodesMap.get(m.father_id);
+                if (!father.children.includes(node.id)) father.children.push(node.id);
+
+                if (!this.links.some(l => l.source === m.father_id && l.target === node.id && l.type === 'parent-child')) {
+                    this.links.push({source: m.father_id, target: node.id, type: 'parent-child'});
                 }
-            } else if (m.relationship_type === 'sibling') {
-                source.siblings.push(target.id);
-                target.siblings.push(source.id);
-                if (!this.links.some(l => l.type === 'sibling' && l.target === source.id)) {
-                    this.links.push({source: source.id, target: target.id, type: 'sibling'});
+            }
+
+            // Procesar Madre
+            if (m.mother_id && nodesMap.has(m.mother_id)) {
+                if (!node.parents.includes(m.mother_id)) node.parents.push(m.mother_id);
+                const mother = nodesMap.get(m.mother_id);
+                if (!mother.children.includes(node.id)) mother.children.push(node.id);
+
+                if (!this.links.some(l => l.source === m.mother_id && l.target === node.id && l.type === 'parent-child')) {
+                    this.links.push({source: m.mother_id, target: node.id, type: 'parent-child'});
+                }
+            }
+
+            // Procesar Pareja/Cónyuge
+            if (m.spouse_id && nodesMap.has(m.spouse_id)) {
+                if (!node.spouses.includes(m.spouse_id)) node.spouses.push(m.spouse_id);
+                const spouse = nodesMap.get(m.spouse_id);
+                if (!spouse.spouses.includes(node.id)) spouse.spouses.push(node.id);
+
+                const linkExists = this.links.some(l =>
+                    l.type === 'spouse' &&
+                    ((l.source === node.id && l.target === m.spouse_id) || (l.source === m.spouse_id && l.target === node.id))
+                );
+                if (!linkExists) {
+                    this.links.push({source: node.id, target: m.spouse_id, type: 'spouse'});
                 }
             }
         });
 
-        const root = dbMembers.find(m => m.relationship_type === 'self') || dbMembers[0];
+        // Inferir Hermanos automáticamente
+        dbMembers.forEach(m => {
+            const node = nodesMap.get(m.id);
+            if (!node) return;
+
+            dbMembers.forEach(other => {
+                if (m.id === other.id) return;
+                const isSibling = (m.father_id && m.father_id === other.father_id) || (m.mother_id && m.mother_id === other.mother_id);
+
+                if (isSibling && !node.siblings.includes(other.id)) {
+                    node.siblings.push(other.id);
+                    const linkExists = this.links.some(l =>
+                        l.type === 'sibling' &&
+                        ((l.source === node.id && l.target === other.id) || (l.source === other.id && l.target === node.id))
+                    );
+                    if (!linkExists) {
+                        this.links.push({source: node.id, target: other.id, type: 'sibling'});
+                    }
+                }
+            });
+        });
+
+        // La Raíz: El primer usuario creado en la base de datos (según orden ascendente)
+        const root = dbMembers[0];
         let positioned = new Set();
 
         // 2. Funciones Algoritmo de Linaje
-
-        // Calcula qué tan lejos llegan los ancestros para asignar el ancho matemático perfecto
         function getAncestorDepth(nodeId) {
             const node = nodesMap.get(nodeId);
             if (!node || !node.parents || node.parents.length === 0) return 0;
@@ -313,9 +332,8 @@ class FamilyTree {
         }
 
         const actualDepth = root ? getAncestorDepth(root.id) : 0;
-        const maxAncDepth = Math.min(actualDepth, 5); // Tope de seguridad
+        const maxAncDepth = Math.min(actualDepth, 5);
 
-        // Dibuja hacia ARRIBA de forma binaria (Padres, Abuelos)
         function positionAncestors(nodeId, x, y, level) {
             const node = nodesMap.get(nodeId);
             if (!node || positioned.has(nodeId)) return;
@@ -326,11 +344,10 @@ class FamilyTree {
 
             if (node.parents && node.parents.length > 0) {
                 let parents = node.parents.map(id => nodesMap.get(id)).filter(Boolean);
-                let p1 = parents.find(p => p.gender === 'M') || parents[0]; // Padre idealmente a la izquierda
-                let p2 = parents.find(p => p.gender === 'F') || parents[1]; // Madre idealmente a la derecha
+                let p1 = parents.find(p => p.gender === 'M') || parents[0];
+                let p2 = parents.find(p => p.gender === 'F') || parents[1];
                 if (p1 === p2 && parents.length > 1) p2 = parents[1];
 
-                // El espacio horizontal se divide por la mitad en cada generación más vieja
                 const currentSpacing = (xSpacing / 1.5) * Math.pow(2, maxAncDepth - level - 1);
 
                 if (p1) positionAncestors(p1.id, x - currentSpacing, y - ySpacing, level + 1);
@@ -338,7 +355,6 @@ class FamilyTree {
             }
         }
 
-        // Dibuja hacia ABAJO (Hijos) y LATERAL (Hermanos/Cónyuges)
         function positionDescendants(nodeId, x, y, level) {
             const node = nodesMap.get(nodeId);
             if (!node || positioned.has(nodeId)) return;
@@ -347,7 +363,6 @@ class FamilyTree {
             node.y = y;
             positioned.add(nodeId);
 
-            // Cónyuges a la derecha
             if (node.spouses && node.spouses.length > 0) {
                 node.spouses.forEach((spId, i) => {
                     const spNode = nodesMap.get(spId);
@@ -359,7 +374,6 @@ class FamilyTree {
                 });
             }
 
-            // Hermanos a la izquierda (Solo si es el root para no distorsionar)
             if (level === 0 && node.siblings && node.siblings.length > 0) {
                 node.siblings.forEach((sibId, i) => {
                     const sibNode = nodesMap.get(sibId);
@@ -371,7 +385,6 @@ class FamilyTree {
                 });
             }
 
-            // Hijos hacia abajo, centrados
             if (node.children && node.children.length > 0) {
                 const totalChildren = node.children.length;
                 const startX = x - ((totalChildren - 1) * xSpacing) / 2;
@@ -382,10 +395,9 @@ class FamilyTree {
             }
         }
 
-        // 3. Ejecutar posicionamiento empezando por el ROOT (Yo)
         if (root) {
             positionAncestors(root.id, 0, 0, 0);
-            positioned.delete(root.id); // Remover del tracking para procesar sus hijos
+            positioned.delete(root.id);
             positionDescendants(root.id, 0, 0, 0);
         }
 
@@ -394,7 +406,6 @@ class FamilyTree {
             const fName = mem.first_name ? mem.first_name.split(' ')[0] : '';
             const lName = mem.last_name ? mem.last_name.split(' ')[0] : '';
 
-            // Si quedó alguien "huérfano" lo ponemos lejos para que no rompa el diseño
             if (!positioned.has(mem.id)) {
                 mem.x = (this.nodes.length + 1) * xSpacing;
                 mem.y = ySpacing * 2;
@@ -425,7 +436,6 @@ class FamilyTree {
         const offsetX = 5000;
         const offsetY = 5000;
 
-        // 1. Dibujar Líneas Vectoriales (Mejora 1: Curvas Bezier)
         let svgContent = '';
         this.links.forEach(link => {
             const source = this.nodes.find(n => n.id === link.source);
@@ -449,21 +459,17 @@ class FamilyTree {
                 }
 
                 const sX = parent.x + offsetX;
-                const sY = parent.y + 70 + offsetY; // Base del padre
+                const sY = parent.y + 70 + offsetY;
                 const tX = child.x + offsetX;
-                const tY = child.y - 70 + offsetY; // Tope del hijo
+                const tY = child.y - 70 + offsetY;
 
-                // Distancia vertical para suavizar la curva
                 const midY = sY + (tY - sY) / 2;
 
-                // Curva Bezier Cúbica Suave
-                // M: Mover a inicio | C: Punto control 1, Punto control 2, Punto final
                 svgContent += `<path d="M ${sX} ${sY} C ${sX} ${midY}, ${tX} ${midY}, ${tX} ${tY}" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="2" />`;
             }
         });
         this.svgLayer.innerHTML = svgContent;
 
-        // 2. Dibujar Tarjetas (Mejora 2 y 3: Glassmorphism y Foco)
         let htmlContent = '';
         this.nodes.forEach(node => {
             const isDead = node.deathDate ? true : false;
@@ -489,7 +495,6 @@ class FamilyTree {
                 glowColor = 'rgba(6, 182, 212, 0.2)';
             }
 
-            // Lógica de Foco en Hover
             const hoverScript = `
                 this.style.transform='translate(-50%, -50%) scale(1.08)'; 
                 this.style.boxShadow='0 10px 30px ${glowColor}, inset 0 0 0 1px ${borderColor}';

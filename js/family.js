@@ -1,5 +1,5 @@
 // family.js
-// Lógica para gestionar la familia utilizando Supabase
+// Lógica para gestionar la familia utilizando Supabase con Relaciones Dinámicas (Drag & Drop)
 
 import {getSupabase} from './config.js';
 import {checkAuth} from './auth.js';
@@ -22,19 +22,40 @@ function setupUIEvents() {
     const btnAdd = document.getElementById('btn-add-member');
     const formPanel = document.getElementById('member-form-panel');
     const btnAddDoc = document.getElementById('btn-add-document');
+
     if (btnAddDoc) {
         btnAddDoc.addEventListener('click', () => window.addDocumentRow());
     }
+
+    // NUEVO: Botón para agregar filas de relación
+    const btnAddRel = document.getElementById('btn-add-relation');
+    if (btnAddRel) {
+        btnAddRel.addEventListener('click', () => window.addRelationRow());
+    }
+
+    // Inicializar SortableJS para las relaciones si está disponible
+    const relContainer = document.getElementById('relationsContainer');
+    if (relContainer && window.Sortable) {
+        new Sortable(relContainer, {
+            handle: '.drag-handle',
+            animation: 150
+        });
+    }
+
     const btnCancel = document.getElementById('btn-cancel-member');
     const memberForm = document.getElementById('member-form');
 
     // Toggle sidebar
     if (btnAdd && formPanel) {
         btnAdd.addEventListener('click', () => {
-            // Reset form for new addition
             memberForm.reset();
             memberForm.removeAttribute('data-edit-id');
             document.getElementById('member-form-title').textContent = "Agregar Familiar";
+
+            // Limpiar contenedores dinámicos
+            document.getElementById('document-list-container').innerHTML = '';
+            if (relContainer) relContainer.innerHTML = '';
+
             formPanel.classList.remove('hidden');
         });
     }
@@ -75,31 +96,26 @@ function setupUIEvents() {
             dropArea.addEventListener(eventName, () => dropArea.classList.remove('drag-over'), false);
         });
 
-        // 1. Cuando el usuario ARRASTRA Y SUELTA
         dropArea.addEventListener('drop', (e) => {
             const dt = e.dataTransfer;
             const files = dt.files;
-            handleFiles(files, true); // Le pasamos "true" porque es un Drop
+            handleFiles(files, true);
         });
 
-        // 2. Cuando el usuario HACE CLIC
         fileInput.addEventListener('change', function () {
-            handleFiles(this.files, false); // Le pasamos "false" porque fue un clic normal
+            handleFiles(this.files, false);
         });
 
-        // 3. La función inteligente de archivos
         function handleFiles(files, isDrop) {
             if (files.length > 0) {
                 const fileMsg = document.querySelector('.file-msg');
                 fileMsg.textContent = files[0].name;
 
-                // Solo inyectamos el archivo si vino volando (Arrastrado)
                 if (isDrop) {
                     const dataTransfer = new DataTransfer();
                     dataTransfer.items.add(files[0]);
                     fileInput.files = dataTransfer.files;
                 }
-
                 dropArea.dataset.filePending = true;
             }
         }
@@ -119,8 +135,7 @@ function setupUIEvents() {
             const results = familyMembers.filter(m =>
                 (m.first_name && m.first_name.toLowerCase().includes(query)) ||
                 (m.last_name && m.last_name.toLowerCase().includes(query)) ||
-                (m.rut && m.rut.toLowerCase().includes(query)) ||
-                (m.profession && m.profession.toLowerCase().includes(query))
+                (m.rut && m.rut.toLowerCase().includes(query))
             );
 
             if (results.length === 0) {
@@ -154,13 +169,56 @@ function setupUIEvents() {
                 div.addEventListener('click', () => {
                     window.openPersonDetails(mem.id);
                     searchInput.value = '';
-                    resultsContainer.innerHTML = ''; // Limpiar tras hacer clic
+                    resultsContainer.innerHTML = '';
                 });
 
                 resultsContainer.appendChild(div);
             });
         });
     }
+}
+
+// --- NUEVO: Generador Dinámico de Filas de Relación ---
+window.addRelationRow = function (type = '', targetId = '') {
+    const container = document.getElementById('relationsContainer');
+    if (!container) return;
+
+    const currentEditId = document.getElementById('member-form').getAttribute('data-edit-id');
+    let optionsHtml = '<option value="">-- Seleccionar Persona --</option>';
+
+    familyMembers.forEach(mem => {
+        if (mem.id === currentEditId) return; // No puede relacionarse consigo mismo
+
+        const year = mem.birth_date ? `(n. ${mem.birth_date.substring(0, 4)})` : '';
+        const selected = mem.id === targetId ? 'selected' : '';
+        optionsHtml += `<option value="${mem.id}" ${selected}>${mem.first_name} ${mem.last_name} ${year}</option>`;
+    });
+
+    const row = document.createElement('div');
+    row.className = 'relation-row draggable-item';
+    row.style.cssText = 'display: flex; gap: 10px; align-items: center; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 0.5rem;';
+
+    row.innerHTML = `
+        <div class="drag-handle" style="cursor: grab; color: var(--text-muted); font-size: 1.2rem; padding: 0 5px;">☰</div>
+        <select class="rel-type modern-form form-control" style="flex: 1; min-width: 110px;">
+            <option value="padre" ${type === 'padre' ? 'selected' : ''}>Padre</option>
+            <option value="madre" ${type === 'madre' ? 'selected' : ''}>Madre</option>
+            <option value="hijo" ${type === 'hijo' ? 'selected' : ''}>Hijo</option>
+            <option value="hija" ${type === 'hija' ? 'selected' : ''}>Hija</option>
+            <option value="esposo" ${type === 'esposo' ? 'selected' : ''}>Esposo</option>
+            <option value="esposa" ${type === 'esposa' ? 'selected' : ''}>Esposa</option>
+            <option value="pareja" ${type === 'pareja' ? 'selected' : ''}>Pareja</option>
+            <option value="hermano" ${type === 'hermano' ? 'selected' : ''}>Hermano</option>
+            <option value="hermana" ${type === 'hermana' ? 'selected' : ''}>Hermana</option>
+        </select>
+        <select class="rel-target modern-form form-control" style="flex: 2;">
+            ${optionsHtml}
+        </select>
+        <button type="button" class="btn-remove-rel" style="background: var(--danger); color: white; border: none; width: 35px; height: 35px; border-radius: 5px; cursor: pointer;">×</button>
+    `;
+
+    row.querySelector('.btn-remove-rel').addEventListener('click', () => row.remove());
+    container.appendChild(row);
 }
 
 window.openPersonDetails = function (id) {
@@ -173,8 +231,6 @@ window.openPersonDetails = function (id) {
     const avatarHtml = mem.photo_url
         ? `<img src="${mem.photo_url}" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); margin: 0 auto 1.5rem auto; display: block;">`
         : `<div class="avatar-circle" style="width: 120px; height: 120px; font-size: 3rem; margin: 0 auto 1.5rem auto; display: flex;">${mem.first_name.charAt(0).toUpperCase()}</div>`;
-
-    const getRelStr = getRelationshipString(mem.relationship_type);
 
     let infoHtml = '';
 
@@ -194,7 +250,6 @@ window.openPersonDetails = function (id) {
     addRow('Nacionalidad', mem.nationality);
     addRow('Profesión', mem.profession);
     addRow('Sexo', mem.gender === 'M' ? 'Masculino' : (mem.gender === 'F' ? 'Femenino' : mem.gender));
-    addRow('Relación familiar', getRelStr);
 
     let bioHtml = '';
     if (mem.bio) {
@@ -205,7 +260,6 @@ window.openPersonDetails = function (id) {
         </div>`;
     }
 
-    // --- NUEVO: Sección de Documentos Dinámicos ---
     let docsHtml = '';
     if (mem.document_links) {
         try {
@@ -216,13 +270,11 @@ window.openPersonDetails = function (id) {
                     const isLink = d.url.startsWith('http');
 
                     if (isLink) {
-                        // Si es un enlace, el título se vuelve clickeable y ocultamos la URL fea
                         return `
-                        <div style="padding: 0.8rem 1rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; transition: background 0.2s;">
-                            📄 <a href="${d.url}" target="_blank" rel="noopener noreferrer" style="color: #a855f7; text-decoration: none; font-weight: 500; display: block; width: 100%;">${titleText} <span style="font-size: 0.8em; opacity: 0.7;">↗</span></a>
+                        <div style="padding: 0.8rem 1rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                            📄 <a href="${d.url}" target="_blank" rel="noopener noreferrer" style="color: #a855f7; text-decoration: none; font-weight: 500; display: block; width: 100%;">${titleText} ↗</a>
                         </div>`;
                     } else {
-                        // Si es una nota física (ej: "En la caja fuerte"), mostramos el texto debajo
                         return `
                         <div style="padding: 0.8rem 1rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 0.5rem; display: flex; flex-direction: column; gap: 0.2rem;">
                             <strong style="color: var(--text-light); font-size: 0.95rem;">📄 ${titleText}</strong>
@@ -233,7 +285,7 @@ window.openPersonDetails = function (id) {
 
                 docsHtml = `
                 <div class="mt-2" style="background: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: 12px;">
-                    <h4 style="color: var(--primary); margin-bottom: 1rem; font-size: 0.95rem;">📁 Documentos y Evidencias</h4>
+                    <h4 style="color: var(--primary); margin-bottom: 1rem; font-size: 0.95rem;">📁 Documentos</h4>
                     ${listItems}
                 </div>`;
             }
@@ -257,24 +309,9 @@ window.openPersonDetails = function (id) {
         ${docsHtml}
     `;
 
-    // Si UI switchView existe en scope global:
     if (window.switchView) {
         window.switchView('detail');
     }
-}
-
-function updateRelatedToDropdown() {
-    const select = document.getElementById('mem-related-to');
-    if (!select) return;
-
-    // Mantener la opción "Yo"
-    let optionsHtml = '<option value="self">Yo (Yo mismo)</option>';
-
-    familyMembers.forEach(mem => {
-        optionsHtml += `<option value="${mem.id}">${mem.first_name} ${mem.last_name}</option>`;
-    });
-
-    select.innerHTML = optionsHtml;
 }
 
 export async function loadFamilyMembers() {
@@ -283,7 +320,6 @@ export async function loadFamilyMembers() {
 
     if (!listContainer) return;
 
-    // Mostrar Skeletons
     listContainer.innerHTML = `
         <div class="skeleton-row"></div>
         <div class="skeleton-row"></div>
@@ -303,15 +339,13 @@ export async function loadFamilyMembers() {
 
     familyMembers = members || [];
     renderMembersList();
-    updateRelatedToDropdown();
-    updateDashboardStats(familyMembers);
 
-    // Avisar al árbol que los datos se actualizaron y debe repintarse
+    if (window.updateDashboardStats) window.updateDashboardStats();
+
     if (window.familyTree) {
         window.familyTree.updateData(familyMembers);
     }
 
-    // Construir línea de tiempo
     buildTimeline(familyMembers);
 }
 
@@ -319,7 +353,6 @@ function buildTimeline(members) {
     const container = document.getElementById('timeline-container');
     if (!container) return;
 
-    // Extraer eventos (nacimientos y fallecimientos)
     let events = [];
 
     members.forEach(mem => {
@@ -333,7 +366,6 @@ function buildTimeline(members) {
                 description: `Nacimiento de ${mem.first_name}` + (mem.birth_place ? ` en ${mem.birth_place}` : '')
             });
         }
-
         if (mem.death_date) {
             events.push({
                 date: new Date(mem.death_date),
@@ -347,15 +379,13 @@ function buildTimeline(members) {
     });
 
     if (events.length === 0) {
-        container.innerHTML = '<p class="text-muted text-center" style="padding: 2rem;">No hay eventos registrados (fechas de nacimiento/defunción) para construir la línea de tiempo.</p>';
+        container.innerHTML = '<p class="text-muted text-center" style="padding: 2rem;">No hay eventos registrados.</p>';
         return;
     }
 
-    // Ordenar cronológicamente (más antiguo primero)
     events.sort((a, b) => a.date - b.date);
 
     let html = '';
-
     events.forEach((ev, index) => {
         const isLeft = index % 2 === 0;
         const icon = ev.type === 'birth' ? '🌟' : '🕊️';
@@ -382,43 +412,80 @@ function buildTimeline(members) {
     container.innerHTML = html;
 }
 
-function updateDashboardStats(members) {
-    if (!members || members.length === 0) return;
+// NUEVO: Motor de Dashboard Avanzado
+window.updateDashboardStats = function () {
+    if (!familyMembers || familyMembers.length === 0) return;
 
-    // 1. Total de familiares
-    const totalMembers = members.length;
-
-    // 2. Países de origen únicos (ignorando los vacíos)
+    const totalMembers = familyMembers.length;
     const uniqueCountries = new Set();
-    members.forEach(mem => {
+    let nationals = 0;
+    let foreigners = 0;
+
+    familyMembers.forEach(mem => {
         if (mem.nationality && mem.nationality.trim() !== '') {
-            uniqueCountries.add(mem.nationality.trim().toUpperCase());
+            const nat = mem.nationality.trim().toUpperCase();
+            uniqueCountries.add(nat);
+            if (nat === 'CL' || nat === 'CHILE') nationals++;
+            else foreigners++;
         }
     });
 
-    // 3. Archivos adjuntos (fotos + documentos)
     let totalFiles = 0;
-    members.forEach(mem => {
+    familyMembers.forEach(mem => {
         if (mem.photo_url) totalFiles++;
         if (mem.document_links) {
             try {
-                const docs = JSON.parse(mem.document_links);
-                totalFiles += docs.length;
+                totalFiles += JSON.parse(mem.document_links).length;
             } catch (e) {
-                // Formato antiguo de texto simple
                 totalFiles++;
             }
         }
     });
 
-    // Animar los números del Dashboard (Efecto contador)
+    let men = 0;
+    let women = 0;
+    familyMembers.forEach(mem => {
+        if (mem.gender === 'M') men++;
+        if (mem.gender === 'F') women++;
+    });
+
+    let oldestName = "Sin datos";
+    let maxAge = 0;
+    const currentYear = new Date().getFullYear();
+
+    familyMembers.forEach(mem => {
+        if (mem.birth_date) {
+            const birthYear = parseInt(mem.birth_date.substring(0, 4));
+            if (!isNaN(birthYear)) {
+                let endYear = currentYear;
+                if (mem.death_date) endYear = parseInt(mem.death_date.substring(0, 4));
+                const age = endYear - birthYear;
+                if (age > maxAge) {
+                    maxAge = age;
+                    const fName = mem.first_name ? mem.first_name.split(' ')[0] : '';
+                    const lName = mem.last_name ? mem.last_name.split(' ')[0] : '';
+                    oldestName = `${fName} ${lName}`.trim();
+                }
+            }
+        }
+    });
+
+    const elGender = document.getElementById('stat-gender');
+    const elNats = document.getElementById('stat-nationals');
+    const elAge = document.getElementById('stat-oldest-age');
+    const elName = document.getElementById('stat-oldest-name');
+
+    if (elGender) elGender.textContent = `${men} / ${women}`;
+    if (elNats) elNats.textContent = `${nationals} / ${foreigners}`;
+    if (elAge) elAge.textContent = `${maxAge} años`;
+    if (elName) elName.textContent = oldestName ? `RÉCORD: ${oldestName}` : 'RÉCORD LONGEVIDAD';
+
     const animateValue = (id, end) => {
         const obj = document.getElementById(id);
         if (!obj) return;
         let start = 0;
         const duration = 1000;
         const increment = end > 0 ? Math.ceil(end / 20) : 1;
-        // Evitar división por cero
         const stepTime = end > 0 ? Math.abs(Math.floor(duration / (end / increment))) : duration;
 
         const timer = setInterval(() => {
@@ -426,17 +493,14 @@ function updateDashboardStats(members) {
             if (start >= end) {
                 obj.textContent = end;
                 clearInterval(timer);
-            } else {
-                obj.textContent = start;
-            }
+            } else obj.textContent = start;
         }, stepTime);
     };
 
-    // Ejecutar animaciones con los nuevos IDs
     animateValue('stat-total', totalMembers);
     animateValue('stat-countries', uniqueCountries.size);
     animateValue('stat-files', totalFiles);
-}
+};
 
 function renderMembersList() {
     const listContainer = document.getElementById('members-list-container');
@@ -455,7 +519,6 @@ function renderMembersList() {
         el.style.padding = '1rem';
 
         const initial = mem.first_name.charAt(0).toUpperCase();
-        const relStr = getRelationshipString(mem.relationship_type);
 
         const avatarHtml = mem.photo_url
             ? `<img src="${mem.photo_url}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--glass-border);">`
@@ -466,7 +529,7 @@ function renderMembersList() {
                 ${avatarHtml}
                 <div>
                     <div style="font-weight: 600">${mem.first_name} ${mem.last_name}</div>
-                    <div style="font-size: 0.85rem; color: var(--text-muted)">${relStr}</div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted)">ID: ${mem.id.substring(0, 8)}</div>
                 </div>
             </div>
             <div style="display: flex; gap: 0.5rem;">
@@ -477,7 +540,6 @@ function renderMembersList() {
         listContainer.appendChild(el);
     });
 
-    // Attach edit handlers
     document.querySelectorAll('.btn-edit-mem').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const id = e.target.dataset.id;
@@ -485,11 +547,10 @@ function renderMembersList() {
         });
     });
 
-    // Attach delete handlers
     document.querySelectorAll('.btn-delete-mem').forEach(btn => {
         btn.addEventListener('click', async (e) => {
             const id = e.target.dataset.id;
-            if (confirm("¿Estás seguro de eliminar a este familiar? Se eliminará del árbol.")) {
+            if (confirm("¿Estás seguro de eliminar a este familiar?")) {
                 await deleteMember(id);
             }
         });
@@ -503,7 +564,6 @@ function openEditForm(id) {
     const formPanel = document.getElementById('member-form-panel');
     const memberForm = document.getElementById('member-form');
 
-    // Populate the form fields
     document.getElementById('mem-system-id').value = mem.id.substring(0, 8);
     document.getElementById('mem-firstname').value = mem.first_name || '';
     document.getElementById('mem-lastname').value = mem.last_name || '';
@@ -511,42 +571,41 @@ function openEditForm(id) {
     document.getElementById('mem-gender').value = mem.gender || '';
     document.getElementById('mem-profession').value = mem.profession || '';
     document.getElementById('mem-nationality').value = mem.nationality || '';
-
-    document.getElementById('mem-relation').value = mem.relationship_type || '';
-    document.getElementById('mem-related-to').value = mem.related_to || 'self';
-
     document.getElementById('mem-birth').value = mem.birth_date || '';
     document.getElementById('mem-birth-place').value = mem.birth_place || '';
     document.getElementById('mem-death').value = mem.death_date || '';
     document.getElementById('mem-death-place').value = mem.death_place || '';
-
     document.getElementById('mem-bio').value = mem.bio || '';
-// Limpiar contenedor actual y poblar con los guardados
+
+    // Cargar documentos
     document.getElementById('document-list-container').innerHTML = '';
     if (mem.document_links) {
         try {
             const docs = JSON.parse(mem.document_links);
             docs.forEach(doc => window.addDocumentRow(doc.title, doc.url));
         } catch (e) {
-            console.warn("Formato antiguo de documentos detectado.");
+            console.warn("Formato antiguo de documentos.");
         }
     }
 
-    // Set to Edit Mode
+    // --- NUEVO: Cargar Relaciones de Arrastrar y Soltar ---
+    const relContainer = document.getElementById('relationsContainer');
+    if (relContainer) relContainer.innerHTML = ''; // Limpiamos
+
+    // Cargamos los padres y pareja
+    if (mem.father_id) window.addRelationRow('padre', mem.father_id);
+    if (mem.mother_id) window.addRelationRow('madre', mem.mother_id);
+    if (mem.spouse_id) window.addRelationRow('esposo', mem.spouse_id);
+
+    // Cargamos a los hijos (Buscamos quién nos tiene como padre o madre)
+    const misHijos = familyMembers.filter(m => m.father_id === id || m.mother_id === id);
+    misHijos.forEach(hijo => {
+        window.addRelationRow(hijo.gender === 'F' ? 'hija' : 'hijo', hijo.id);
+    });
+
     memberForm.setAttribute('data-edit-id', id);
     document.getElementById('member-form-title').textContent = "Editar Persona";
     formPanel.classList.remove('hidden');
-}
-
-function getRelationshipString(type) {
-    const map = {
-        'self': 'Yo',
-        'parent': 'Padre/Madre',
-        'child': 'Hijo/Hija',
-        'sibling': 'Hermano/Hermana',
-        'spouse': 'Cónyuge'
-    };
-    return map[type] || type;
 }
 
 async function uploadPhoto(file) {
@@ -555,59 +614,47 @@ async function uploadPhoto(file) {
     const fileName = `${Math.random()}.${fileExt}`;
     const filePath = `${currentUser.id}/${fileName}`;
 
-    // MAYÚSCULAS ASEGURADAS AQUÍ
-    const {data, error} = await supabase.storage
-        .from('family_photos')
-        .upload(filePath, file);
-
+    const {data, error} = await supabase.storage.from('family_photos').upload(filePath, file);
     if (error) throw error;
 
-    // Obtener public URL
-    const {data: {publicUrl}} = supabase.storage
-        .from('family_photos')
-        .getPublicUrl(filePath);
-
+    const {data: {publicUrl}} = supabase.storage.from('family_photos').getPublicUrl(filePath);
     return publicUrl;
 }
 
-// Función para borrar fotos huérfanas del Storage
 async function deletePhotoFromStorage(photoUrl) {
     if (!photoUrl) return;
     const supabase = getSupabase();
-
     try {
         const urlParts = photoUrl.split('/family_photos/');
         if (urlParts.length === 2) {
             const filePath = urlParts[1];
             await supabase.storage.from('family_photos').remove([filePath]);
-            console.log("Foto antigua eliminada del Storage para liberar espacio.");
         }
     } catch (err) {
-        console.error("Error intentando borrar la foto antigua:", err);
+        console.error("Error borrando foto:", err);
     }
 }
 
+// --- NUEVO: CEREBRO LOGICO DE GUARDADO ---
 async function saveMember() {
     const supabase = getSupabase();
-
     const memberForm = document.getElementById('member-form');
+    const editId = memberForm.getAttribute('data-edit-id');
+
+    // Leer campos básicos
     const firstName = document.getElementById('mem-firstname').value;
     const lastName = document.getElementById('mem-lastname').value;
     const rut = document.getElementById('mem-rut').value;
     const gender = document.getElementById('mem-gender').value;
     const profession = document.getElementById('mem-profession').value;
     const nationality = document.getElementById('mem-nationality').value;
-
-    const relation = document.getElementById('mem-relation').value;
-    const relatedToVal = document.getElementById('mem-related-to').value;
-
     const birth = document.getElementById('mem-birth').value;
     const birthPlace = document.getElementById('mem-birth-place').value;
     const death = document.getElementById('mem-death').value;
     const deathPlace = document.getElementById('mem-death-place').value;
-
     const bio = document.getElementById('mem-bio').value;
-    // Recopilar todos los documentos dinámicos
+
+    // Documentos
     const docRows = document.querySelectorAll('.doc-row');
     const docsArray = [];
     docRows.forEach(row => {
@@ -615,10 +662,7 @@ async function saveMember() {
         const url = row.querySelector('.doc-url').value.trim();
         if (title || url) docsArray.push({title, url});
     });
-    const documentLinks = JSON.stringify(docsArray); // Lo convertimos a texto para Supabase
-
-    const editId = memberForm.getAttribute('data-edit-id');
-    let relatedToId = relatedToVal === 'self' ? null : relatedToVal;
+    const documentLinks = JSON.stringify(docsArray);
 
     showLoader();
 
@@ -627,23 +671,48 @@ async function saveMember() {
         let oldPhotoUrl = null;
         const fileInput = document.querySelector('.file-input');
 
-        // Si estamos editando, buscamos si ya tenía una foto
         if (editId) {
             const existingMember = familyMembers.find(m => m.id === editId);
-            if (existingMember) {
-                oldPhotoUrl = existingMember.photo_url;
-            }
+            if (existingMember) oldPhotoUrl = existingMember.photo_url;
         }
 
-        // Si el usuario seleccionó una foto nueva en el formulario
         if (fileInput.files.length > 0) {
             photoUrl = await uploadPhoto(fileInput.files[0]);
-
-            // Si subió la nueva con éxito y existía una vieja, ¡borramos la vieja!
-            if (oldPhotoUrl) {
-                await deletePhotoFromStorage(oldPhotoUrl);
-            }
+            if (oldPhotoUrl) await deletePhotoFromStorage(oldPhotoUrl);
         }
+
+        // --- MAGIA: Leer Filas Dinámicas de Relaciones ---
+        let myFatherId = null;
+        let myMotherId = null;
+        let mySpouseId = null;
+        const updatesForOthers = []; // Guardaremos las IDs de quienes debemos actualizar mutuamente
+
+        const relRows = document.querySelectorAll('.relation-row');
+        relRows.forEach(row => {
+            const type = row.querySelector('.rel-type').value;
+            const targetId = row.querySelector('.rel-target').value;
+
+            if (!targetId) return;
+
+            // Datos para MI propio perfil
+            if (type === 'padre') myFatherId = targetId;
+            if (type === 'madre') myMotherId = targetId;
+            if (type === 'esposo' || type === 'esposa' || type === 'pareja') {
+                mySpouseId = targetId;
+                // Vínculo bidireccional (Yo también soy su pareja)
+                updatesForOthers.push({id: targetId, spouse_id: 'MY_NEW_ID'});
+            }
+
+            // Datos para OTROS perfiles (Yo soy el padre/madre)
+            if (type === 'hijo' || type === 'hija') {
+                if (gender === 'M') updatesForOthers.push({id: targetId, father_id: 'MY_NEW_ID'});
+                else if (gender === 'F') updatesForOthers.push({
+                    id: targetId,
+                    mother_id: 'MY_NEW_ID'
+                });
+                else updatesForOthers.push({id: targetId, father_id: 'MY_NEW_ID'}); // Fallback
+            }
+        });
 
         const memberData = {
             user_id: currentUser.id,
@@ -653,8 +722,9 @@ async function saveMember() {
             gender: gender || null,
             profession: profession || null,
             nationality: nationality || null,
-            relationship_type: relation || null,
-            related_to: relatedToId,
+            father_id: myFatherId,
+            mother_id: myMotherId,
+            spouse_id: mySpouseId,
             birth_date: birth || null,
             birth_place: birthPlace || null,
             death_date: death || null,
@@ -663,33 +733,41 @@ async function saveMember() {
             document_links: documentLinks || null
         };
 
-        if (photoUrl) {
-            memberData.photo_url = photoUrl;
-        }
+        if (photoUrl) memberData.photo_url = photoUrl;
 
-        let result;
+        let savedMemberId = editId;
+
+        // Guardar o Actualizar a la persona actual
         if (editId) {
-            // Update existing
-            result = await supabase
-                .from('family_members')
-                .update(memberData)
-                .eq('id', editId);
+            const {error} = await supabase.from('family_members').update(memberData).eq('id', editId);
+            if (error) throw error;
         } else {
-            // Insert new
-            result = await supabase
-                .from('family_members')
-                .insert([memberData]);
+            const {
+                data,
+                error
+            } = await supabase.from('family_members').insert([memberData]).select();
+            if (error) throw error;
+            savedMemberId = data[0].id;
         }
 
-        if (result.error) throw result.error;
+        // --- SEGUNDA PARTE DE LA MAGIA: Actualizar a los Familiares (Hijos, Parejas) ---
+        if (updatesForOthers.length > 0 && savedMemberId) {
+            for (const update of updatesForOthers) {
+                const payload = {};
+                // Reemplazamos el marcador por nuestra ID real generada
+                if (update.father_id) payload.father_id = savedMemberId;
+                if (update.mother_id) payload.mother_id = savedMemberId;
+                if (update.spouse_id) payload.spouse_id = savedMemberId;
 
-        // Reset form UI y ocultar
+                await supabase.from('family_members').update(payload).eq('id', update.id);
+            }
+        }
+
         memberForm.reset();
         memberForm.removeAttribute('data-edit-id');
         document.querySelector('.file-msg').textContent = "Arrastra una foto aquí o haz clic";
         document.getElementById('member-form-panel').classList.add('hidden');
 
-        // Recargar la lista
         await loadFamilyMembers();
 
     } catch (err) {
@@ -702,24 +780,15 @@ async function saveMember() {
 
 async function deleteMember(id) {
     const supabase = getSupabase();
-
-    // 1. Buscamos al familiar antes de borrarlo para saber si tenía foto
     const memberToDelete = familyMembers.find(m => m.id === id);
 
     showLoader();
-
-    // 2. Borramos el registro de la base de datos
-    const {error} = await supabase
-        .from('family_members')
-        .delete()
-        .eq('id', id);
-
+    const {error} = await supabase.from('family_members').delete().eq('id', id);
     hideLoader();
 
     if (error) {
         alert("No se pudo eliminar: " + error.message);
     } else {
-        // 3. Si se borró de la BD y tenía foto, la borramos del Storage
         if (memberToDelete && memberToDelete.photo_url) {
             await deletePhotoFromStorage(memberToDelete.photo_url);
         }
@@ -727,7 +796,7 @@ async function deleteMember(id) {
     }
 }
 
-// Variable global para el arrastre de documentos
+// Drag & Drop de Documentos (Mantenemos tu código actual intacto)
 let draggedDocRow = null;
 
 window.addDocumentRow = function (title = '', url = '') {
@@ -740,16 +809,14 @@ window.addDocumentRow = function (title = '', url = '') {
     row.innerHTML = `
         <div class="drag-handle" style="color: var(--text-muted); padding: 0 0.5rem;">≡</div>
         <div style="flex: 1; display: flex; flex-direction: column; gap: 0.5rem;">
-            <input type="text" class="doc-title modern-form form-control" placeholder="Título del Documento (ej: Partida de Nacimiento)" value="${title}">
-            <input type="text" class="doc-url modern-form form-control" placeholder="Enlace (iCloud, Drive) o Ubicación" value="${url}">
+            <input type="text" class="doc-title modern-form form-control" placeholder="Título del Documento" value="${title}">
+            <input type="text" class="doc-url modern-form form-control" placeholder="Enlace o Ubicación" value="${url}">
         </div>
         <button type="button" class="btn-remove-doc" style="background: var(--danger); color: white; border: none; border-radius: 8px; width: 40px; height: 40px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">×</button>
     `;
 
-    // Evento para borrar la fila
     row.querySelector('.btn-remove-doc').addEventListener('click', () => row.remove());
 
-    // Eventos Drag & Drop para reordenar
     row.addEventListener('dragstart', function () {
         draggedDocRow = row;
         setTimeout(() => row.style.opacity = '0.4', 0);
