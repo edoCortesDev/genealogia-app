@@ -519,6 +519,7 @@ async function saveMember() {
     const deathPlace = document.getElementById('mem-death-place').value;
 
     const bio = document.getElementById('mem-bio').value;
+    const documentLinks = document.getElementById('mem-documents').value;
 
     const editId = memberForm.getAttribute('data-edit-id');
     let relatedToId = relatedToVal === 'self' ? null : relatedToVal;
@@ -562,7 +563,8 @@ async function saveMember() {
             birth_place: birthPlace || null,
             death_date: death || null,
             death_place: deathPlace || null,
-            bio: bio || null
+            bio: bio || null,
+            document_links: documentLinks || null
         };
 
         if (photoUrl) {
