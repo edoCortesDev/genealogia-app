@@ -85,7 +85,12 @@ function setupUIEvents() {
             if (files.length > 0) {
                 const fileMsg = document.querySelector('.file-msg');
                 fileMsg.textContent = files[0].name;
-                // Guardar referencia al archivo en el DOM provisionalmente
+
+                // Usamos DataTransfer para inyectar el archivo arrastrado al input real
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(files[0]);
+                fileInput.files = dataTransfer.files;
+
                 dropArea.dataset.filePending = true;
             }
         }
