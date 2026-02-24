@@ -1,5 +1,5 @@
 // family.js
-// LÃ³gica para gestionar la familia utilizando Supabase
+// Lógica para gestionar la familia utilizando Supabase
 
 import {getSupabase} from './config.js';
 import {checkAuth} from './auth.js';
@@ -71,32 +71,37 @@ function setupUIEvents() {
             dropArea.addEventListener(eventName, () => dropArea.classList.remove('drag-over'), false);
         });
 
+        // 1. Cuando el usuario ARRASTRA Y SUELTA
         dropArea.addEventListener('drop', (e) => {
             const dt = e.dataTransfer;
             const files = dt.files;
-            handleFiles(files);
+            handleFiles(files, true); // Le pasamos "true" porque es un Drop
         });
 
+        // 2. Cuando el usuario HACE CLIC
         fileInput.addEventListener('change', function () {
-            handleFiles(this.files);
+            handleFiles(this.files, false); // Le pasamos "false" porque fue un clic normal
         });
 
-        function handleFiles(files) {
+        // 3. La función inteligente de archivos
+        function handleFiles(files, isDrop) {
             if (files.length > 0) {
                 const fileMsg = document.querySelector('.file-msg');
                 fileMsg.textContent = files[0].name;
 
-                // Usamos DataTransfer para inyectar el archivo arrastrado al input real
-                const dataTransfer = new DataTransfer();
-                dataTransfer.items.add(files[0]);
-                fileInput.files = dataTransfer.files;
+                // Solo inyectamos el archivo si vino volando (Arrastrado)
+                if (isDrop) {
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(files[0]);
+                    fileInput.files = dataTransfer.files;
+                }
 
                 dropArea.dataset.filePending = true;
             }
         }
     }
 
-    // Funcionalidad de BÃºsqueda en el Dashboard
+    // Funcionalidad de Búsqueda en el Dashboard
     const searchInput = document.getElementById('search-person');
     const resultsContainer = document.getElementById('search-results-container');
 
@@ -183,15 +188,15 @@ window.openPersonDetails = function (id) {
     addRow('Fallecimiento', mem.death_date ? `${mem.death_date} ${mem.death_place ? 'en ' + mem.death_place : ''}` : null);
     addRow('RUT', mem.rut);
     addRow('Nacionalidad', mem.nationality);
-    addRow('ProfesiÃ³n', mem.profession);
+    addRow('Profesión', mem.profession);
     addRow('Sexo', mem.gender === 'M' ? 'Masculino' : (mem.gender === 'F' ? 'Femenino' : mem.gender));
-    addRow('RelaciÃ³n familiar', getRelStr);
+    addRow('Relación familiar', getRelStr);
 
     let bioHtml = '';
     if (mem.bio) {
         bioHtml = `
         <div class="mt-2" style="background: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: 12px;">
-            <h4 style="color: var(--primary); margin-bottom: 0.5rem; font-size: 0.95rem;">BiografÃ­a e Historia</h4>
+            <h4 style="color: var(--primary); margin-bottom: 0.5rem; font-size: 0.95rem;">Biografía e Historia</h4>
             <p style="color: var(--text-light); line-height: 1.6; white-space: pre-wrap;">${mem.bio}</p>
         </div>`;
     }
@@ -220,7 +225,7 @@ function updateRelatedToDropdown() {
     const select = document.getElementById('mem-related-to');
     if (!select) return;
 
-    // Mantener la opciÃ³n "Yo"
+    // Mantener la opción "Yo"
     let optionsHtml = '<option value="self">Yo (Yo mismo)</option>';
 
     familyMembers.forEach(mem => {
@@ -259,12 +264,12 @@ export async function loadFamilyMembers() {
     updateRelatedToDropdown();
     updateDashboardStats(familyMembers);
 
-    // Avisar al Ã¡rbol que los datos se actualizaron y debe repintarse
+    // Avisar al árbol que los datos se actualizaron y debe repintarse
     if (window.familyTree) {
         window.familyTree.updateData(familyMembers);
     }
 
-    // Construir lÃ­nea de tiempo
+    // Construir línea de tiempo
     buildTimeline(familyMembers);
 }
 
@@ -300,18 +305,18 @@ function buildTimeline(members) {
     });
 
     if (events.length === 0) {
-        container.innerHTML = '<p class="text-muted text-center" style="padding: 2rem;">No hay eventos registrados (fechas de nacimiento/defunciÃ³n) para construir la lÃ­nea de tiempo.</p>';
+        container.innerHTML = '<p class="text-muted text-center" style="padding: 2rem;">No hay eventos registrados (fechas de nacimiento/defunción) para construir la línea de tiempo.</p>';
         return;
     }
 
-    // Ordenar cronolÃ³gicamente (mÃ¡s antiguo primero)
+    // Ordenar cronológicamente (más antiguo primero)
     events.sort((a, b) => a.date - b.date);
 
     let html = '';
 
     events.forEach((ev, index) => {
         const isLeft = index % 2 === 0;
-        const icon = ev.type === 'birth' ? 'ðŸŒŸ' : 'âœï¸';
+        const icon = ev.type === 'birth' ? '🌟' : '🕊️';
         const colorClass = ev.type === 'birth' ? 'text-primary' : 'text-muted';
 
         const avatarHtml = ev.photo
@@ -346,7 +351,7 @@ function updateDashboardStats(members) {
     let hombres = members.filter(m => m.gender === 'M').length;
     let mujeres = members.filter(m => m.gender === 'F').length;
 
-    // SimplificaciÃ³n: Unidades familiares (simuladas por ahora)
+    // Simplificación: Unidades familiares (simuladas por ahora)
     let familias = new Set(members.map(m => m.last_name.split(' ')[0])).size;
 
     elPersonas.textContent = members.length;
@@ -362,7 +367,7 @@ function renderMembersList() {
     listContainer.innerHTML = '';
 
     if (familyMembers.length === 0) {
-        listContainer.innerHTML = '<p class="text-muted" style="text-align:center; padding: 2rem;">AÃºn no has agregado familiares. Â¡SÃ© el primero!</p>';
+        listContainer.innerHTML = '<p class="text-muted" style="text-align:center; padding: 2rem;">Aún no has agregado familiares. ¡Sé el primero!</p>';
         return;
     }
 
@@ -374,7 +379,6 @@ function renderMembersList() {
         const initial = mem.first_name.charAt(0).toUpperCase();
         const relStr = getRelationshipString(mem.relationship_type);
 
-        // Fix image load using supabase storage direct link if photo exists
         const avatarHtml = mem.photo_url
             ? `<img src="${mem.photo_url}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--glass-border);">`
             : `<div class="avatar-circle" style="width: 40px; height: 40px; font-size: 1rem;">${initial}</div>`;
@@ -407,7 +411,7 @@ function renderMembersList() {
     document.querySelectorAll('.btn-delete-mem').forEach(btn => {
         btn.addEventListener('click', async (e) => {
             const id = e.target.dataset.id;
-            if (confirm("Â¿EstÃ¡s seguro de eliminar a este familiar? Se eliminarÃ¡ del Ã¡rbol.")) {
+            if (confirm("¿Estás seguro de eliminar a este familiar? Se eliminará del árbol.")) {
                 await deleteMember(id);
             }
         });
@@ -452,7 +456,7 @@ function getRelationshipString(type) {
         'parent': 'Padre/Madre',
         'child': 'Hijo/Hija',
         'sibling': 'Hermano/Hermana',
-        'spouse': 'CÃ³nyuge'
+        'spouse': 'Cónyuge'
     };
     return map[type] || type;
 }
@@ -463,18 +467,36 @@ async function uploadPhoto(file) {
     const fileName = `${Math.random()}.${fileExt}`;
     const filePath = `${currentUser.id}/${fileName}`;
 
+    // MAYÚSCULAS ASEGURADAS AQUÍ
     const {data, error} = await supabase.storage
-        .from('family_photos')
+        .from('FAMILY_PHOTOS')
         .upload(filePath, file);
 
     if (error) throw error;
 
     // Obtener public URL
     const {data: {publicUrl}} = supabase.storage
-        .from('family_photos')
+        .from('FAMILY_PHOTOS')
         .getPublicUrl(filePath);
 
     return publicUrl;
+}
+
+// Función para borrar fotos huérfanas del Storage
+async function deletePhotoFromStorage(photoUrl) {
+    if (!photoUrl) return;
+    const supabase = getSupabase();
+
+    try {
+        const urlParts = photoUrl.split('/FAMILY_PHOTOS/');
+        if (urlParts.length === 2) {
+            const filePath = urlParts[1];
+            await supabase.storage.from('FAMILY_PHOTOS').remove([filePath]);
+            console.log("Foto antigua eliminada del Storage para liberar espacio.");
+        }
+    } catch (err) {
+        console.error("Error intentando borrar la foto antigua:", err);
+    }
 }
 
 async function saveMember() {
@@ -505,10 +527,25 @@ async function saveMember() {
 
     try {
         let photoUrl = null;
+        let oldPhotoUrl = null;
         const fileInput = document.querySelector('.file-input');
 
+        // Si estamos editando, buscamos si ya tenía una foto
+        if (editId) {
+            const existingMember = familyMembers.find(m => m.id === editId);
+            if (existingMember) {
+                oldPhotoUrl = existingMember.photo_url;
+            }
+        }
+
+        // Si el usuario seleccionó una foto nueva en el formulario
         if (fileInput.files.length > 0) {
             photoUrl = await uploadPhoto(fileInput.files[0]);
+
+            // Si subió la nueva con éxito y existía una vieja, ¡borramos la vieja!
+            if (oldPhotoUrl) {
+                await deletePhotoFromStorage(oldPhotoUrl);
+            }
         }
 
         const memberData = {
@@ -551,7 +588,7 @@ async function saveMember() {
         // Reset form UI y ocultar
         memberForm.reset();
         memberForm.removeAttribute('data-edit-id');
-        document.querySelector('.file-msg').textContent = "Arrastra una foto aquÃ­ o haz clic";
+        document.querySelector('.file-msg').textContent = "Arrastra una foto aquí o haz clic";
         document.getElementById('member-form-panel').classList.add('hidden');
 
         // Recargar la lista
@@ -567,8 +604,13 @@ async function saveMember() {
 
 async function deleteMember(id) {
     const supabase = getSupabase();
+
+    // 1. Buscamos al familiar antes de borrarlo para saber si tenía foto
+    const memberToDelete = familyMembers.find(m => m.id === id);
+
     showLoader();
 
+    // 2. Borramos el registro de la base de datos
     const {error} = await supabase
         .from('family_members')
         .delete()
@@ -579,6 +621,10 @@ async function deleteMember(id) {
     if (error) {
         alert("No se pudo eliminar: " + error.message);
     } else {
+        // 3. Si se borró de la BD y tenía foto, la borramos del Storage
+        if (memberToDelete && memberToDelete.photo_url) {
+            await deletePhotoFromStorage(memberToDelete.photo_url);
+        }
         await loadFamilyMembers();
     }
 }
