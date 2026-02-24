@@ -305,7 +305,7 @@ class FamilyTree {
         const offsetX = 5000;
         const offsetY = 5000;
 
-        // 1. Dibujar Líneas Vectoriales
+        // 1. Dibujar Líneas Vectoriales (Mejora 1: Curvas Bezier)
         let svgContent = '';
         this.links.forEach(link => {
             const source = this.nodes.find(n => n.id === link.source);
@@ -319,10 +319,8 @@ class FamilyTree {
                 const sY = source.y + offsetY;
                 const tY = target.y + offsetY;
 
-                // Línea punteada de color distinto para hermanos/esposos
-                svgContent += `<line x1="${sEdge}" y1="${sY}" x2="${tEdge}" y2="${tY}" stroke="rgba(168, 85, 247, 0.5)" stroke-width="2" stroke-dasharray="5,5" />`;
+                svgContent += `<line x1="${sEdge}" y1="${sY}" x2="${tEdge}" y2="${tY}" stroke="rgba(168, 85, 247, 0.4)" stroke-width="2" stroke-dasharray="6,6" />`;
             } else if (link.type === 'parent-child') {
-                // Siempre asume que el source es el Padre (está arriba, Y menor)
                 let parent = source;
                 let child = target;
                 if (source.y > target.y) {
@@ -330,27 +328,29 @@ class FamilyTree {
                     child = source;
                 }
 
-                const sY = parent.y + 70 + offsetY; // Base del padre
-                const tY = child.y - 70 + offsetY; // Tope del hijo
-                const midY = (sY + tY) / 2;
                 const sX = parent.x + offsetX;
+                const sY = parent.y + 70 + offsetY; // Base del padre
                 const tX = child.x + offsetX;
+                const tY = child.y - 70 + offsetY; // Tope del hijo
 
-                // Línea Ortogonal Perfecta (Codos)
-                svgContent += `<path d="M ${sX} ${sY} L ${sX} ${midY} L ${tX} ${midY} L ${tX} ${tY}" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2" stroke-linejoin="round"/>`;
+                // Distancia vertical para suavizar la curva
+                const midY = sY + (tY - sY) / 2;
+
+                // Curva Bezier Cúbica Suave
+                // M: Mover a inicio | C: Punto control 1, Punto control 2, Punto final
+                svgContent += `<path d="M ${sX} ${sY} C ${sX} ${midY}, ${tX} ${midY}, ${tX} ${tY}" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="2" />`;
             }
         });
         this.svgLayer.innerHTML = svgContent;
 
-// 2. Dibujar Tarjetas
+        // 2. Dibujar Tarjetas (Mejora 2 y 3: Glassmorphism y Foco)
         let htmlContent = '';
         this.nodes.forEach(node => {
             const isDead = node.deathDate ? true : false;
-            const crossSymbol = isDead ? `<span style="color:#ccc; margin-right:3px; font-weight:normal;">†</span>` : '';
+            const crossSymbol = isDead ? `<span style="color:rgba(255,255,255,0.4); margin-right:4px; font-weight:normal;">†</span>` : '';
 
-            // MODIFICACIÓN: Ahora la bandera es un bloque independiente con su propio margen
             const flagHTML = getFlagEmoji(node.nationality)
-                ? `<span style="display: block; font-size: 1.1rem; margin-top: 4px; margin-bottom: 2px;">${getFlagEmoji(node.nationality)}</span>`
+                ? `<span style="display: block; font-size: 1.1rem; margin-top: 4px; margin-bottom: 2px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));">${getFlagEmoji(node.nationality)}</span>`
                 : '';
 
             const photoSrc = node.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(node.name)}&background=random`;
@@ -359,24 +359,44 @@ class FamilyTree {
             let dY = node.deathDate ? node.deathDate.substring(0, 4) : "";
             const dateStr = (bY || dY) ? `${bY || '?'} - ${dY || 'Presente'}` : "Sin fecha";
 
-            let borderColor = 'rgba(255,255,255,0.15)';
-            if (node.gender === 'F') borderColor = '#ec4899';
-            else if (node.gender === 'M') borderColor = '#06b6d4';
+            let borderColor = 'rgba(255,255,255,0.1)';
+            let glowColor = 'rgba(255,255,255,0.1)';
+            if (node.gender === 'F') { borderColor = 'rgba(236, 72, 153, 0.5)'; glowColor = 'rgba(236, 72, 153, 0.2)'; }
+            else if (node.gender === 'M') { borderColor = 'rgba(6, 182, 212, 0.5)'; glowColor = 'rgba(6, 182, 212, 0.2)'; }
+
+            // Lógica de Foco en Hover
+            const hoverScript = `
+                this.style.transform='translate(-50%, -50%) scale(1.08)'; 
+                this.style.boxShadow='0 10px 30px ${glowColor}, inset 0 0 0 1px ${borderColor}';
+                this.style.zIndex='10';
+                this.style.background='rgba(30, 30, 45, 0.8)';
+                Array.from(this.parentElement.children).forEach(el => { if(el !== this) el.style.opacity = '0.3'; });
+            `;
+            const outScript = `
+                this.style.transform='translate(-50%, -50%) scale(1)'; 
+                this.style.boxShadow='0 8px 32px 0 rgba(0, 0, 0, 0.4)';
+                this.style.zIndex='1';
+                this.style.background='rgba(20, 20, 30, 0.6)';
+                Array.from(this.parentElement.children).forEach(el => el.style.opacity = '1');
+            `;
 
             htmlContent += `
-                <div class="glass-panel" 
-                     style="position: absolute; left: ${node.x}px; top: ${node.y}px; transform: translate(-50%, -50%); width: 160px; padding: 15px; text-align: center; cursor: pointer; border-color: ${borderColor}; transition: var(--transition-smooth);" 
-                     onmouseover="this.style.transform='translate(-50%, -50%) scale(1.05)'; this.style.boxShadow='0 0 20px var(--primary-glow)';" 
-                     onmouseout="this.style.transform='translate(-50%, -50%) scale(1)'; this.style.boxShadow='var(--glass-shadow)';"
+                <div class="tree-node glass-panel" 
+                     style="position: absolute; left: ${node.x}px; top: ${node.y}px; transform: translate(-50%, -50%); width: 160px; padding: 15px; text-align: center; cursor: pointer; 
+                            background: rgba(20, 20, 30, 0.6); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); 
+                            border: 1px solid rgba(255,255,255,0.05); border-top: 1px solid rgba(255,255,255,0.1); border-radius: 16px; 
+                            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4); transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); z-index: 1;" 
+                     onmouseover="${hoverScript.replace(/\n/g, ' ')}" 
+                     onmouseout="${outScript.replace(/\n/g, ' ')}"
                      onclick="if(window.openPersonDetails){window.openPersonDetails('${node.id}');}">
                     
-                    <img src="${photoSrc}" style="width: 70px; height: 70px; border-radius: 50%; border: 3px solid ${borderColor}; object-fit: cover; margin-bottom: 10px; background: #333;">
+                    <img src="${photoSrc}" style="width: 75px; height: 75px; border-radius: 50%; border: 2px solid ${borderColor}; object-fit: cover; margin-bottom: 12px; background: #111; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
                     
-                    <span style="display: block; font-weight: 600; font-size: 0.95rem; color: var(--text-light); line-height: 1.2;">${crossSymbol}${node.name}</span>
+                    <span style="display: block; font-weight: 600; font-size: 0.95rem; color: #f8fafc; line-height: 1.2; letter-spacing: -0.01em;">${crossSymbol}${node.name}</span>
                     
                     ${flagHTML}
                     
-                    <span style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">${dateStr}</span>
+                    <span style="display: block; font-size: 0.75rem; color: #8b8d9b; margin-top: 6px; font-weight: 500; letter-spacing: 0.02em;">${dateStr}</span>
                     
                 </div>
             `;
