@@ -105,30 +105,26 @@
                 <h1 class="dash-title">Mi legado <span style="color: #06b6d4;">vivo.</span></h1>
                 <p class="dash-subtitle">Busca a un familiar para ver su perfil detallado.</p>
 
-                <div class="stats-grid mt-2">
+                <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-number"
-                             id="stat-personas">0
+                             id="stat-total">0
                         </div>
-                        <div class="stat-label text-cyan">PERSONAS</div>
+                        <div class="stat-label text-cyan">FAMILIARES</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-number"
-                             id="stat-familias">0
+                             id="stat-countries">0
                         </div>
-                        <div class="stat-label text-cyan">FAMILIAS</div>
+                        <div class="stat-label text-pink">PAÍSES DE ORIGEN</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-number"
-                             id="stat-hombres">0
+                             id="stat-files">0
                         </div>
-                        <div class="stat-label text-cyan">HOMBRES</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number"
-                             id="stat-mujeres">0
+                        <div class="stat-label"
+                             style="color: #a855f7;">ARCHIVOS ADJUNTOS
                         </div>
-                        <div class="stat-label text-pink">MUJERES</div>
                     </div>
                 </div>
 
@@ -474,13 +470,19 @@
                         </button>
                     </div>
 
-                    <div class="form-section-box mt-2" style="border: 1px solid var(--glass-border); border-radius: 8px; padding: 1rem; background: rgba(255,255,255,0.02);">
-                        <h3 style="color: var(--primary); margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem;">📁 Documentos y Evidencias</h3>
+                    <div class="form-section-box mt-2"
+                         style="border: 1px solid var(--glass-border); border-radius: 8px; padding: 1rem; background: rgba(255,255,255,0.02);">
+                        <h3 style="color: var(--primary); margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem;">
+                            📁 Documentos y Evidencias</h3>
 
-                        <div id="document-list-container" style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;">
+                        <div id="document-list-container"
+                             style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;">
                         </div>
 
-                        <button type="button" id="btn-add-document" class="btn btn-outline" style="width: 100%; border-style: dashed;">
+                        <button type="button"
+                                id="btn-add-document"
+                                class="btn btn-outline"
+                                style="width: 100%; border-style: dashed;">
                             + Adjuntar Documento
                         </button>
                     </div>

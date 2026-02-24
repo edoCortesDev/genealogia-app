@@ -383,23 +383,59 @@ function buildTimeline(members) {
 }
 
 function updateDashboardStats(members) {
-    const elPersonas = document.getElementById('stat-personas');
-    const elFamilias = document.getElementById('stat-familias');
-    const elHombres = document.getElementById('stat-hombres');
-    const elMujeres = document.getElementById('stat-mujeres');
+    if (!members || members.length === 0) return;
 
-    if (!elPersonas) return;
+    // 1. Total de familiares
+    const totalMembers = members.length;
 
-    let hombres = members.filter(m => m.gender === 'M').length;
-    let mujeres = members.filter(m => m.gender === 'F').length;
+    // 2. Países de origen únicos (ignorando los vacíos)
+    const uniqueCountries = new Set();
+    members.forEach(mem => {
+        if (mem.nationality && mem.nationality.trim() !== '') {
+            uniqueCountries.add(mem.nationality.trim().toUpperCase());
+        }
+    });
 
-    // Simplificación: Unidades familiares (simuladas por ahora)
-    let familias = new Set(members.map(m => m.last_name.split(' ')[0])).size;
+    // 3. Archivos adjuntos (fotos + documentos)
+    let totalFiles = 0;
+    members.forEach(mem => {
+        if (mem.photo_url) totalFiles++;
+        if (mem.document_links) {
+            try {
+                const docs = JSON.parse(mem.document_links);
+                totalFiles += docs.length;
+            } catch (e) {
+                // Formato antiguo de texto simple
+                totalFiles++;
+            }
+        }
+    });
 
-    elPersonas.textContent = members.length;
-    elFamilias.textContent = familias || 0;
-    elHombres.textContent = hombres;
-    elMujeres.textContent = mujeres;
+    // Animar los números del Dashboard (Efecto contador)
+    const animateValue = (id, end) => {
+        const obj = document.getElementById(id);
+        if (!obj) return;
+        let start = 0;
+        const duration = 1000;
+        const increment = end > 0 ? Math.ceil(end / 20) : 1;
+        // Evitar división por cero
+        const stepTime = end > 0 ? Math.abs(Math.floor(duration / (end / increment))) : duration;
+
+        const timer = setInterval(() => {
+            start += increment;
+            if (start >= end) {
+                obj.textContent = end;
+                clearInterval(timer);
+            } else {
+                obj.textContent = start;
+            }
+        }, stepTime);
+    };
+
+    // Ejecutar animaciones con los nuevos IDs
+    animateValue('stat-total', totalMembers);
+    animateValue('stat-countries', uniqueCountries.size);
+    animateValue('stat-files', totalFiles);
 }
 
 function renderMembersList() {
