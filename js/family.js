@@ -205,23 +205,30 @@ window.openPersonDetails = function (id) {
         </div>`;
     }
 
-// --- NUEVO: Sección de Documentos Dinámicos ---
+    // --- NUEVO: Sección de Documentos Dinámicos ---
     let docsHtml = '';
     if (mem.document_links) {
         try {
             const docs = JSON.parse(mem.document_links);
             if (docs.length > 0) {
                 let listItems = docs.map(d => {
+                    const titleText = d.title || 'Documento adjunto';
                     const isLink = d.url.startsWith('http');
-                    const linkContent = isLink
-                        ? `<a href="${d.url}" target="_blank" style="color: #a855f7; text-decoration: none; font-weight: 500;">${d.url}</a>`
-                        : `<span style="color: var(--text-muted);">${d.url}</span>`;
 
-                    return `
-                    <div style="display: flex; flex-direction: column; padding: 0.8rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 0.5rem;">
-                        <strong style="color: var(--text-light); font-size: 0.95rem;">📄 ${d.title || 'Documento sin título'}</strong>
-                        <div style="font-size: 0.85rem; margin-top: 0.2rem; word-break: break-all;">${linkContent}</div>
-                    </div>`;
+                    if (isLink) {
+                        // Si es un enlace, el título se vuelve clickeable y ocultamos la URL fea
+                        return `
+                        <div style="padding: 0.8rem 1rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; transition: background 0.2s;">
+                            📄 <a href="${d.url}" target="_blank" rel="noopener noreferrer" style="color: #a855f7; text-decoration: none; font-weight: 500; display: block; width: 100%;">${titleText} <span style="font-size: 0.8em; opacity: 0.7;">↗</span></a>
+                        </div>`;
+                    } else {
+                        // Si es una nota física (ej: "En la caja fuerte"), mostramos el texto debajo
+                        return `
+                        <div style="padding: 0.8rem 1rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 0.5rem; display: flex; flex-direction: column; gap: 0.2rem;">
+                            <strong style="color: var(--text-light); font-size: 0.95rem;">📄 ${titleText}</strong>
+                            <span style="color: var(--text-muted); font-size: 0.85rem;">${d.url}</span>
+                        </div>`;
+                    }
                 }).join('');
 
                 docsHtml = `
@@ -231,7 +238,7 @@ window.openPersonDetails = function (id) {
                 </div>`;
             }
         } catch (e) {
-            // Ignorar errores de parseo si hay texto viejo
+            console.warn("Error renderizando documentos:", e);
         }
     }
 
