@@ -469,14 +469,14 @@ async function uploadPhoto(file) {
 
     // MAYÚSCULAS ASEGURADAS AQUÍ
     const {data, error} = await supabase.storage
-        .from('FAMILY_PHOTOS')
+        .from('family_photos')
         .upload(filePath, file);
 
     if (error) throw error;
 
     // Obtener public URL
     const {data: {publicUrl}} = supabase.storage
-        .from('FAMILY_PHOTOS')
+        .from('family_photos')
         .getPublicUrl(filePath);
 
     return publicUrl;
@@ -488,10 +488,10 @@ async function deletePhotoFromStorage(photoUrl) {
     const supabase = getSupabase();
 
     try {
-        const urlParts = photoUrl.split('/FAMILY_PHOTOS/');
+        const urlParts = photoUrl.split('/family_photos/');
         if (urlParts.length === 2) {
             const filePath = urlParts[1];
-            await supabase.storage.from('FAMILY_PHOTOS').remove([filePath]);
+            await supabase.storage.from('family_photos').remove([filePath]);
             console.log("Foto antigua eliminada del Storage para liberar espacio.");
         }
     } catch (err) {
