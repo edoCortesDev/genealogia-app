@@ -15,15 +15,15 @@ function getFlagEmoji(code) {
 }
 
 class FamilyTree {
-    constructor(containerId) {
+    constructor() { // <-- Fix: Removido el parámetro no usado (containerId)
         this.wrapper = document.getElementById('tree-canvas-wrapper');
         this.transformLayer = document.getElementById('tree-transform-layer');
         this.svgLayer = document.getElementById('tree-svg-layer');
         this.htmlLayer = document.getElementById('tree-html-layer');
 
-        this.nodesMap = new Map();
         this.nodes = [];
         this.links = [];
+        // Fix: Se eliminó this.nodesMap porque solo se usa localmente
 
         // Cámara
         this.zoom = 1;
@@ -53,7 +53,7 @@ class FamilyTree {
         const width = this.wrapper.clientWidth;
         const height = this.wrapper.clientHeight;
         this.panX = width / 2;
-        this.panY = height / 2; // Centrar al medio de la pantalla
+        this.panY = height / 2;
         this.zoom = 1;
         this.applyTransform();
     }
@@ -95,9 +95,7 @@ class FamilyTree {
             if (progress < 1) {
                 requestAnimationFrame(animate);
             } else {
-                const nodes = Array.from(this.htmlLayer.children);
-                const targetEl = nodes.find(el => el.style.left === `${node.x}px` && el.style.top === `${node.y}px`);
-
+                const targetEl = document.getElementById(`tree-node-${node.id}`);
                 if (targetEl) {
                     targetEl.style.transition = 'all 0.3s';
                     targetEl.style.boxShadow = '0 0 50px rgba(168, 85, 247, 0.8), inset 0 0 0 2px #a855f7';
@@ -246,7 +244,6 @@ class FamilyTree {
         const xSpacing = 160;
         const ySpacing = 300;
 
-        // 1. Mapeo de Relaciones Estrictas (NUEVO SISTEMA ID CRUZADOS)
         const nodesMap = new Map();
         dbMembers.forEach(m => {
             nodesMap.set(m.id, {
@@ -260,7 +257,6 @@ class FamilyTree {
             const node = nodesMap.get(m.id);
             if (!node) return;
 
-            // Procesar Padre
             if (m.father_id && nodesMap.has(m.father_id)) {
                 if (!node.parents.includes(m.father_id)) node.parents.push(m.father_id);
                 const father = nodesMap.get(m.father_id);
@@ -271,7 +267,6 @@ class FamilyTree {
                 }
             }
 
-            // Procesar Madre
             if (m.mother_id && nodesMap.has(m.mother_id)) {
                 if (!node.parents.includes(m.mother_id)) node.parents.push(m.mother_id);
                 const mother = nodesMap.get(m.mother_id);
@@ -282,7 +277,6 @@ class FamilyTree {
                 }
             }
 
-            // Procesar Pareja/Cónyuge
             if (m.spouse_id && nodesMap.has(m.spouse_id)) {
                 if (!node.spouses.includes(m.spouse_id)) node.spouses.push(m.spouse_id);
                 const spouse = nodesMap.get(m.spouse_id);
@@ -298,7 +292,6 @@ class FamilyTree {
             }
         });
 
-        // Inferir Hermanos automáticamente
         dbMembers.forEach(m => {
             const node = nodesMap.get(m.id);
             if (!node) return;
@@ -320,11 +313,9 @@ class FamilyTree {
             });
         });
 
-        // La Raíz: El primer usuario creado en la base de datos (según orden ascendente)
         const root = dbMembers[0];
         let positioned = new Set();
 
-        // 2. Funciones Algoritmo de Linaje
         function getAncestorDepth(nodeId) {
             const node = nodesMap.get(nodeId);
             if (!node || !node.parents || node.parents.length === 0) return 0;
@@ -401,7 +392,6 @@ class FamilyTree {
             positionDescendants(root.id, 0, 0, 0);
         }
 
-        // 4. Mapear datos limpios
         Array.from(nodesMap.values()).forEach(mem => {
             const fName = mem.first_name ? mem.first_name.split(' ')[0] : '';
             const lName = mem.last_name ? mem.last_name.split(' ')[0] : '';
@@ -472,7 +462,8 @@ class FamilyTree {
 
         let htmlContent = '';
         this.nodes.forEach(node => {
-            const isDead = node.deathDate ? true : false;
+            // Fix: Simplificado a booleanos nativos para evitar warning del IDE
+            const isDead = !!node.deathDate;
             const crossSymbol = isDead ? `<span style="color:rgba(255,255,255,0.4); margin-right:4px; font-weight:normal;">†</span>` : '';
 
             const flagHTML = getFlagEmoji(node.nationality)
@@ -511,7 +502,7 @@ class FamilyTree {
             `;
 
             htmlContent += `
-                <div class="tree-node glass-panel" 
+                <div id="tree-node-${node.id}" class="tree-node glass-panel" 
                      style="position: absolute; left: ${node.x}px; top: ${node.y}px; transform: translate(-50%, -50%); width: 160px; padding: 15px; text-align: center; cursor: pointer; 
                             background: rgba(20, 20, 30, 0.6); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); 
                             border: 1px solid rgba(255,255,255,0.05); border-top: 1px solid rgba(255,255,255,0.1); border-radius: 16px; 
@@ -520,7 +511,7 @@ class FamilyTree {
                      onmouseout="${outScript.replace(/\n/g, ' ')}"
                      onclick="if(window.openPersonDetails){window.openPersonDetails('${node.id}');}">
                     
-                    <img src="${photoSrc}" style="width: 75px; height: 75px; border-radius: 50%; border: 2px solid ${borderColor}; object-fit: cover; margin-bottom: 12px; background: #111; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
+                    <img src="${photoSrc}" alt="Foto de ${node.name}" style="width: 75px; height: 75px; border-radius: 50%; border: 2px solid ${borderColor}; object-fit: cover; margin-bottom: 12px; background: #111; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
                     
                     <span style="display: block; font-weight: 600; font-size: 0.95rem; color: #f8fafc; line-height: 1.2; letter-spacing: -0.01em;">${crossSymbol}${node.name}</span>
                     
@@ -536,7 +527,8 @@ class FamilyTree {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Inicialización al cargar el árbol
     if (document.getElementById('view-tree')) {
-        window.familyTree = new FamilyTree('tree-canvas-wrapper');
+        window.familyTree = new FamilyTree();
     }
 });
