@@ -420,16 +420,14 @@
                                   placeholder="Historia breve..."></textarea>
                     </div>
 
-                    <div class="form-section-box mt-2"
-                         style="border: 1px solid var(--glass-border); border-radius: 8px; padding: 1rem; background: rgba(255,255,255,0.02);">
-                        <h4 class="text-cyan"
-                            style="margin-bottom: 0.5rem; font-size: 0.9rem;">📅 Línea de Tiempo
-                                                                              (Eventos)</h4>
-                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;">
-                            Arrastra las filas para reordenar.</p>
-                        <button type="button"
-                                class="btn btn-outline btn-small">+ Agregar Evento
-                        </button>
+                    <div class="form-section-box mt-2" style="border: 1px solid var(--glass-border); border-radius: 8px; padding: 1rem; background: rgba(255,255,255,0.02);">
+                        <h4 class="text-cyan" style="margin-bottom: 0.5rem; font-size: 0.9rem;">📅 Línea de Tiempo (Eventos)</h4>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;">Agrega hitos históricos (matrimonios, graduaciones, viajes).</p>
+
+                        <div id="eventsContainer" style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;">
+                        </div>
+
+                        <button type="button" id="btn-add-event" class="btn btn-outline" style="width: 100%; border-style: dashed; font-size: 0.9rem;">+ Agregar Evento</button>
                     </div>
 
                     <div class="form-section-box mt-2"

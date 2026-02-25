@@ -1,5 +1,5 @@
 // family.js
-// Lógica para gestionar la familia utilizando Supabase con Relaciones Dinámicas (Drag & Drop)
+// Lógica para gestionar la familia, Perfiles Wikipedia, Guardado Bidireccional y Eventos JSON
 
 import {getSupabase} from './config.js';
 import {checkAuth} from './auth.js';
@@ -22,40 +22,32 @@ function setupUIEvents() {
     const btnAdd = document.getElementById('btn-add-member');
     const formPanel = document.getElementById('member-form-panel');
     const btnAddDoc = document.getElementById('btn-add-document');
-
-    if (btnAddDoc) {
-        btnAddDoc.addEventListener('click', () => window.addDocumentRow());
-    }
-
-    // NUEVO: Botón para agregar filas de relación
+    const btnAddEvent = document.getElementById('btn-add-event');
     const btnAddRel = document.getElementById('btn-add-relation');
-    if (btnAddRel) {
-        btnAddRel.addEventListener('click', () => window.addRelationRow());
-    }
 
-    // Inicializar SortableJS para las relaciones si está disponible
+    if (btnAddDoc) btnAddDoc.addEventListener('click', () => window.addDocumentRow());
+    if (btnAddEvent) btnAddEvent.addEventListener('click', () => window.addEventRow());
+    if (btnAddRel) btnAddRel.addEventListener('click', () => window.addRelationRow());
+
     const relContainer = document.getElementById('relationsContainer');
-    if (relContainer && window.Sortable) {
-        new Sortable(relContainer, {
-            handle: '.drag-handle',
-            animation: 150
-        });
+    const evContainer = document.getElementById('eventsContainer');
+
+    if (window.Sortable) {
+        if (relContainer) new Sortable(relContainer, {handle: '.drag-handle', animation: 150});
+        if (evContainer) new Sortable(evContainer, {handle: '.drag-handle', animation: 150});
     }
 
     const btnCancel = document.getElementById('btn-cancel-member');
     const memberForm = document.getElementById('member-form');
 
-    // Toggle sidebar
     if (btnAdd && formPanel) {
         btnAdd.addEventListener('click', () => {
             memberForm.reset();
             memberForm.removeAttribute('data-edit-id');
             document.getElementById('member-form-title').textContent = "Agregar Familiar";
-
-            // Limpiar contenedores dinámicos
             document.getElementById('document-list-container').innerHTML = '';
             if (relContainer) relContainer.innerHTML = '';
-
+            if (evContainer) evContainer.innerHTML = '';
             formPanel.classList.remove('hidden');
         });
     }
@@ -74,7 +66,7 @@ function setupUIEvents() {
         });
     }
 
-    // Handlers para Foto (Arrastrar y Soltar)
+    // Drag and Drop de Fotos
     const dropArea = document.getElementById('photo-drop-area');
     const fileInput = document.querySelector('.file-input');
 
@@ -98,8 +90,7 @@ function setupUIEvents() {
 
         dropArea.addEventListener('drop', (e) => {
             const dt = e.dataTransfer;
-            const files = dt.files;
-            handleFiles(files, true);
+            handleFiles(dt.files, true);
         });
 
         fileInput.addEventListener('change', function () {
@@ -121,7 +112,7 @@ function setupUIEvents() {
         }
     }
 
-    // Funcionalidad de Búsqueda en el Dashboard
+    // Buscador del Dashboard
     const searchInput = document.getElementById('search-person');
     const resultsContainer = document.getElementById('search-results-container');
 
@@ -178,7 +169,55 @@ function setupUIEvents() {
     }
 }
 
-// --- NUEVO: Generador Dinámico de Filas de Relación ---
+// --- FILAS DINÁMICAS (EVENTOS Y RELACIONES) ---
+
+window.addEventRow = function (year = '', type = 'otro', targetId = '', desc = '') {
+    const container = document.getElementById('eventsContainer');
+    if (!container) return;
+
+    const currentEditId = document.getElementById('member-form').getAttribute('data-edit-id');
+    let optionsHtml = '<option value="">-- Sin persona vinculada --</option>';
+
+    familyMembers.forEach(mem => {
+        if (mem.id === currentEditId) return;
+        const memYear = mem.birth_date ? `(n. ${mem.birth_date.substring(0, 4)})` : '';
+        const selected = mem.id === targetId ? 'selected' : '';
+        optionsHtml += `<option value="${mem.id}" ${selected}>${mem.first_name} ${mem.last_name} ${memYear}</option>`;
+    });
+
+    const row = document.createElement('div');
+    row.className = 'event-row draggable-item';
+    row.style.cssText = 'display: flex; gap: 10px; align-items: center; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 0.5rem;';
+
+    row.innerHTML = `
+        <div class="drag-handle" style="cursor: grab; color: var(--text-muted); font-size: 1.2rem; padding: 0 5px;">☰</div>
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 0.5rem;">
+            <div style="display: flex; gap: 0.5rem;">
+                <input type="number" class="ev-year modern-form form-control" placeholder="Año" style="width: 80px;" value="${year}">
+                <select class="ev-type modern-form form-control" style="flex: 1;">
+                    <option value="matrimonio" ${type === 'matrimonio' ? 'selected' : ''}>💍 Matrimonio / Unión</option>
+                    <option value="hijo" ${type === 'hijo' ? 'selected' : ''}>👶 Nacimiento de Hijo/a</option>
+                    <option value="graduacion" ${type === 'graduacion' ? 'selected' : ''}>🎓 Graduación / Logro</option>
+                    <option value="viaje" ${type === 'viaje' ? 'selected' : ''}>✈️ Viaje / Mudanza</option>
+                    <option value="religion" ${type === 'religion' ? 'selected' : ''}>⛪ Bautizo / Religión</option>
+                    <option value="premio" ${type === 'premio' ? 'selected' : ''}>🏆 Premio / Reconocimiento</option>
+                    <option value="otro" ${type === 'otro' ? 'selected' : ''}>📝 Otro</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+                <select class="ev-target modern-form form-control" style="flex: 1;">
+                    ${optionsHtml}
+                </select>
+            </div>
+            <input type="text" class="ev-desc modern-form form-control" placeholder="Descripción breve del evento..." value="${desc}">
+        </div>
+        <button type="button" class="btn-remove-ev" style="background: var(--danger); color: white; border: none; width: 35px; height: 35px; border-radius: 5px; cursor: pointer;">×</button>
+    `;
+
+    row.querySelector('.btn-remove-ev').addEventListener('click', () => row.remove());
+    container.appendChild(row);
+}
+
 window.addRelationRow = function (type = '', targetId = '') {
     const container = document.getElementById('relationsContainer');
     if (!container) return;
@@ -187,8 +226,7 @@ window.addRelationRow = function (type = '', targetId = '') {
     let optionsHtml = '<option value="">-- Seleccionar Persona --</option>';
 
     familyMembers.forEach(mem => {
-        if (mem.id === currentEditId) return; // No puede relacionarse consigo mismo
-
+        if (mem.id === currentEditId) return;
         const year = mem.birth_date ? `(n. ${mem.birth_date.substring(0, 4)})` : '';
         const selected = mem.id === targetId ? 'selected' : '';
         optionsHtml += `<option value="${mem.id}" ${selected}>${mem.first_name} ${mem.last_name} ${year}</option>`;
@@ -221,7 +259,7 @@ window.addRelationRow = function (type = '', targetId = '') {
     container.appendChild(row);
 }
 
-// --- FUNCIONES DEL LIGHTBOX (VISOR DE FOTOS) ---
+// --- VISOR DE FOTOS (LIGHTBOX) ---
 window.openPhotoLightbox = function (url) {
     const lightbox = document.getElementById('photo-lightbox');
     const img = document.getElementById('lightbox-img');
@@ -229,7 +267,6 @@ window.openPhotoLightbox = function (url) {
 
     img.src = url;
     lightbox.classList.remove('hidden');
-    // Pequeño delay para que la transición de CSS se active
     setTimeout(() => {
         lightbox.style.opacity = '1';
         img.style.transform = 'scale(1)';
@@ -249,7 +286,7 @@ window.closePhotoLightbox = function () {
     }, 300);
 };
 
-// --- EL NUEVO PERFIL (ESTILO WIKIPEDIA / CORPORATIVO) ---
+// --- PERFIL ESTILO WIKIPEDIA ---
 window.openPersonDetails = function (id) {
     const mem = familyMembers.find(m => m.id === id);
     if (!mem) return;
@@ -257,14 +294,11 @@ window.openPersonDetails = function (id) {
     const detailContainer = document.getElementById('person-detail-content');
     if (!detailContainer) return;
 
-    // 1. LÓGICA DE NAVEGACIÓN (Buscando a la familia directa)
     const padre = familyMembers.find(m => m.id === mem.father_id);
     const madre = familyMembers.find(m => m.id === mem.mother_id);
     const pareja = familyMembers.find(m => m.id === mem.spouse_id);
-    // Hijos: Todos aquellos donde yo sea su padre o madre
     const hijos = familyMembers.filter(m => m.father_id === id || m.mother_id === id);
 
-    // Generador de Etiquetas (Pills)
     const renderPill = (person) => {
         if (!person) return '';
         const miniPhoto = person.photo_url
@@ -282,11 +316,10 @@ window.openPersonDetails = function (id) {
         `;
     };
 
-    // 2. CABECERA (Foto y Nombres)
     const photoSrc = mem.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(mem.first_name)}&background=random`;
     const avatarHtml = `
         <div style="position: relative; display: inline-block; cursor: zoom-in; margin-bottom: 1rem;" onclick="openPhotoLightbox('${photoSrc}')">
-            <img src="${photoSrc}" style="width: 140px; height: 140px; border-radius: 50%; object-fit: cover; border: 4px solid var(--glass-border); box-shadow: 0 10px 25px rgba(0,0,0,0.5); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+            <img src="${photoSrc}" alt="Foto" style="width: 140px; height: 140px; border-radius: 50%; object-fit: cover; border: 4px solid var(--glass-border); box-shadow: 0 10px 25px rgba(0,0,0,0.5); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
             <div style="position: absolute; bottom: 5px; right: 5px; background: var(--bg-dark); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--glass-border); box-shadow: 0 4px 10px rgba(0,0,0,0.3);">🔍</div>
         </div>
     `;
@@ -295,52 +328,18 @@ window.openPersonDetails = function (id) {
     let dY = mem.death_date ? mem.death_date.substring(0, 4) : "";
     const dateStr = (bY || dY) ? `${bY || '?'} - ${dY || 'Presente'}` : "";
 
-    // 3. BLOQUE DE RELACIONES DIRECTAS
     let relHtml = '';
-    const hasParents = padre || madre;
-    const hasSpouse = pareja;
-    const hasChildren = hijos.length > 0;
-
-    if (hasParents || hasSpouse || hasChildren) {
+    if (padre || madre || pareja || hijos.length > 0) {
         relHtml += `<div style="background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem;">`;
-
-        if (hasParents) {
-            relHtml += `
-                <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;">
-                    <span style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Padres</span>
-                    <div style="display: flex; flex-wrap: wrap;">${renderPill(padre)}${renderPill(madre)}</div>
-                </div>
-            `;
-        }
-        if (hasSpouse) {
-            relHtml += `
-                <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: ${hasChildren ? '1rem' : '0'};">
-                    <span style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Pareja / Cónyuge</span>
-                    <div style="display: flex; flex-wrap: wrap;">${renderPill(pareja)}</div>
-                </div>
-            `;
-        }
-        if (hasChildren) {
-            const hijosPills = hijos.map(h => renderPill(h)).join('');
-            relHtml += `
-                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                    <span style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Hijos (${hijos.length})</span>
-                    <div style="display: flex; flex-wrap: wrap;">${hijosPills}</div>
-                </div>
-            `;
-        }
+        if (padre || madre) relHtml += `<div style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;"><span style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Padres</span><div style="display: flex; flex-wrap: wrap;">${renderPill(padre)}${renderPill(madre)}</div></div>`;
+        if (pareja) relHtml += `<div style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: ${hijos.length > 0 ? '1rem' : '0'};"><span style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Pareja / Cónyuge</span><div style="display: flex; flex-wrap: wrap;">${renderPill(pareja)}</div></div>`;
+        if (hijos.length > 0) relHtml += `<div style="display: flex; flex-direction: column; gap: 0.5rem;"><span style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Hijos (${hijos.length})</span><div style="display: flex; flex-wrap: wrap;">${hijos.map(h => renderPill(h)).join('')}</div></div>`;
         relHtml += `</div>`;
     }
 
-    // 4. BLOQUE DE DATOS TÉCNICOS (Ficha)
     const addRow = (label, value) => {
         if (!value) return '';
-        return `
-            <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                <span style="color: var(--text-muted); font-size: 0.9rem; flex: 1;">${label}</span>
-                <span style="color: var(--text-light); font-weight: 500; flex: 2; text-align: right;">${value}</span>
-            </div>
-        `;
+        return `<div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05);"><span style="color: var(--text-muted); font-size: 0.9rem; flex: 1;">${label}</span><span style="color: var(--text-light); font-weight: 500; flex: 2; text-align: right;">${value}</span></div>`;
     };
 
     let techHtml = `<div style="background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border); border-radius: 16px; padding: 0.5rem 1.5rem; margin-bottom: 1.5rem;">`;
@@ -351,14 +350,9 @@ window.openPersonDetails = function (id) {
     techHtml += addRow('Sexo', mem.gender === 'M' ? 'Masculino' : (mem.gender === 'F' ? 'Femenino' : mem.gender));
     techHtml += `</div>`;
 
-    // 5. BLOQUES EXTRA (Bio y Docs)
     let bioHtml = '';
     if (mem.bio) {
-        bioHtml = `
-        <div style="background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem;">
-            <h4 style="color: var(--primary); margin-bottom: 1rem; font-size: 1rem; display: flex; align-items: center; gap: 8px;"><span>📖</span> Historia y Biografía</h4>
-            <p style="color: var(--text-light); line-height: 1.6; white-space: pre-wrap; font-size: 0.95rem;">${mem.bio}</p>
-        </div>`;
+        bioHtml = `<div style="background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem;"><h4 style="color: var(--primary); margin-bottom: 1rem; font-size: 1rem; display: flex; align-items: center; gap: 8px;"><span>📖</span> Historia y Biografía</h4><p style="color: var(--text-light); line-height: 1.6; white-space: pre-wrap; font-size: 0.95rem;">${mem.bio}</p></div>`;
     }
 
     let docsHtml = '';
@@ -366,74 +360,46 @@ window.openPersonDetails = function (id) {
         try {
             const docs = JSON.parse(mem.document_links);
             if (docs.length > 0) {
-                let listItems = docs.map(d => {
-                    const titleText = d.title || 'Documento adjunto';
-                    return `
-                    <a href="${d.url}" target="_blank" rel="noopener noreferrer" style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; margin-bottom: 0.5rem; text-decoration: none; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'">
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <span style="font-size: 1.5rem;">📄</span>
-                            <span style="color: var(--text-light); font-weight: 500;">${titleText}</span>
-                        </div>
-                        <span style="color: var(--primary);">Abrir ↗</span>
-                    </a>`;
-                }).join('');
-
-                docsHtml = `
-                <div style="background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1.5rem;">
-                    <h4 style="color: var(--primary); margin-bottom: 1rem; font-size: 1rem; display: flex; align-items: center; gap: 8px;"><span>📁</span> Documentos y Evidencias</h4>
-                    ${listItems}
-                </div>`;
+                let listItems = docs.map(d => `<a href="${d.url}" target="_blank" rel="noopener noreferrer" style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; margin-bottom: 0.5rem; text-decoration: none;"><div style="display: flex; align-items: center; gap: 12px;"><span style="font-size: 1.5rem;">📄</span><span style="color: var(--text-light); font-weight: 500;">${d.title || 'Documento adjunto'}</span></div><span style="color: var(--primary);">Abrir ↗</span></a>`).join('');
+                docsHtml = `<div style="background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1.5rem;"><h4 style="color: var(--primary); margin-bottom: 1rem; font-size: 1rem; display: flex; align-items: center; gap: 8px;"><span>📁</span> Documentos y Evidencias</h4>${listItems}</div>`;
             }
         } catch (e) {
             console.warn("Error renderizando documentos");
         }
     }
 
-    // --- ENSAMBLAJE FINAL ---
     detailContainer.innerHTML = `
         <div style="text-align: center; margin-bottom: 2rem; padding-top: 1rem;">
             ${avatarHtml}
             <h2 style="font-size: 2.2rem; background: linear-gradient(135deg, #a855f7, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.5rem;">${mem.first_name} ${mem.last_name}</h2>
-            
             <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; color: var(--text-muted); font-size: 0.9rem;">
                 ${dateStr ? `<span style="display: flex; align-items: center; gap: 4px;">📅 ${dateStr}</span>` : ''}
                 ${mem.profession ? `<span style="display: flex; align-items: center; gap: 4px;">💼 ${mem.profession}</span>` : ''}
             </div>
         </div>
-        
         ${relHtml}
         ${techHtml}
         ${bioHtml}
         ${docsHtml}
     `;
 
-    // Hacer scroll arriba suavemente (útil para móviles cuando saltas de perfil en perfil)
     document.getElementById('view-person-detail').scrollTo({top: 0, behavior: 'smooth'});
-
-    if (window.switchView) {
-        window.switchView('detail');
-    }
+    if (window.switchView) window.switchView('detail');
 }
 
 export async function loadFamilyMembers() {
     const supabase = getSupabase();
     const listContainer = document.getElementById('members-list-container');
-
     if (!listContainer) return;
 
-    listContainer.innerHTML = `
-        <div class="skeleton-row"></div>
-        <div class="skeleton-row"></div>
-        <div class="skeleton-row"></div>
-    `;
+    listContainer.innerHTML = `<div class="skeleton-row"></div><div class="skeleton-row"></div><div class="skeleton-row"></div>`;
 
-    const {data: members, error} = await supabase
-        .from('family_members')
-        .select('*')
-        .order('created_at', {ascending: true});
+    const {
+        data: members,
+        error
+    } = await supabase.from('family_members').select('*').order('created_at', {ascending: true});
 
     if (error) {
-        console.error("Error loading family members:", error);
         listContainer.innerHTML = `<p class="text-danger">Error: ${error.message}</p>`;
         return;
     }
@@ -442,40 +408,85 @@ export async function loadFamilyMembers() {
     renderMembersList();
 
     if (window.updateDashboardStats) window.updateDashboardStats();
-
-    if (window.familyTree) {
-        window.familyTree.updateData(familyMembers);
-    }
+    if (window.familyTree) window.familyTree.updateData(familyMembers);
 
     buildTimeline(familyMembers);
 }
 
+// --- CEREBRO DE LA LÍNEA DE TIEMPO (AHORA LEE EVENTOS JSON) ---
 function buildTimeline(members) {
     const container = document.getElementById('timeline-container');
     if (!container) return;
 
     let events = [];
 
+    // Recolectar Nacimientos, Muertes y Eventos JSON
     members.forEach(mem => {
         if (mem.birth_date) {
             events.push({
-                date: new Date(mem.birth_date),
-                year: mem.birth_date.split('-')[0],
-                type: 'birth',
-                person: `${mem.first_name} ${mem.last_name}`,
-                photo: mem.photo_url,
-                description: `Nacimiento de ${mem.first_name}` + (mem.birth_place ? ` en ${mem.birth_place}` : '')
+                date: new Date(mem.birth_date), year: mem.birth_date.split('-')[0],
+                type: 'birth', person: `${mem.first_name} ${mem.last_name}`, photo: mem.photo_url,
+                description: `<strong>Nacimiento</strong>` + (mem.birth_place ? ` en ${mem.birth_place}` : '')
             });
         }
         if (mem.death_date) {
             events.push({
-                date: new Date(mem.death_date),
-                year: mem.death_date.split('-')[0],
-                type: 'death',
-                person: `${mem.first_name} ${mem.last_name}`,
-                photo: mem.photo_url,
-                description: `Fallecimiento de ${mem.first_name}` + (mem.death_place ? ` en ${mem.death_place}` : '')
+                date: new Date(mem.death_date), year: mem.death_date.split('-')[0],
+                type: 'death', person: `${mem.first_name} ${mem.last_name}`, photo: mem.photo_url,
+                description: `<strong>Fallecimiento</strong>` + (mem.death_place ? ` en ${mem.death_place}` : '')
             });
+        }
+
+        // Leer eventos personalizados de la columna JSONB
+        if (mem.custom_events && mem.custom_events !== "[]") {
+            try {
+                const customEvts = JSON.parse(mem.custom_events);
+                customEvts.forEach(ev => {
+                    if (!ev.year) return;
+
+                    let icon = '📌';
+                    let titleText = ev.type.charAt(0).toUpperCase() + ev.type.slice(1);
+
+                    if (ev.type === 'matrimonio') {
+                        icon = '💍';
+                        titleText = 'Matrimonio / Unión';
+                    } else if (ev.type === 'graduacion') {
+                        icon = '🎓';
+                        titleText = 'Graduación';
+                    } else if (ev.type === 'viaje') {
+                        icon = '✈️';
+                        titleText = 'Viaje / Mudanza';
+                    } else if (ev.type === 'religion') {
+                        icon = '⛪';
+                        titleText = 'Ceremonia Religiosa';
+                    } else if (ev.type === 'premio') {
+                        icon = '🏆';
+                        titleText = 'Reconocimiento';
+                    } else if (ev.type === 'hijo') {
+                        icon = '👶';
+                        titleText = 'Nacimiento de Hijo/a';
+                    }
+
+                    let extraPerson = '';
+                    if (ev.related_person_id) {
+                        const rel = members.find(m => m.id === ev.related_person_id);
+                        if (rel) extraPerson = ` con ${rel.first_name} ${rel.last_name}`;
+                    }
+
+                    events.push({
+                        // Usamos enero 1 como aproximación para ordenarlo en ese año
+                        date: new Date(ev.year, 0, 1),
+                        year: ev.year,
+                        type: ev.type,
+                        iconOverride: icon,
+                        person: `${mem.first_name} ${mem.last_name}`,
+                        photo: mem.photo_url,
+                        description: `<strong>${titleText}${extraPerson}</strong>. ${ev.description}`
+                    });
+                });
+            } catch (e) {
+                console.warn("Error parseando eventos", e);
+            }
         }
     });
 
@@ -489,45 +500,36 @@ function buildTimeline(members) {
     let html = '';
     events.forEach((ev, index) => {
         const isLeft = index % 2 === 0;
-        const icon = ev.type === 'birth' ? '🌟' : '🕊️';
-        const colorClass = ev.type === 'birth' ? 'text-primary' : 'text-muted';
+        let icon = ev.iconOverride || '🌟';
+        if (!ev.iconOverride && ev.type === 'death') icon = '🕊️';
 
-        const avatarHtml = ev.photo
-            ? `<img src="${ev.photo}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid var(--glass-border); margin-right: 10px;">`
-            : `<div class="avatar-circle" style="width: 32px; height: 32px; font-size: 0.8rem; margin-right: 10px; display: inline-flex;">${ev.person.charAt(0).toUpperCase()}</div>`;
+        const colorClass = ev.type === 'birth' ? 'text-primary' : (ev.type === 'death' ? 'text-muted' : 'text-cyan');
+        const avatarHtml = ev.photo ? `<img src="${ev.photo}" alt="Avatar" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid var(--glass-border); margin-right: 10px;">` : `<div class="avatar-circle" style="width: 32px; height: 32px; font-size: 0.8rem; margin-right: 10px; display: inline-flex;">${ev.person.charAt(0).toUpperCase()}</div>`;
 
         html += `
             <div class="timeline-item ${isLeft ? 'left' : 'right'}">
                 <div class="timeline-content glass-panel" style="padding: 1.5rem;">
                     <span class="timeline-date ${colorClass}" style="font-weight: bold; font-size: 1.2rem; display: block; margin-bottom: 0.5rem;">${ev.year} ${icon}</span>
-                    <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
-                        ${avatarHtml}
-                        <h4 style="margin: 0; color: var(--text-light);">${ev.person}</h4>
-                    </div>
-                    <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">${ev.description}</p>
+                    <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">${avatarHtml}<h4 style="margin: 0; color: var(--text-light);">${ev.person}</h4></div>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0; line-height: 1.5;">${ev.description}</p>
                 </div>
             </div>
         `;
     });
-
     container.innerHTML = html;
 }
 
-// NUEVO: Motor de Dashboard Avanzado
 window.updateDashboardStats = function () {
     if (!familyMembers || familyMembers.length === 0) return;
-
     const totalMembers = familyMembers.length;
     const uniqueCountries = new Set();
-    let nationals = 0;
-    let foreigners = 0;
+    let nationals = 0, foreigners = 0;
 
     familyMembers.forEach(mem => {
         if (mem.nationality && mem.nationality.trim() !== '') {
             const nat = mem.nationality.trim().toUpperCase();
             uniqueCountries.add(nat);
-            if (nat === 'CL' || nat === 'CHILE') nationals++;
-            else foreigners++;
+            if (nat === 'CL' || nat === 'CHILE') nationals++; else foreigners++;
         }
     });
 
@@ -542,44 +544,6 @@ window.updateDashboardStats = function () {
             }
         }
     });
-
-    let men = 0;
-    let women = 0;
-    familyMembers.forEach(mem => {
-        if (mem.gender === 'M') men++;
-        if (mem.gender === 'F') women++;
-    });
-
-    let oldestName = "Sin datos";
-    let maxAge = 0;
-    const currentYear = new Date().getFullYear();
-
-    familyMembers.forEach(mem => {
-        if (mem.birth_date) {
-            const birthYear = parseInt(mem.birth_date.substring(0, 4));
-            if (!isNaN(birthYear)) {
-                let endYear = currentYear;
-                if (mem.death_date) endYear = parseInt(mem.death_date.substring(0, 4));
-                const age = endYear - birthYear;
-                if (age > maxAge) {
-                    maxAge = age;
-                    const fName = mem.first_name ? mem.first_name.split(' ')[0] : '';
-                    const lName = mem.last_name ? mem.last_name.split(' ')[0] : '';
-                    oldestName = `${fName} ${lName}`.trim();
-                }
-            }
-        }
-    });
-
-    const elGender = document.getElementById('stat-gender');
-    const elNats = document.getElementById('stat-nationals');
-    const elAge = document.getElementById('stat-oldest-age');
-    const elName = document.getElementById('stat-oldest-name');
-
-    if (elGender) elGender.textContent = `${men} / ${women}`;
-    if (elNats) elNats.textContent = `${nationals} / ${foreigners}`;
-    if (elAge) elAge.textContent = `${maxAge} años`;
-    if (elName) elName.textContent = oldestName ? `RÉCORD: ${oldestName}` : 'RÉCORD LONGEVIDAD';
 
     const animateValue = (id, end) => {
         const obj = document.getElementById(id);
@@ -606,7 +570,6 @@ window.updateDashboardStats = function () {
 function renderMembersList() {
     const listContainer = document.getElementById('members-list-container');
     if (!listContainer) return;
-
     listContainer.innerHTML = '';
 
     if (familyMembers.length === 0) {
@@ -618,20 +581,13 @@ function renderMembersList() {
         const el = document.createElement('div');
         el.className = 'glass-panel mb-1 flex-between';
         el.style.padding = '1rem';
-
         const initial = mem.first_name.charAt(0).toUpperCase();
-
-        const avatarHtml = mem.photo_url
-            ? `<img src="${mem.photo_url}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--glass-border);">`
-            : `<div class="avatar-circle" style="width: 40px; height: 40px; font-size: 1rem;">${initial}</div>`;
+        const avatarHtml = mem.photo_url ? `<img src="${mem.photo_url}" alt="Foto" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--glass-border);">` : `<div class="avatar-circle" style="width: 40px; height: 40px; font-size: 1rem;">${initial}</div>`;
 
         el.innerHTML = `
             <div style="display: flex; align-items: center; gap: 1rem;">
                 ${avatarHtml}
-                <div>
-                    <div style="font-weight: 600">${mem.first_name} ${mem.last_name}</div>
-                    <div style="font-size: 0.85rem; color: var(--text-muted)">ID: ${mem.id.substring(0, 8)}</div>
-                </div>
+                <div><div style="font-weight: 600">${mem.first_name} ${mem.last_name}</div><div style="font-size: 0.85rem; color: var(--text-muted)">ID: ${mem.id.substring(0, 8)}</div></div>
             </div>
             <div style="display: flex; gap: 0.5rem;">
                 <button class="btn btn-ghost btn-small text-primary btn-edit-mem" data-id="${mem.id}">Editar</button>
@@ -641,21 +597,10 @@ function renderMembersList() {
         listContainer.appendChild(el);
     });
 
-    document.querySelectorAll('.btn-edit-mem').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const id = e.target.dataset.id;
-            openEditForm(id);
-        });
-    });
-
-    document.querySelectorAll('.btn-delete-mem').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-            const id = e.target.dataset.id;
-            if (confirm("¿Estás seguro de eliminar a este familiar?")) {
-                await deleteMember(id);
-            }
-        });
-    });
+    document.querySelectorAll('.btn-edit-mem').forEach(btn => btn.addEventListener('click', (e) => openEditForm(e.target.dataset.id)));
+    document.querySelectorAll('.btn-delete-mem').forEach(btn => btn.addEventListener('click', async (e) => {
+        if (confirm("¿Estás seguro de eliminar a este familiar?")) await deleteMember(e.target.dataset.id);
+    }));
 }
 
 function openEditForm(id) {
@@ -678,31 +623,37 @@ function openEditForm(id) {
     document.getElementById('mem-death-place').value = mem.death_place || '';
     document.getElementById('mem-bio').value = mem.bio || '';
 
-    // Cargar documentos
+    // Cargar Documentos
     document.getElementById('document-list-container').innerHTML = '';
     if (mem.document_links) {
         try {
-            const docs = JSON.parse(mem.document_links);
-            docs.forEach(doc => window.addDocumentRow(doc.title, doc.url));
+            JSON.parse(mem.document_links).forEach(doc => window.addDocumentRow(doc.title, doc.url));
         } catch (e) {
             console.warn("Formato antiguo de documentos.");
         }
     }
 
-    // --- NUEVO: Cargar Relaciones de Arrastrar y Soltar ---
+    // Cargar Relaciones (Arrastrar y Soltar)
     const relContainer = document.getElementById('relationsContainer');
-    if (relContainer) relContainer.innerHTML = ''; // Limpiamos
+    if (relContainer) relContainer.innerHTML = '';
 
-    // Cargamos los padres y pareja
     if (mem.father_id) window.addRelationRow('padre', mem.father_id);
     if (mem.mother_id) window.addRelationRow('madre', mem.mother_id);
     if (mem.spouse_id) window.addRelationRow('esposo', mem.spouse_id);
 
-    // Cargamos a los hijos (Buscamos quién nos tiene como padre o madre)
     const misHijos = familyMembers.filter(m => m.father_id === id || m.mother_id === id);
-    misHijos.forEach(hijo => {
-        window.addRelationRow(hijo.gender === 'F' ? 'hija' : 'hijo', hijo.id);
-    });
+    misHijos.forEach(hijo => window.addRelationRow(hijo.gender === 'F' ? 'hija' : 'hijo', hijo.id));
+
+    // Cargar Eventos (NUEVO JSONB)
+    const evContainer = document.getElementById('eventsContainer');
+    if (evContainer) evContainer.innerHTML = '';
+    if (mem.custom_events && mem.custom_events !== "[]") {
+        try {
+            const evs = JSON.parse(mem.custom_events);
+            evs.forEach(ev => window.addEventRow(ev.year, ev.type, ev.related_person_id, ev.description));
+        } catch (e) {
+        }
+    }
 
     memberForm.setAttribute('data-edit-id', id);
     document.getElementById('member-form-title').textContent = "Editar Persona";
@@ -714,10 +665,8 @@ async function uploadPhoto(file) {
     const fileExt = file.name.split('.').pop();
     const fileName = `${Math.random()}.${fileExt}`;
     const filePath = `${currentUser.id}/${fileName}`;
-
     const {data, error} = await supabase.storage.from('family_photos').upload(filePath, file);
     if (error) throw error;
-
     const {data: {publicUrl}} = supabase.storage.from('family_photos').getPublicUrl(filePath);
     return publicUrl;
 }
@@ -727,22 +676,17 @@ async function deletePhotoFromStorage(photoUrl) {
     const supabase = getSupabase();
     try {
         const urlParts = photoUrl.split('/family_photos/');
-        if (urlParts.length === 2) {
-            const filePath = urlParts[1];
-            await supabase.storage.from('family_photos').remove([filePath]);
-        }
+        if (urlParts.length === 2) await supabase.storage.from('family_photos').remove([urlParts[1]]);
     } catch (err) {
         console.error("Error borrando foto:", err);
     }
 }
 
-// --- NUEVO: CEREBRO LOGICO DE GUARDADO ---
 async function saveMember() {
     const supabase = getSupabase();
     const memberForm = document.getElementById('member-form');
     const editId = memberForm.getAttribute('data-edit-id');
 
-    // Leer campos básicos
     const firstName = document.getElementById('mem-firstname').value;
     const lastName = document.getElementById('mem-lastname').value;
     const rut = document.getElementById('mem-rut').value;
@@ -755,15 +699,32 @@ async function saveMember() {
     const deathPlace = document.getElementById('mem-death-place').value;
     const bio = document.getElementById('mem-bio').value;
 
-    // Documentos
-    const docRows = document.querySelectorAll('.doc-row');
     const docsArray = [];
-    docRows.forEach(row => {
+    document.querySelectorAll('.doc-row').forEach(row => {
         const title = row.querySelector('.doc-title').value.trim();
         const url = row.querySelector('.doc-url').value.trim();
         if (title || url) docsArray.push({title, url});
     });
     const documentLinks = JSON.stringify(docsArray);
+
+    // --- NUEVO: Capturar eventos JSON ---
+    const customEventsArray = [];
+    document.querySelectorAll('.event-row').forEach(row => {
+        const year = row.querySelector('.ev-year').value.trim();
+        const type = row.querySelector('.ev-type').value;
+        const targetId = row.querySelector('.ev-target').value;
+        const desc = row.querySelector('.ev-desc').value.trim();
+
+        if (year || desc) {
+            customEventsArray.push({
+                year: year,
+                type: type,
+                related_person_id: targetId || null,
+                description: desc
+            });
+        }
+    });
+    const customEventsJson = JSON.stringify(customEventsArray);
 
     showLoader();
 
@@ -782,36 +743,31 @@ async function saveMember() {
             if (oldPhotoUrl) await deletePhotoFromStorage(oldPhotoUrl);
         }
 
-        // --- MAGIA: Leer Filas Dinámicas de Relaciones ---
         let myFatherId = null;
         let myMotherId = null;
         let mySpouseId = null;
-        const updatesForOthers = []; // Guardaremos las IDs de quienes debemos actualizar mutuamente
+        const updatesForOthers = [];
 
-        const relRows = document.querySelectorAll('.relation-row');
-        relRows.forEach(row => {
+        document.querySelectorAll('.relation-row').forEach(row => {
             const type = row.querySelector('.rel-type').value;
             const targetId = row.querySelector('.rel-target').value;
 
             if (!targetId) return;
 
-            // Datos para MI propio perfil
             if (type === 'padre') myFatherId = targetId;
             if (type === 'madre') myMotherId = targetId;
             if (type === 'esposo' || type === 'esposa' || type === 'pareja') {
                 mySpouseId = targetId;
-                // Vínculo bidireccional (Yo también soy su pareja)
                 updatesForOthers.push({id: targetId, spouse_id: 'MY_NEW_ID'});
             }
 
-            // Datos para OTROS perfiles (Yo soy el padre/madre)
             if (type === 'hijo' || type === 'hija') {
                 if (gender === 'M') updatesForOthers.push({id: targetId, father_id: 'MY_NEW_ID'});
                 else if (gender === 'F') updatesForOthers.push({
                     id: targetId,
                     mother_id: 'MY_NEW_ID'
                 });
-                else updatesForOthers.push({id: targetId, father_id: 'MY_NEW_ID'}); // Fallback
+                else updatesForOthers.push({id: targetId, father_id: 'MY_NEW_ID'});
             }
         });
 
@@ -831,14 +787,14 @@ async function saveMember() {
             death_date: death || null,
             death_place: deathPlace || null,
             bio: bio || null,
-            document_links: documentLinks || null
+            document_links: documentLinks || null,
+            custom_events: customEventsJson // Guardamos el JSONB mágico
         };
 
         if (photoUrl) memberData.photo_url = photoUrl;
 
         let savedMemberId = editId;
 
-        // Guardar o Actualizar a la persona actual
         if (editId) {
             const {error} = await supabase.from('family_members').update(memberData).eq('id', editId);
             if (error) throw error;
@@ -851,15 +807,12 @@ async function saveMember() {
             savedMemberId = data[0].id;
         }
 
-        // --- SEGUNDA PARTE DE LA MAGIA: Actualizar a los Familiares (Hijos, Parejas) ---
         if (updatesForOthers.length > 0 && savedMemberId) {
             for (const update of updatesForOthers) {
                 const payload = {};
-                // Reemplazamos el marcador por nuestra ID real generada
                 if (update.father_id) payload.father_id = savedMemberId;
                 if (update.mother_id) payload.mother_id = savedMemberId;
                 if (update.spouse_id) payload.spouse_id = savedMemberId;
-
                 await supabase.from('family_members').update(payload).eq('id', update.id);
             }
         }
@@ -890,14 +843,11 @@ async function deleteMember(id) {
     if (error) {
         alert("No se pudo eliminar: " + error.message);
     } else {
-        if (memberToDelete && memberToDelete.photo_url) {
-            await deletePhotoFromStorage(memberToDelete.photo_url);
-        }
+        if (memberToDelete && memberToDelete.photo_url) await deletePhotoFromStorage(memberToDelete.photo_url);
         await loadFamilyMembers();
     }
 }
 
-// Drag & Drop de Documentos (Mantenemos tu código actual intacto)
 let draggedDocRow = null;
 
 window.addDocumentRow = function (title = '', url = '') {
