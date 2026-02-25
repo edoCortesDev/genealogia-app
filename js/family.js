@@ -221,6 +221,35 @@ window.addRelationRow = function (type = '', targetId = '') {
     container.appendChild(row);
 }
 
+// --- FUNCIONES DEL LIGHTBOX (VISOR DE FOTOS) ---
+window.openPhotoLightbox = function (url) {
+    const lightbox = document.getElementById('photo-lightbox');
+    const img = document.getElementById('lightbox-img');
+    if (!lightbox || !img) return;
+
+    img.src = url;
+    lightbox.classList.remove('hidden');
+    // Pequeño delay para que la transición de CSS se active
+    setTimeout(() => {
+        lightbox.style.opacity = '1';
+        img.style.transform = 'scale(1)';
+    }, 10);
+};
+
+window.closePhotoLightbox = function () {
+    const lightbox = document.getElementById('photo-lightbox');
+    const img = document.getElementById('lightbox-img');
+    if (!lightbox) return;
+
+    lightbox.style.opacity = '0';
+    img.style.transform = 'scale(0.9)';
+    setTimeout(() => {
+        lightbox.classList.add('hidden');
+        img.src = '';
+    }, 300);
+};
+
+// --- EL NUEVO PERFIL (ESTILO WIKIPEDIA / CORPORATIVO) ---
 window.openPersonDetails = function (id) {
     const mem = familyMembers.find(m => m.id === id);
     if (!mem) return;
@@ -228,86 +257,158 @@ window.openPersonDetails = function (id) {
     const detailContainer = document.getElementById('person-detail-content');
     if (!detailContainer) return;
 
-    const avatarHtml = mem.photo_url
-        ? `<img src="${mem.photo_url}" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); margin: 0 auto 1.5rem auto; display: block;">`
-        : `<div class="avatar-circle" style="width: 120px; height: 120px; font-size: 3rem; margin: 0 auto 1.5rem auto; display: flex;">${mem.first_name.charAt(0).toUpperCase()}</div>`;
+    // 1. LÓGICA DE NAVEGACIÓN (Buscando a la familia directa)
+    const padre = familyMembers.find(m => m.id === mem.father_id);
+    const madre = familyMembers.find(m => m.id === mem.mother_id);
+    const pareja = familyMembers.find(m => m.id === mem.spouse_id);
+    // Hijos: Todos aquellos donde yo sea su padre o madre
+    const hijos = familyMembers.filter(m => m.father_id === id || m.mother_id === id);
 
-    let infoHtml = '';
+    // Generador de Etiquetas (Pills)
+    const renderPill = (person) => {
+        if (!person) return '';
+        const miniPhoto = person.photo_url
+            ? `<img src="${person.photo_url}" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover;">`
+            : `<div style="width: 28px; height: 28px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold;">${person.first_name.charAt(0)}</div>`;
 
-    const addRow = (label, value) => {
-        if (value) {
-            infoHtml += `
-            <div style="padding: 1rem 0; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between;">
-                <span style="color: var(--text-muted); font-size: 0.9rem;">${label}</span>
-                <span style="color: var(--text-light); font-weight: 500;">${value}</span>
-            </div>`;
-        }
+        return `
+            <div onclick="window.openPersonDetails('${person.id}')" 
+                 style="display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px 4px 4px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 50px; cursor: pointer; transition: all 0.2s ease; margin: 4px;"
+                 onmouseover="this.style.background='rgba(168, 85, 247, 0.15)'; this.style.borderColor='var(--primary)';"
+                 onmouseout="this.style.background='rgba(255,255,255,0.05)'; this.style.borderColor='rgba(255,255,255,0.1)';">
+                ${miniPhoto}
+                <span style="font-size: 0.85rem; color: var(--text-light); font-weight: 500;">${person.first_name} ${person.last_name.split(' ')[0]}</span>
+            </div>
+        `;
     };
 
-    addRow('Nacimiento', mem.birth_date ? `${mem.birth_date} ${mem.birth_place ? 'en ' + mem.birth_place : ''}` : null);
-    addRow('Fallecimiento', mem.death_date ? `${mem.death_date} ${mem.death_place ? 'en ' + mem.death_place : ''}` : null);
-    addRow('RUT', mem.rut);
-    addRow('Nacionalidad', mem.nationality);
-    addRow('Profesión', mem.profession);
-    addRow('Sexo', mem.gender === 'M' ? 'Masculino' : (mem.gender === 'F' ? 'Femenino' : mem.gender));
+    // 2. CABECERA (Foto y Nombres)
+    const photoSrc = mem.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(mem.first_name)}&background=random`;
+    const avatarHtml = `
+        <div style="position: relative; display: inline-block; cursor: zoom-in; margin-bottom: 1rem;" onclick="openPhotoLightbox('${photoSrc}')">
+            <img src="${photoSrc}" style="width: 140px; height: 140px; border-radius: 50%; object-fit: cover; border: 4px solid var(--glass-border); box-shadow: 0 10px 25px rgba(0,0,0,0.5); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+            <div style="position: absolute; bottom: 5px; right: 5px; background: var(--bg-dark); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--glass-border); box-shadow: 0 4px 10px rgba(0,0,0,0.3);">🔍</div>
+        </div>
+    `;
 
+    let bY = mem.birth_date ? mem.birth_date.substring(0, 4) : "";
+    let dY = mem.death_date ? mem.death_date.substring(0, 4) : "";
+    const dateStr = (bY || dY) ? `${bY || '?'} - ${dY || 'Presente'}` : "";
+
+    // 3. BLOQUE DE RELACIONES DIRECTAS
+    let relHtml = '';
+    const hasParents = padre || madre;
+    const hasSpouse = pareja;
+    const hasChildren = hijos.length > 0;
+
+    if (hasParents || hasSpouse || hasChildren) {
+        relHtml += `<div style="background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem;">`;
+
+        if (hasParents) {
+            relHtml += `
+                <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;">
+                    <span style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Padres</span>
+                    <div style="display: flex; flex-wrap: wrap;">${renderPill(padre)}${renderPill(madre)}</div>
+                </div>
+            `;
+        }
+        if (hasSpouse) {
+            relHtml += `
+                <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: ${hasChildren ? '1rem' : '0'};">
+                    <span style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Pareja / Cónyuge</span>
+                    <div style="display: flex; flex-wrap: wrap;">${renderPill(pareja)}</div>
+                </div>
+            `;
+        }
+        if (hasChildren) {
+            const hijosPills = hijos.map(h => renderPill(h)).join('');
+            relHtml += `
+                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                    <span style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Hijos (${hijos.length})</span>
+                    <div style="display: flex; flex-wrap: wrap;">${hijosPills}</div>
+                </div>
+            `;
+        }
+        relHtml += `</div>`;
+    }
+
+    // 4. BLOQUE DE DATOS TÉCNICOS (Ficha)
+    const addRow = (label, value) => {
+        if (!value) return '';
+        return `
+            <div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <span style="color: var(--text-muted); font-size: 0.9rem; flex: 1;">${label}</span>
+                <span style="color: var(--text-light); font-weight: 500; flex: 2; text-align: right;">${value}</span>
+            </div>
+        `;
+    };
+
+    let techHtml = `<div style="background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border); border-radius: 16px; padding: 0.5rem 1.5rem; margin-bottom: 1.5rem;">`;
+    techHtml += addRow('Nacimiento', mem.birth_date ? `${mem.birth_date} ${mem.birth_place ? '📍 ' + mem.birth_place : ''}` : null);
+    techHtml += addRow('Fallecimiento', mem.death_date ? `${mem.death_date} ${mem.death_place ? '📍 ' + mem.death_place : ''}` : null);
+    techHtml += addRow('Nacionalidad', mem.nationality ? `<span style="background: rgba(6, 182, 212, 0.1); color: #06b6d4; padding: 2px 8px; border-radius: 4px; font-size: 0.85rem;">${mem.nationality}</span>` : null);
+    techHtml += addRow('Identificación', mem.rut);
+    techHtml += addRow('Sexo', mem.gender === 'M' ? 'Masculino' : (mem.gender === 'F' ? 'Femenino' : mem.gender));
+    techHtml += `</div>`;
+
+    // 5. BLOQUES EXTRA (Bio y Docs)
     let bioHtml = '';
     if (mem.bio) {
         bioHtml = `
-        <div class="mt-2" style="background: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: 12px;">
-            <h4 style="color: var(--primary); margin-bottom: 0.5rem; font-size: 0.95rem;">Biografía e Historia</h4>
-            <p style="color: var(--text-light); line-height: 1.6; white-space: pre-wrap;">${mem.bio}</p>
+        <div style="background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem;">
+            <h4 style="color: var(--primary); margin-bottom: 1rem; font-size: 1rem; display: flex; align-items: center; gap: 8px;"><span>📖</span> Historia y Biografía</h4>
+            <p style="color: var(--text-light); line-height: 1.6; white-space: pre-wrap; font-size: 0.95rem;">${mem.bio}</p>
         </div>`;
     }
 
     let docsHtml = '';
-    if (mem.document_links) {
+    if (mem.document_links && mem.document_links !== "[]") {
         try {
             const docs = JSON.parse(mem.document_links);
             if (docs.length > 0) {
                 let listItems = docs.map(d => {
                     const titleText = d.title || 'Documento adjunto';
-                    const isLink = d.url.startsWith('http');
-
-                    if (isLink) {
-                        return `
-                        <div style="padding: 0.8rem 1rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
-                            📄 <a href="${d.url}" target="_blank" rel="noopener noreferrer" style="color: #a855f7; text-decoration: none; font-weight: 500; display: block; width: 100%;">${titleText} ↗</a>
-                        </div>`;
-                    } else {
-                        return `
-                        <div style="padding: 0.8rem 1rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 0.5rem; display: flex; flex-direction: column; gap: 0.2rem;">
-                            <strong style="color: var(--text-light); font-size: 0.95rem;">📄 ${titleText}</strong>
-                            <span style="color: var(--text-muted); font-size: 0.85rem;">${d.url}</span>
-                        </div>`;
-                    }
+                    return `
+                    <a href="${d.url}" target="_blank" rel="noopener noreferrer" style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; margin-bottom: 0.5rem; text-decoration: none; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <span style="font-size: 1.5rem;">📄</span>
+                            <span style="color: var(--text-light); font-weight: 500;">${titleText}</span>
+                        </div>
+                        <span style="color: var(--primary);">Abrir ↗</span>
+                    </a>`;
                 }).join('');
 
                 docsHtml = `
-                <div class="mt-2" style="background: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: 12px;">
-                    <h4 style="color: var(--primary); margin-bottom: 1rem; font-size: 0.95rem;">📁 Documentos</h4>
+                <div style="background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1.5rem;">
+                    <h4 style="color: var(--primary); margin-bottom: 1rem; font-size: 1rem; display: flex; align-items: center; gap: 8px;"><span>📁</span> Documentos y Evidencias</h4>
                     ${listItems}
                 </div>`;
             }
         } catch (e) {
-            console.warn("Error renderizando documentos:", e);
+            console.warn("Error renderizando documentos");
         }
     }
 
+    // --- ENSAMBLAJE FINAL ---
     detailContainer.innerHTML = `
-        <div style="text-align: center; margin-bottom: 2rem;">
+        <div style="text-align: center; margin-bottom: 2rem; padding-top: 1rem;">
             ${avatarHtml}
-            <h2 style="font-size: 2rem; background: linear-gradient(135deg, #a855f7, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">${mem.first_name} ${mem.last_name}</h2>
-            <p style="color: var(--text-muted); margin-top: 0.5rem;">Registro ID: ${mem.id.substring(0, 8)}</p>
+            <h2 style="font-size: 2.2rem; background: linear-gradient(135deg, #a855f7, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.5rem;">${mem.first_name} ${mem.last_name}</h2>
+            
+            <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; color: var(--text-muted); font-size: 0.9rem;">
+                ${dateStr ? `<span style="display: flex; align-items: center; gap: 4px;">📅 ${dateStr}</span>` : ''}
+                ${mem.profession ? `<span style="display: flex; align-items: center; gap: 4px;">💼 ${mem.profession}</span>` : ''}
+            </div>
         </div>
         
-        <div style="background: var(--bg-dark-accent); border: 1px solid rgba(255,255,255,0.02); border-radius: 12px; padding: 1rem 1.5rem;">
-            ${infoHtml}
-        </div>
-        
+        ${relHtml}
+        ${techHtml}
         ${bioHtml}
         ${docsHtml}
     `;
+
+    // Hacer scroll arriba suavemente (útil para móviles cuando saltas de perfil en perfil)
+    document.getElementById('view-person-detail').scrollTo({top: 0, behavior: 'smooth'});
 
     if (window.switchView) {
         window.switchView('detail');
