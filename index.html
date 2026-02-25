@@ -6,7 +6,6 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
     <title>Genealogía Moderna - Descubre tus raíces</title>
-    <!-- Google Fonts: Inter -->
     <link rel="preconnect"
           href="https://fonts.googleapis.com">
     <link rel="preconnect"
@@ -14,15 +13,12 @@
           crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
           rel="stylesheet">
-
-    <!-- CSS -->
     <link rel="stylesheet"
           href="css/style.css">
 </head>
 
 <body class="landing-page dark-mode">
 
-<!-- Header Navigation -->
 <header class="glass-header">
     <div class="container nav-container">
         <div class="logo">
@@ -31,18 +27,15 @@
         </div>
         <nav class="auth-nav">
             <button class="btn btn-ghost"
-                    id="btn-login">Iniciar
-                                   Sesión
+                    id="btn-login">Iniciar Sesión
             </button>
             <button class="btn btn-primary"
-                    id="btn-signup">Crear
-                                    Cuenta
+                    id="btn-signup">Crear Cuenta
             </button>
         </nav>
     </div>
 </header>
 
-<!-- Hero Section -->
 <main>
     <section class="hero-section">
         <div class="hero-content">
@@ -50,18 +43,16 @@
                 <span class="text-gradient">familia</span> para siempre.
             </h1>
             <p class="hero-subtitle">Una plataforma visualmente asombrosa para construir, gestionar
-                                     y explorar tu
-                                     árbol genealógico en tiempo real con total privacidad.</p>
+                                     y explorar tu árbol genealógico en tiempo real con total
+                                     privacidad.</p>
             <div class="hero-actions">
                 <button class="btn btn-primary btn-large"
-                        id="btn-hero-start">Empezar
-                                            Ahora
+                        id="btn-hero-start">Empezar Ahora
                 </button>
                 <button class="btn btn-outline btn-large">Ver Demo</button>
             </div>
         </div>
         <div class="hero-graphics">
-            <!-- Abstract visual representation of a network/tree for the landing page -->
             <div class="abstract-node n1"></div>
             <div class="abstract-node n2"></div>
             <div class="abstract-node n3"></div>
@@ -69,14 +60,8 @@
             <div class="abstract-line l2"></div>
         </div>
     </section>
-
-    <section class="features-section container">
-        <!-- Features details to be filled later -->
-    </section>
 </main>
 
-<!-- Auth Modals -->
-<!-- Login Modal -->
 <div id="modal-login"
      class="modal hidden">
     <div class="modal-overlay"></div>
@@ -113,7 +98,6 @@
     </div>
 </div>
 
-<!-- Register Modal -->
 <div id="modal-register"
      class="modal hidden">
     <div class="modal-overlay"></div>
@@ -122,15 +106,14 @@
         <h2 class="mb-2">Crear Cuenta</h2>
         <form id="form-register"
               class="modern-form">
-            <div class="form-row"
-                 style="display: flex; gap: 1rem;">
-                <div class="form-group flex-1">
+            <div class="form-row">
+                <div class="form-group">
                     <label for="reg-firstname">Nombre</label>
                     <input type="text"
                            id="reg-firstname"
                            required>
                 </div>
-                <div class="form-group flex-1">
+                <div class="form-group">
                     <label for="reg-lastname">Apellido</label>
                     <input type="text"
                            id="reg-lastname"
@@ -164,16 +147,13 @@
     </div>
 </div>
 
-<!-- Global Full Page Loader -->
 <div id="global-loader"
      class="global-loader hidden">
     <div class="spinner"></div>
 </div>
 
-<!-- Supabase JS Library -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/ui.js"
         type="module"></script>
 </body>
-
 </html>

@@ -63,3 +63,14 @@
     align-items: center;
     height: 70px;
 }
+
+/* --- Mobile First: Layout --- */
+@media (max-width: 768px) {
+    .nav-container {
+        height: auto;
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+        justify-content: center;
+    }
+}

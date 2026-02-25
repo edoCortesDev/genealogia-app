@@ -49,3 +49,13 @@
 .btn-close:hover {
     color: var(--danger);
 }
+
+/* --- Mobile First: Modals --- */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 90%;
+        padding: 1.5rem;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+}
