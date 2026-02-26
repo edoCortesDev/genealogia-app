@@ -429,6 +429,15 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
+
+    background-color: var(--bg-main);
+
+    /* Diseño Bosque Iluminado: Manchas de luz orgánica y viñeta profunda */
+    background-image:
+            radial-gradient(circle at 15% 20%, rgba(158, 159, 115, 0.3), transparent 35%),
+            radial-gradient(circle at 85% 80%, rgba(212, 163, 115, 0.25), transparent 35%),
+            radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.9) 0%, transparent 50%),
+            radial-gradient(circle at 50% 50%, transparent 40%, rgba(50, 73, 64, 0.5) 150%);
 }
 
 .tree-toolbar {
