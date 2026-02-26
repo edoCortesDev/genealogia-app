@@ -88,30 +88,32 @@
     <section id="view-dashboard"
              class="app-view active">
         <div class="dashboard-header"
-             style="height: calc(100vh - 70px); align-items: center; background: radial-gradient(circle at center, rgba(158, 159, 115, 0.2) 0%, transparent 60%);">
-            <div class="dashboard-content container">
-                <h1 class="dash-title">Mi legado <span style="color: var(--secondary);">vivo.</span>
-                </h1>
-                <p class="dash-subtitle">Busca a un familiar para ver su perfil detallado.</p>
+             style="min-height: calc(100vh - 70px); align-items: center; display: flex; background: radial-gradient(circle at center, rgba(158, 159, 115, 0.15) 0%, transparent 60%);">
+            <div class="dashboard-content container"
+                 style="margin: 0 auto;">
 
-                <div class="stats-grid">
+                <h1 class="dash-title">Mi legado <span class="text-gradient">vivo.</span></h1>
+                <p class="dash-subtitle">Explora las raíces de tu historia, gestiona los perfiles y
+                                         descubre las conexiones que te hacen ser quien eres.</p>
+
+                <div class="stats-grid mt-2">
                     <div class="stat-card">
                         <div class="stat-number"
                              id="stat-total">0
                         </div>
-                        <div class="stat-label">FAMILIARES</div>
+                        <div class="stat-label">👥 Familiares</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-number"
                              id="stat-countries">0
                         </div>
-                        <div class="stat-label">PAÍSES DE ORIGEN</div>
+                        <div class="stat-label">🌍 Países</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-number"
                              id="stat-files">0
                         </div>
-                        <div class="stat-label">ARCHIVOS ADJUNTOS</div>
+                        <div class="stat-label">📎 Archivos</div>
                     </div>
                 </div>
 
@@ -120,12 +122,13 @@
                     <input type="text"
                            class="search-input"
                            id="search-person"
-                           placeholder="Buscar persona por nombre y ver perfil...">
+                           placeholder="Buscar a un familiar por nombre, apellido o RUT...">
                 </div>
 
                 <div id="search-results-container"
                      class="mt-2"
-                     style="max-width: 600px; margin: 1rem auto; text-align: left;"></div>
+                     style="max-width: 650px; margin: 1rem auto; text-align: left;"></div>
+
             </div>
         </div>
     </section>
