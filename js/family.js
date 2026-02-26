@@ -509,9 +509,19 @@ function buildTimeline(members) {
         html += `
             <div class="timeline-item ${isLeft ? 'left' : 'right'}">
                 <div class="timeline-content glass-panel" style="padding: 1.5rem;">
-                    <span class="timeline-date ${colorClass}" style="font-weight: bold; font-size: 1.2rem; display: block; margin-bottom: 0.5rem;">${ev.year} ${icon}</span>
-                    <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">${avatarHtml}<h4 style="margin: 0; color: var(--text-main);">${ev.person}</h4></div>
-                    <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0; line-height: 1.5;">${ev.description}</p>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; border-bottom: 1px solid rgba(50,73,64,0.1); padding-bottom: 0.8rem;">
+                        <span style="font-weight: 800; font-size: 1.8rem; color: var(--accent); letter-spacing: -0.03em; line-height: 1;">${ev.year}</span>
+                        <span style="font-size: 1.5rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));">${icon}</span>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; margin-bottom: 0.8rem;">
+                        ${avatarHtml}
+                        <h4 style="margin: 0; color: var(--primary); font-size: 1.1rem; font-weight: 700;">${ev.person}</h4>
+                    </div>
+                    
+                    <p style="color: var(--text-main); font-size: 0.95rem; margin: 0; line-height: 1.6;">${ev.description}</p>
+                    
                 </div>
             </div>
         `;

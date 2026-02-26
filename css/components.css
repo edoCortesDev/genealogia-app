@@ -433,11 +433,10 @@
     background-color: var(--bg-main);
 
     /* Diseño Bosque Iluminado: Manchas de luz orgánica y viñeta profunda */
-    background-image:
-            radial-gradient(circle at 15% 20%, rgba(158, 159, 115, 0.3), transparent 35%),
-            radial-gradient(circle at 85% 80%, rgba(212, 163, 115, 0.25), transparent 35%),
-            radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.9) 0%, transparent 50%),
-            radial-gradient(circle at 50% 50%, transparent 40%, rgba(50, 73, 64, 0.5) 150%);
+    background-image: radial-gradient(circle at 15% 20%, rgba(158, 159, 115, 0.3), transparent 35%),
+    radial-gradient(circle at 85% 80%, rgba(212, 163, 115, 0.25), transparent 35%),
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.9) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, transparent 40%, rgba(50, 73, 64, 0.5) 150%);
 }
 
 .tree-toolbar {
@@ -468,15 +467,23 @@
     padding: 2rem 0;
 }
 
+.timeline-wrapper {
+    position: relative;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 0;
+}
+
+/* Columna vertebral sólida color Fichte translúcido */
 .timeline-wrapper::after {
     content: '';
     position: absolute;
-    width: 3px;
-    background: linear-gradient(to bottom, transparent, var(--glass-border), transparent);
+    width: 2px;
+    background: rgba(50, 73, 64, 0.2);
     top: 0;
     bottom: 0;
     left: 50%;
-    margin-left: -1.5px;
+    margin-left: -1px;
 }
 
 .timeline-item {
@@ -487,19 +494,38 @@
     box-sizing: border-box;
 }
 
-/* Puntos Terracota para la chispa de color */
+/* NUEVO: Brazos conectores (Línea horizontal hacia la tarjeta) */
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    top: 38px;
+    width: 40px;
+    height: 2px;
+    background: rgba(50, 73, 64, 0.2);
+    z-index: 0;
+}
+
+.timeline-item.left::before {
+    right: 0;
+}
+
+.timeline-item.right::before {
+    left: 0;
+}
+
+/* Nodo central (Anillo Terracota con fondo blanco) */
 .timeline-item::after {
     content: '';
     position: absolute;
-    width: 18px;
-    height: 18px;
-    right: -9px;
-    background-color: var(--accent);
-    border: 4px solid var(--bg-main);
-    top: 15px;
+    width: 16px;
+    height: 16px;
+    right: -8px;
+    background-color: #FFFFFF;
+    border: 4px solid var(--accent);
+    top: 31px;
     border-radius: 50%;
     z-index: 1;
-    box-shadow: 0 0 10px rgba(212, 163, 115, 0.4);
+    box-shadow: 0 0 0 4px rgba(212, 163, 115, 0.15);
 }
 
 .timeline-item.left {
@@ -511,12 +537,15 @@
 }
 
 .timeline-item.right::after {
-    left: -9px;
+    left: -8px;
 }
 
+/* Ficha Histórica con borde superior anclado */
 .timeline-content {
     position: relative;
     border-radius: 12px;
+    border-top: 4px solid var(--primary);
+    z-index: 2;
 }
 
 /* 6. ANIMACIONES */
@@ -688,7 +717,7 @@
 
     .timeline-item {
         width: 100%;
-        padding-left: 50px;
+        padding-left: 60px; /* Más espacio para el brazo */
         padding-right: 15px;
     }
 
@@ -697,7 +726,13 @@
     }
 
     .timeline-item.left::after, .timeline-item.right::after {
-        left: 11px;
+        left: 12px;
+    }
+
+    /* Brazos en móvil alineados a la izquierda */
+    .timeline-item.left::before, .timeline-item.right::before {
+        left: 20px;
+        width: 40px;
     }
 
     .auth-nav {
