@@ -13,14 +13,12 @@
           crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
           rel="stylesheet">
-
     <link rel="stylesheet"
           href="css/style.css">
-
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
-<body class="app-page dark-mode">
+<body class="app-page">
 
 <header class="app-header glass-header">
     <div class="app-container app-nav-container">
@@ -35,7 +33,7 @@
             <button class="btn-icon mobile-menu-btn"
                     id="mobile-menu-toggle"
                     aria-expanded="false"
-                    style="display: none; font-size: 1.5rem; color: var(--text-light); background: transparent; border: none; cursor: pointer; padding-bottom: 5px; margin-right: 0.5rem;">
+                    style="display: none; font-size: 1.5rem; color: var(--primary); background: transparent; border: none; cursor: pointer; padding-bottom: 5px; margin-right: 0.5rem;">
                 &#8942;
             </button>
 
@@ -90,9 +88,10 @@
     <section id="view-dashboard"
              class="app-view active">
         <div class="dashboard-header"
-             style="height: calc(100vh - 70px); align-items: center; background: radial-gradient(circle at center, rgba(168, 85, 247, 0.1) 0%, transparent 60%);">
+             style="height: calc(100vh - 70px); align-items: center; background: radial-gradient(circle at center, rgba(158, 159, 115, 0.2) 0%, transparent 60%);">
             <div class="dashboard-content container">
-                <h1 class="dash-title">Mi legado <span style="color: #06b6d4;">vivo.</span></h1>
+                <h1 class="dash-title">Mi legado <span style="color: var(--secondary);">vivo.</span>
+                </h1>
                 <p class="dash-subtitle">Busca a un familiar para ver su perfil detallado.</p>
 
                 <div class="stats-grid">
@@ -100,21 +99,19 @@
                         <div class="stat-number"
                              id="stat-total">0
                         </div>
-                        <div class="stat-label text-cyan">FAMILIARES</div>
+                        <div class="stat-label">FAMILIARES</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-number"
                              id="stat-countries">0
                         </div>
-                        <div class="stat-label text-pink">PAÍSES DE ORIGEN</div>
+                        <div class="stat-label">PAÍSES DE ORIGEN</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-number"
                              id="stat-files">0
                         </div>
-                        <div class="stat-label"
-                             style="color: #a855f7;">ARCHIVOS ADJUNTOS
-                        </div>
+                        <div class="stat-label">ARCHIVOS ADJUNTOS</div>
                     </div>
                 </div>
 
@@ -128,27 +125,26 @@
 
                 <div id="search-results-container"
                      class="mt-2"
-                     style="max-width: 600px; margin: 1rem auto; text-align: left;">
-                </div>
+                     style="max-width: 600px; margin: 1rem auto; text-align: left;"></div>
             </div>
         </div>
     </section>
 
     <section id="view-tree"
              class="app-view hidden"
-             style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; padding:0; margin:0; z-index: 1; overflow: hidden; background: var(--bg-dark); cursor: grab;">
+             style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; padding:0; margin:0; z-index: 1; overflow: hidden; background: var(--bg-main); cursor: grab;">
         <div class="tree-toolbar"
              style="position: absolute; bottom: 30px; top: auto; left: 50%; transform: translateX(-50%); z-index: 10; padding: 0;">
             <div class="zoom-controls"
-                 style="background: rgba(10,10,15,0.8); padding: 0.5rem 1rem; border-radius: 50px; border: 1px solid var(--glass-border); display: flex; flex-direction: row; gap: 0.5rem; backdrop-filter: blur(10px); box-shadow: 0 8px 32px rgba(0,0,0,0.5); align-items: center;">
+                 style="background: var(--glass-bg); padding: 0.5rem 1rem; border-radius: 50px; border: 1px solid var(--glass-border); display: flex; flex-direction: row; gap: 0.5rem; backdrop-filter: blur(10px); box-shadow: var(--glass-shadow); align-items: center;">
 
-                <div style="position: relative; display: flex; align-items: center; border-right: 1px solid rgba(255,255,255,0.1); padding-right: 0.5rem; margin-right: 0.5rem;">
+                <div style="position: relative; display: flex; align-items: center; border-right: 1px solid var(--glass-border); padding-right: 0.5rem; margin-right: 0.5rem;">
                     <div id="tree-search-results"
                          class="glass-panel hidden"
-                         style="position: absolute; bottom: 120%; left: 0; min-width: 200px; max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; border-radius: 12px; padding: 0.5rem 0; z-index: 20; box-shadow: 0 -10px 30px rgba(0,0,0,0.5);"></div>
+                         style="position: absolute; bottom: 120%; left: 0; min-width: 200px; max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; border-radius: 12px; padding: 0.5rem 0; z-index: 20; box-shadow: var(--glass-shadow);"></div>
                     <button id="btn-tree-search"
                             class="btn-icon"
-                            style="border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; cursor: pointer; color: white;"
+                            style="border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; cursor: pointer; color: var(--primary);"
                             title="Buscar Familiar">
                         <span style="font-size: 1.2rem;">🔍</span>
                     </button>
@@ -156,7 +152,7 @@
                            id="tree-search-input"
                            placeholder="Buscar..."
                            class="modern-form form-control"
-                           style="width: 0; padding: 0; border: none; background: transparent; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); opacity: 0; font-size: 0.95rem; border-radius: 20px; color: white;">
+                           style="width: 0; padding: 0; border: none; background: transparent; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); opacity: 0; font-size: 0.95rem; border-radius: 20px; color: var(--text-main);">
                 </div>
 
                 <button id="btn-zoom-in"
@@ -210,15 +206,14 @@
             <button class="btn btn-ghost btn-small mb-1"
                     id="btn-back-dashboard">← Volver al Inicio
             </button>
-            <div id="person-detail-content">
-            </div>
+            <div id="person-detail-content"></div>
         </div>
     </section>
 
     <section id="view-profile"
              class="app-view hidden app-container">
         <div class="glass-panel form-panel mt-2">
-            <h2>Mi Perfil</h2>
+            <h2 style="color: var(--primary);">Mi Perfil</h2>
             <form id="profile-form"
                   class="modern-form">
                 <div class="avatar-upload">
@@ -258,7 +253,7 @@
         <div class="manage-layout mt-2">
             <div class="glass-panel flex-1">
                 <div class="flex-between mb-2">
-                    <h2>Miembros de la Familia</h2>
+                    <h2 style="color: var(--primary);">Miembros de la Familia</h2>
                     <button class="btn btn-primary"
                             id="btn-add-member">+ Agregar Nuevo
                     </button>
@@ -275,19 +270,19 @@
                  id="member-form-panel"
                  style="width: 100%; max-width: 450px; padding: 2rem; max-height: calc(100vh - 100px); overflow-y: auto;">
                 <h3 id="member-form-title"
-                    style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 1rem;">
+                    style="color: var(--primary); margin-bottom: 1.5rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 1rem;">
                     Crear / Editar Persona</h3>
 
                 <form id="member-form"
                       class="modern-form">
                     <div class="form-group">
                         <label for="mem-system-id"
-                               class="text-cyan text-sm">ID Sistema</label>
+                               class="text-sm">ID Sistema</label>
                         <input type="text"
                                id="mem-system-id"
                                placeholder="p034"
                                disabled
-                               style="background: rgba(0,0,0,0.5); opacity: 0.7;">
+                               style="background: rgba(255,255,255,0.5); opacity: 0.7;">
                     </div>
 
                     <div class="form-row"
@@ -295,7 +290,7 @@
                         <div class="form-group"
                              style="flex: 1;">
                             <label for="mem-firstname"
-                                   class="text-cyan text-sm">Nombres</label>
+                                   class="text-sm">Nombres</label>
                             <input type="text"
                                    id="mem-firstname"
                                    placeholder="Ej: Juan Andrés"
@@ -304,7 +299,7 @@
                         <div class="form-group"
                              style="flex: 1;">
                             <label for="mem-lastname"
-                                   class="text-cyan text-sm">Apellidos</label>
+                                   class="text-sm">Apellidos</label>
                             <input type="text"
                                    id="mem-lastname"
                                    placeholder="Ej: Pérez García"
@@ -317,7 +312,7 @@
                         <div class="form-group"
                              style="flex: 1;">
                             <label for="mem-rut"
-                                   class="text-cyan text-sm">RUT / Identificación</label>
+                                   class="text-sm">RUT / Identificación</label>
                             <input type="text"
                                    id="mem-rut"
                                    placeholder="Ej: 12.345.678-9">
@@ -325,7 +320,7 @@
                         <div class="form-group"
                              style="flex: 1;">
                             <label for="mem-gender"
-                                   class="text-cyan text-sm">Sexo</label>
+                                   class="text-sm">Sexo</label>
                             <select id="mem-gender">
                                 <option value="">-- Seleccionar --</option>
                                 <option value="M">Masculino</option>
@@ -340,7 +335,7 @@
                         <div class="form-group"
                              style="flex: 1;">
                             <label for="mem-profession"
-                                   class="text-cyan text-sm">Profesión / Ocupación</label>
+                                   class="text-sm">Profesión / Ocupación</label>
                             <input type="text"
                                    id="mem-profession"
                                    placeholder="Ej: Profesor, Agricultor">
@@ -348,7 +343,7 @@
                         <div class="form-group"
                              style="flex: 1;">
                             <label for="mem-nationality"
-                                   class="text-cyan text-sm">Nacionalidad (Código)</label>
+                                   class="text-sm">Nacionalidad (Código)</label>
                             <input type="text"
                                    id="mem-nationality"
                                    placeholder="EJ: CL, AR, ES, IT">
@@ -363,14 +358,14 @@
                         <div class="form-group"
                              style="flex: 1;">
                             <label for="mem-birth"
-                                   class="text-cyan text-sm">Fecha de Nacimiento</label>
+                                   class="text-sm">Fecha de Nacimiento</label>
                             <input type="date"
                                    id="mem-birth">
                         </div>
                         <div class="form-group"
                              style="flex: 1;">
                             <label for="mem-birth-place"
-                                   class="text-cyan text-sm">Lugar de Nacimiento</label>
+                                   class="text-sm">Lugar de Nacimiento</label>
                             <input type="text"
                                    id="mem-birth-place"
                                    placeholder="Ej: Santiago, Chile">
@@ -382,7 +377,7 @@
                         <div class="form-group"
                              style="flex: 1;">
                             <label for="mem-death"
-                                   class="text-cyan text-sm">Fecha de Fallecimiento</label>
+                                   class="text-sm">Fecha de Fallecimiento</label>
                             <input type="date"
                                    id="mem-death">
                             <small style="color: var(--text-muted); font-size: 0.75rem;">Déjalo
@@ -392,7 +387,7 @@
                         <div class="form-group"
                              style="flex: 1;">
                             <label for="mem-death-place"
-                                   class="text-cyan text-sm">Lugar de Fallecimiento</label>
+                                   class="text-sm">Lugar de Fallecimiento</label>
                             <input type="text"
                                    id="mem-death-place"
                                    placeholder="Ej: Hospital Naval">
@@ -400,7 +395,7 @@
                     </div>
 
                     <div class="form-group mt-2">
-                        <label class="text-cyan text-sm">Foto de Perfil</label>
+                        <label class="text-sm">Foto de Perfil</label>
                         <div class="file-drop-area"
                              id="photo-drop-area"
                              style="padding: 1rem;">
@@ -413,26 +408,33 @@
 
                     <div class="form-group mt-2">
                         <label for="mem-bio"
-                               class="text-cyan text-sm">Biografía General</label>
+                               class="text-sm">Biografía General</label>
                         <textarea id="mem-bio"
                                   rows="4"
-                                  style="width: 100%; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); border-radius: 8px; padding: 0.75rem; color: white;"
+                                  style="width: 100%; background: rgba(255,255,255,0.6); border: 1px solid var(--glass-border); border-radius: 8px; padding: 0.75rem; color: var(--text-main);"
                                   placeholder="Historia breve..."></textarea>
                     </div>
 
-                    <div class="form-section-box mt-2" style="border: 1px solid var(--glass-border); border-radius: 8px; padding: 1rem; background: rgba(255,255,255,0.02);">
-                        <h4 class="text-cyan" style="margin-bottom: 0.5rem; font-size: 0.9rem;">📅 Línea de Tiempo (Eventos)</h4>
-                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;">Agrega hitos históricos (matrimonios, graduaciones, viajes).</p>
-
-                        <div id="eventsContainer" style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;">
-                        </div>
-
-                        <button type="button" id="btn-add-event" class="btn btn-outline" style="width: 100%; border-style: dashed; font-size: 0.9rem;">+ Agregar Evento</button>
+                    <div class="form-section-box mt-2"
+                         style="border: 1px solid var(--glass-border); border-radius: 8px; padding: 1rem; background: rgba(255,255,255,0.4);">
+                        <h4 style="color: var(--primary); margin-bottom: 0.5rem; font-size: 0.9rem;">
+                            📅 Línea de Tiempo (Eventos)</h4>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;">
+                            Agrega hitos históricos (matrimonios, graduaciones, viajes).</p>
+                        <div id="eventsContainer"
+                             style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;"></div>
+                        <button type="button"
+                                id="btn-add-event"
+                                class="btn btn-outline"
+                                style="width: 100%; border-style: dashed; font-size: 0.9rem;">+
+                                                                                              Agregar
+                                                                                              Evento
+                        </button>
                     </div>
 
                     <div class="form-section-box mt-2"
-                         style="border: 1px solid var(--glass-border); border-radius: 8px; padding: 1rem; background: rgba(255,255,255,0.02);">
-                        <h3 style="color: var(--primary); margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem;">
+                         style="border: 1px solid var(--glass-border); border-radius: 8px; padding: 1rem; background: rgba(255,255,255,0.4);">
+                        <h3 style="color: var(--primary); margin-bottom: 1rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 0.5rem;">
                             📁 Documentos y Evidencias</h3>
                         <div id="document-list-container"
                              style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;"></div>
@@ -444,17 +446,13 @@
                     </div>
 
                     <div class="form-section-box mt-2"
-                         style="border: 1px solid var(--glass-border); border-radius: 8px; padding: 1rem; background: rgba(255,255,255,0.02);">
-                        <h4 style="color: #a855f7; margin-bottom: 0.5rem; font-size: 0.9rem;">🔗
-                                                                                              Relaciones
-                                                                                              Familiares</h4>
+                         style="border: 1px solid var(--glass-border); border-radius: 8px; padding: 1rem; background: rgba(255,255,255,0.4);">
+                        <h4 style="color: var(--secondary); margin-bottom: 0.5rem; font-size: 0.9rem;">
+                            🔗 Relaciones Familiares</h4>
                         <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;">
                             Arrastra las 3 rayitas (☰) para reordenar.</p>
-
                         <div id="relationsContainer"
-                             style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;">
-                        </div>
-
+                             style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;"></div>
                         <button type="button"
                                 id="btn-add-relation"
                                 class="btn btn-outline"
@@ -471,8 +469,7 @@
                         </button>
                         <button type="submit"
                                 class="btn btn-primary"
-                                style="flex: 1; margin-left: 1rem; background: linear-gradient(135deg, #6366f1, #06b6d4);">
-                            💾 Guardar Persona
+                                style="flex: 1; margin-left: 1rem;">💾 Guardar Persona
                         </button>
                     </div>
                 </form>
@@ -483,7 +480,7 @@
 
 <div id="photo-lightbox"
      class="hidden"
-     style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); z-index: 9999; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease;">
+     style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(50, 73, 64, 0.85); backdrop-filter: blur(5px); z-index: 9999; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease;">
     <button onclick="closePhotoLightbox()"
             style="position: absolute; top: 20px; right: 20px; background: transparent; border: none; color: white; font-size: 2rem; cursor: pointer; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">
         ×
@@ -499,7 +496,6 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
-
 <script type="module"
         src="js/config.js"></script>
 <script type="module"
@@ -513,5 +509,4 @@
 <script type="module"
         src="js/tree.js"></script>
 </body>
-
 </html>

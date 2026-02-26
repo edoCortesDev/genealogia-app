@@ -151,7 +151,7 @@ function setupUIEvents() {
                     <div style="display: flex; align-items: center; gap: 1rem;">
                         ${avatarHtml}
                         <div>
-                            <div style="font-weight: 600; color: var(--text-light);">${mem.first_name} ${mem.last_name}</div>
+                            <div style="font-weight: 600; color: var(--text-main);">${mem.first_name} ${mem.last_name}</div>
                             <div style="font-size: 0.85rem; color: var(--text-muted)">${mem.profession || 'Familiar'}</div>
                         </div>
                     </div>
@@ -187,7 +187,7 @@ window.addEventRow = function (year = '', type = 'otro', targetId = '', desc = '
 
     const row = document.createElement('div');
     row.className = 'event-row draggable-item';
-    row.style.cssText = 'display: flex; gap: 10px; align-items: center; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 0.5rem;';
+    row.style.cssText = 'display: flex; gap: 10px; align-items: center; background: rgba(255,255,255,0.6); padding: 10px; border-radius: 8px; border: 1px solid var(--glass-border); margin-bottom: 0.5rem;';
 
     row.innerHTML = `
         <div class="drag-handle" style="cursor: grab; color: var(--text-muted); font-size: 1.2rem; padding: 0 5px;">☰</div>
@@ -234,7 +234,7 @@ window.addRelationRow = function (type = '', targetId = '') {
 
     const row = document.createElement('div');
     row.className = 'relation-row draggable-item';
-    row.style.cssText = 'display: flex; gap: 10px; align-items: center; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 0.5rem;';
+    row.style.cssText = 'display: flex; gap: 10px; align-items: center; background: rgba(255,255,255,0.6); padding: 10px; border-radius: 8px; border: 1px solid var(--glass-border); margin-bottom: 0.5rem;';
 
     row.innerHTML = `
         <div class="drag-handle" style="cursor: grab; color: var(--text-muted); font-size: 1.2rem; padding: 0 5px;">☰</div>
@@ -303,15 +303,15 @@ window.openPersonDetails = function (id) {
         if (!person) return '';
         const miniPhoto = person.photo_url
             ? `<img src="${person.photo_url}" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover;">`
-            : `<div style="width: 28px; height: 28px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold;">${person.first_name.charAt(0)}</div>`;
+            : `<div style="width: 28px; height: 28px; border-radius: 50%; background: var(--primary); color: #F4F2E0; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold;">${person.first_name.charAt(0)}</div>`;
 
         return `
             <div onclick="window.openPersonDetails('${person.id}')" 
-                 style="display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px 4px 4px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 50px; cursor: pointer; transition: all 0.2s ease; margin: 4px;"
-                 onmouseover="this.style.background='rgba(168, 85, 247, 0.15)'; this.style.borderColor='var(--primary)';"
-                 onmouseout="this.style.background='rgba(255,255,255,0.05)'; this.style.borderColor='rgba(255,255,255,0.1)';">
+                 style="display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px 4px 4px; background: rgba(255,255,255,0.6); border: 1px solid var(--glass-border); border-radius: 50px; cursor: pointer; transition: all 0.2s ease; margin: 4px;"
+                 onmouseover="this.style.background='rgba(158, 159, 115, 0.2)'; this.style.borderColor='var(--secondary)';"
+                 onmouseout="this.style.background='rgba(255,255,255,0.6)'; this.style.borderColor='var(--glass-border)';">
                 ${miniPhoto}
-                <span style="font-size: 0.85rem; color: var(--text-light); font-weight: 500;">${person.first_name} ${person.last_name.split(' ')[0]}</span>
+                <span style="font-size: 0.85rem; color: var(--text-main); font-weight: 500;">${person.first_name} ${person.last_name.split(' ')[0]}</span>
             </div>
         `;
     };
@@ -319,8 +319,8 @@ window.openPersonDetails = function (id) {
     const photoSrc = mem.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(mem.first_name)}&background=random`;
     const avatarHtml = `
         <div style="position: relative; display: inline-block; cursor: zoom-in; margin-bottom: 1rem;" onclick="openPhotoLightbox('${photoSrc}')">
-            <img src="${photoSrc}" alt="Foto" style="width: 140px; height: 140px; border-radius: 50%; object-fit: cover; border: 4px solid var(--glass-border); box-shadow: 0 10px 25px rgba(0,0,0,0.5); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-            <div style="position: absolute; bottom: 5px; right: 5px; background: var(--bg-dark); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--glass-border); box-shadow: 0 4px 10px rgba(0,0,0,0.3);">🔍</div>
+            <img src="${photoSrc}" alt="Foto" style="width: 140px; height: 140px; border-radius: 50%; object-fit: cover; border: 4px solid var(--glass-border); box-shadow: 0 10px 25px rgba(50,73,64,0.15); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+            <div style="position: absolute; bottom: 5px; right: 5px; background: var(--bg-panel); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--glass-border); box-shadow: 0 4px 10px rgba(50,73,64,0.1);">🔍</div>
         </div>
     `;
 
@@ -330,7 +330,7 @@ window.openPersonDetails = function (id) {
 
     let relHtml = '';
     if (padre || madre || pareja || hijos.length > 0) {
-        relHtml += `<div style="background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem;">`;
+        relHtml += `<div style="background: rgba(255,255,255,0.4); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem;">`;
         if (padre || madre) relHtml += `<div style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;"><span style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Padres</span><div style="display: flex; flex-wrap: wrap;">${renderPill(padre)}${renderPill(madre)}</div></div>`;
         if (pareja) relHtml += `<div style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: ${hijos.length > 0 ? '1rem' : '0'};"><span style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Pareja / Cónyuge</span><div style="display: flex; flex-wrap: wrap;">${renderPill(pareja)}</div></div>`;
         if (hijos.length > 0) relHtml += `<div style="display: flex; flex-direction: column; gap: 0.5rem;"><span style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Hijos (${hijos.length})</span><div style="display: flex; flex-wrap: wrap;">${hijos.map(h => renderPill(h)).join('')}</div></div>`;
@@ -339,20 +339,20 @@ window.openPersonDetails = function (id) {
 
     const addRow = (label, value) => {
         if (!value) return '';
-        return `<div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05);"><span style="color: var(--text-muted); font-size: 0.9rem; flex: 1;">${label}</span><span style="color: var(--text-light); font-weight: 500; flex: 2; text-align: right;">${value}</span></div>`;
+        return `<div style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(50,73,64,0.1);"><span style="color: var(--text-muted); font-size: 0.9rem; flex: 1;">${label}</span><span style="color: var(--text-main); font-weight: 500; flex: 2; text-align: right;">${value}</span></div>`;
     };
 
-    let techHtml = `<div style="background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border); border-radius: 16px; padding: 0.5rem 1.5rem; margin-bottom: 1.5rem;">`;
+    let techHtml = `<div style="background: rgba(255,255,255,0.4); border: 1px solid var(--glass-border); border-radius: 16px; padding: 0.5rem 1.5rem; margin-bottom: 1.5rem;">`;
     techHtml += addRow('Nacimiento', mem.birth_date ? `${mem.birth_date} ${mem.birth_place ? '📍 ' + mem.birth_place : ''}` : null);
     techHtml += addRow('Fallecimiento', mem.death_date ? `${mem.death_date} ${mem.death_place ? '📍 ' + mem.death_place : ''}` : null);
-    techHtml += addRow('Nacionalidad', mem.nationality ? `<span style="background: rgba(6, 182, 212, 0.1); color: #06b6d4; padding: 2px 8px; border-radius: 4px; font-size: 0.85rem;">${mem.nationality}</span>` : null);
+    techHtml += addRow('Nacionalidad', mem.nationality ? `<span style="background: rgba(158, 159, 115, 0.2); color: var(--primary); padding: 2px 8px; border-radius: 4px; font-size: 0.85rem;">${mem.nationality}</span>` : null);
     techHtml += addRow('Identificación', mem.rut);
     techHtml += addRow('Sexo', mem.gender === 'M' ? 'Masculino' : (mem.gender === 'F' ? 'Femenino' : mem.gender));
     techHtml += `</div>`;
 
     let bioHtml = '';
     if (mem.bio) {
-        bioHtml = `<div style="background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem;"><h4 style="color: var(--primary); margin-bottom: 1rem; font-size: 1rem; display: flex; align-items: center; gap: 8px;"><span>📖</span> Historia y Biografía</h4><p style="color: var(--text-light); line-height: 1.6; white-space: pre-wrap; font-size: 0.95rem;">${mem.bio}</p></div>`;
+        bioHtml = `<div style="background: rgba(255,255,255,0.4); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem;"><h4 style="color: var(--primary); margin-bottom: 1rem; font-size: 1rem; display: flex; align-items: center; gap: 8px;"><span>📖</span> Historia y Biografía</h4><p style="color: var(--text-main); line-height: 1.6; white-space: pre-wrap; font-size: 0.95rem;">${mem.bio}</p></div>`;
     }
 
     let docsHtml = '';
@@ -360,8 +360,8 @@ window.openPersonDetails = function (id) {
         try {
             const docs = JSON.parse(mem.document_links);
             if (docs.length > 0) {
-                let listItems = docs.map(d => `<a href="${d.url}" target="_blank" rel="noopener noreferrer" style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; margin-bottom: 0.5rem; text-decoration: none;"><div style="display: flex; align-items: center; gap: 12px;"><span style="font-size: 1.5rem;">📄</span><span style="color: var(--text-light); font-weight: 500;">${d.title || 'Documento adjunto'}</span></div><span style="color: var(--primary);">Abrir ↗</span></a>`).join('');
-                docsHtml = `<div style="background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1.5rem;"><h4 style="color: var(--primary); margin-bottom: 1rem; font-size: 1rem; display: flex; align-items: center; gap: 8px;"><span>📁</span> Documentos y Evidencias</h4>${listItems}</div>`;
+                let listItems = docs.map(d => `<a href="${d.url}" target="_blank" rel="noopener noreferrer" style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; background: rgba(255,255,255,0.6); border: 1px solid var(--glass-border); border-radius: 12px; margin-bottom: 0.5rem; text-decoration: none;"><div style="display: flex; align-items: center; gap: 12px;"><span style="font-size: 1.5rem;">📄</span><span style="color: var(--text-main); font-weight: 500;">${d.title || 'Documento adjunto'}</span></div><span style="color: var(--primary);">Abrir ↗</span></a>`).join('');
+                docsHtml = `<div style="background: rgba(255,255,255,0.4); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1.5rem;"><h4 style="color: var(--primary); margin-bottom: 1rem; font-size: 1rem; display: flex; align-items: center; gap: 8px;"><span>📁</span> Documentos y Evidencias</h4>${listItems}</div>`;
             }
         } catch (e) {
             console.warn("Error renderizando documentos");
@@ -371,7 +371,7 @@ window.openPersonDetails = function (id) {
     detailContainer.innerHTML = `
         <div style="text-align: center; margin-bottom: 2rem; padding-top: 1rem;">
             ${avatarHtml}
-            <h2 style="font-size: 2.2rem; background: linear-gradient(135deg, #a855f7, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.5rem;">${mem.first_name} ${mem.last_name}</h2>
+            <h2 style="font-size: 2.2rem; background: linear-gradient(135deg, var(--secondary), var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.5rem;">${mem.first_name} ${mem.last_name}</h2>
             <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; color: var(--text-muted); font-size: 0.9rem;">
                 ${dateStr ? `<span style="display: flex; align-items: center; gap: 4px;">📅 ${dateStr}</span>` : ''}
                 ${mem.profession ? `<span style="display: flex; align-items: center; gap: 4px;">💼 ${mem.profession}</span>` : ''}
@@ -510,7 +510,7 @@ function buildTimeline(members) {
             <div class="timeline-item ${isLeft ? 'left' : 'right'}">
                 <div class="timeline-content glass-panel" style="padding: 1.5rem;">
                     <span class="timeline-date ${colorClass}" style="font-weight: bold; font-size: 1.2rem; display: block; margin-bottom: 0.5rem;">${ev.year} ${icon}</span>
-                    <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">${avatarHtml}<h4 style="margin: 0; color: var(--text-light);">${ev.person}</h4></div>
+                    <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">${avatarHtml}<h4 style="margin: 0; color: var(--text-main);">${ev.person}</h4></div>
                     <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0; line-height: 1.5;">${ev.description}</p>
                 </div>
             </div>
@@ -587,7 +587,7 @@ function renderMembersList() {
         el.innerHTML = `
             <div style="display: flex; align-items: center; gap: 1rem;">
                 ${avatarHtml}
-                <div><div style="font-weight: 600">${mem.first_name} ${mem.last_name}</div><div style="font-size: 0.85rem; color: var(--text-muted)">ID: ${mem.id.substring(0, 8)}</div></div>
+                <div><div style="font-weight: 600; color: var(--text-main);">${mem.first_name} ${mem.last_name}</div><div style="font-size: 0.85rem; color: var(--text-muted)">ID: ${mem.id.substring(0, 8)}</div></div>
             </div>
             <div style="display: flex; gap: 0.5rem;">
                 <button class="btn btn-ghost btn-small text-primary btn-edit-mem" data-id="${mem.id}">Editar</button>
@@ -855,7 +855,7 @@ window.addDocumentRow = function (title = '', url = '') {
     const row = document.createElement('div');
     row.className = 'doc-row';
     row.draggable = true;
-    row.style.cssText = 'display: flex; gap: 1rem; align-items: center; background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); cursor: grab;';
+    row.style.cssText = 'display: flex; gap: 1rem; align-items: center; background: rgba(255,255,255,0.6); padding: 1rem; border-radius: 8px; border: 1px solid var(--glass-border); cursor: grab;';
 
     row.innerHTML = `
         <div class="drag-handle" style="color: var(--text-muted); padding: 0 0.5rem;">≡</div>

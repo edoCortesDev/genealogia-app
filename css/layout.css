@@ -47,24 +47,46 @@
     box-shadow: var(--glass-shadow);
 }
 
+/* CABECERA FUERTE Y ANCLADA (Color Blocking) */
 .glass-header {
-    background: rgba(10, 10, 12, 0.7);
-    backdrop-filter: var(--glass-blur);
-    border-bottom: 1px solid var(--glass-border);
+    background: var(--primary); /* Verde Fichte */
+    color: #F4F2E0; /* Texto Eggshell */
     position: sticky;
     top: 0;
     z-index: 100;
+    box-shadow: 0 4px 20px rgba(50, 73, 64, 0.3);
 }
 
-.nav-container,
-.app-nav-container {
+.glass-header .logo {
+    color: #F4F2E0;
+}
+
+.glass-header .btn-outline {
+    color: #F4F2E0;
+    border-color: rgba(244, 242, 224, 0.4);
+}
+
+.glass-header .btn-outline:hover {
+    background: rgba(244, 242, 224, 0.1);
+    color: var(--secondary);
+    border-color: var(--secondary);
+}
+
+.glass-header .btn-ghost {
+    color: #F4F2E0;
+}
+
+.glass-header .btn-ghost:hover {
+    background: rgba(244, 242, 224, 0.1);
+}
+
+.nav-container, .app-nav-container {
     display: flex;
     justify-content: space-between;
     align-items: center;
     height: 70px;
 }
 
-/* --- Mobile First: Layout --- */
 @media (max-width: 768px) {
     .nav-container {
         height: auto;

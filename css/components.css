@@ -3,25 +3,22 @@
    Sistema de diseño modular para Genealogía App
    ========================================================================== */
 
-
-/* --------------------------------------------------------------------------
-   1. TIPOGRAFÍA Y AYUDANTES (Helpers)
-   -------------------------------------------------------------------------- */
+/* 1. TIPOGRAFÍA Y AYUDANTES */
 .logo {
     display: flex;
     align-items: center;
     gap: 0.75rem;
     font-size: 1.25rem;
     font-weight: 700;
-    color: var(--text-light);
+    color: var(--primary);
 }
 
 .logo-icon {
     width: 32px;
     height: 32px;
     border-radius: 8px;
-    background: linear-gradient(135deg, var(--primary), #a855f7);
-    box-shadow: 0 0 15px var(--primary-glow);
+    background: linear-gradient(135deg, var(--secondary), var(--accent));
+    box-shadow: 0 4px 10px rgba(212, 163, 115, 0.3);
 }
 
 .text-danger {
@@ -29,17 +26,14 @@
 }
 
 .text-cyan {
-    color: #06b6d4;
+    color: var(--secondary);
 }
 
 .text-pink {
-    color: #ec4899;
+    color: var(--accent);
 }
 
-
-/* --------------------------------------------------------------------------
-   2. BOTONES
-   -------------------------------------------------------------------------- */
+/* 2. BOTONES */
 .btn {
     display: inline-flex;
     align-items: center;
@@ -66,62 +60,64 @@
     font-size: 0.85rem;
 }
 
+/* Botones principales vibrantes con contraste */
 .btn-primary {
-    background: var(--primary);
-    color: white;
+    background: var(--secondary);
+    color: #1f2d27; /* Texto oscuro sobre oliva */
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(158, 159, 115, 0.3);
 }
 
 .btn-primary:hover {
-    background: var(--primary-hover);
+    background: #afb08a;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px var(--primary-glow);
+    box-shadow: 0 6px 16px rgba(158, 159, 115, 0.5);
 }
 
 .btn-glow {
-    box-shadow: 0 0 15px var(--primary-glow);
+    box-shadow: 0 0 15px rgba(158, 159, 115, 0.5);
 }
 
 .btn-outline {
     background: transparent;
-    border: 1px solid var(--glass-border);
-    color: var(--text-light);
+    border: 1px solid var(--primary);
+    color: var(--primary);
 }
 
 .btn-outline:hover {
-    background: var(--glass-bg);
-    border-color: var(--primary);
+    background: rgba(50, 73, 64, 0.05);
 }
 
 .btn-ghost {
     background: transparent;
-    color: var(--text-light);
+    color: var(--primary);
 }
 
 .btn-ghost:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(50, 73, 64, 0.05);
 }
 
-/* Botón de Ícono Circular (Usado en el árbol) */
 .btn-icon {
     width: 36px;
     height: 36px;
     border-radius: 8px;
     border: 1px solid var(--glass-border);
-    background: rgba(0, 0, 0, 0.4);
-    color: white;
+    background: var(--glass-bg);
+    color: var(--primary);
     font-size: 1.2rem;
     cursor: pointer;
     transition: all 0.2s;
+    box-shadow: 0 2px 5px rgba(50, 73, 64, 0.05);
 }
 
 .btn-icon:hover {
-    background: var(--primary);
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+    transform: translateY(-2px);
 }
 
-
-/* --------------------------------------------------------------------------
-   3. NAVEGACIÓN Y MENÚ DE USUARIO
-   -------------------------------------------------------------------------- */
+/* 3. NAVEGACIÓN Y MENÚ DE USUARIO */
 .user-menu-container {
     position: relative;
 }
@@ -142,14 +138,15 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--primary), #8b5cf6);
+    background: linear-gradient(135deg, var(--secondary), var(--accent));
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 600;
     font-size: 1.1rem;
-    color: white;
-    border: 2px solid var(--glass-border);
+    color: #fff;
+    border: 2px solid #fff;
+    box-shadow: 0 4px 10px rgba(212, 163, 115, 0.3);
 }
 
 .user-dropdown {
@@ -161,22 +158,25 @@
     z-index: 200;
     transform-origin: top right;
     animation: fadeInScale 0.2s ease forwards;
+    background: #FFFFFF;
 }
 
 .dropdown-item {
     display: block;
     padding: 0.75rem 1rem;
-    color: var(--text-light);
+    color: var(--text-main);
     border-radius: 8px;
+    font-weight: 500;
 }
 
 .dropdown-item:hover {
-    background: var(--glass-bg);
-    color: var(--primary);
+    background: rgba(212, 163, 115, 0.1);
+    color: var(--accent);
 }
 
 .dropdown-item.text-danger:hover {
     color: var(--danger);
+    background: rgba(230, 57, 70, 0.1);
 }
 
 .divider {
@@ -185,10 +185,7 @@
     margin: 0.5rem 0;
 }
 
-
-/* --------------------------------------------------------------------------
-   4. FORMULARIOS E INPUTS
-   -------------------------------------------------------------------------- */
+/* 4. FORMULARIOS E INPUTS */
 .modern-form .form-group {
     margin-bottom: 1.25rem;
 }
@@ -197,33 +194,29 @@
     display: block;
     margin-bottom: 0.5rem;
     font-size: 0.9rem;
-    color: var(--text-muted);
+    color: var(--primary);
+    font-weight: 600;
 }
 
-.modern-form input,
-.modern-form select,
-.modern-form textarea {
+.modern-form input, .modern-form select, .modern-form textarea {
     width: 100%;
     padding: 0.75rem 1rem;
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid var(--glass-border);
+    background: #ffffff;
+    border: 1px solid rgba(50, 73, 64, 0.2);
     border-radius: 8px;
-    color: var(--text-light);
+    color: var(--text-main);
     font-family: inherit;
     font-size: 1rem;
     transition: var(--transition-smooth);
-    resize: vertical;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
 }
 
-.modern-form input:focus,
-.modern-form select:focus,
-.modern-form textarea:focus {
+.modern-form input:focus, .modern-form select:focus, .modern-form textarea:focus {
     outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+    border-color: var(--secondary);
+    box-shadow: 0 0 0 3px rgba(158, 159, 115, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.02);
 }
 
-/* FIX: Esta es la regla de escritorio que faltaba para emparejar inputs */
 .form-row {
     display: flex;
     gap: 1rem;
@@ -231,23 +224,22 @@
 
 .form-row .form-group {
     flex: 1;
-    margin-bottom: 0; /* Evita doble margen en filas divididas */
+    margin-bottom: 0;
 }
 
-/* Área de subida de archivos (Drag & Drop) */
 .file-drop-area {
-    border: 2px dashed var(--glass-border);
+    border: 2px dashed rgba(50, 73, 64, 0.2);
     border-radius: 12px;
     padding: 2rem;
     text-align: center;
     position: relative;
     transition: var(--transition-smooth);
-    background: rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.5);
 }
 
 .file-drop-area.drag-over {
-    border-color: var(--primary);
-    background: var(--primary-glow);
+    border-color: var(--accent);
+    background: rgba(212, 163, 115, 0.05);
 }
 
 .file-input {
@@ -263,9 +255,9 @@
 .file-msg {
     color: var(--text-muted);
     font-size: 0.9rem;
+    font-weight: 500;
 }
 
-/* Layouts específicos de paneles de formularios */
 .form-panel {
     max-width: 600px;
     margin: 0 auto;
@@ -282,16 +274,12 @@
     flex-shrink: 0;
 }
 
-
-/* --------------------------------------------------------------------------
-   5. COMPONENTES DE VISTAS (APP VIEWS)
-   -------------------------------------------------------------------------- */
+/* 5. VISTAS */
 .app-view {
     padding-top: 1rem;
     animation: fadeInScale 0.3s ease;
 }
 
-/* --- Hero Landing Page --- */
 .hero-section {
     display: flex;
     align-items: center;
@@ -307,9 +295,9 @@
 }
 
 .hero-title {
-    font-size: 4rem;
+    font-size: 4.5rem;
     margin-bottom: 1.5rem;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.03em;
 }
 
 .hero-subtitle {
@@ -330,7 +318,6 @@
     height: 500px;
 }
 
-/* --- Dashboard --- */
 .dashboard-header {
     width: 100%;
     z-index: 5;
@@ -339,7 +326,6 @@
     display: flex;
     justify-content: center;
     text-align: center;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .dashboard-content {
@@ -348,54 +334,57 @@
 }
 
 .dash-title {
-    font-size: 3.5rem;
+    font-size: 4rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.03em;
 }
 
 .dash-subtitle {
     font-size: 1.1rem;
     color: var(--text-muted);
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem;
+    font-weight: 500;
 }
 
 .stats-grid {
     display: flex;
     justify-content: center;
     gap: 1.5rem;
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem;
 }
 
 .stat-card {
-    background: #151521;
-    border: 1px solid rgba(255, 255, 255, 0.03);
-    border-radius: 12px;
-    padding: 1.25rem 2rem;
-    min-width: 140px;
-    transition: transform 0.2s, box-shadow 0.2s;
+    background: #FFFFFF;
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 1.5rem 2rem;
+    min-width: 150px;
+    transition: all 0.3s ease;
+    box-shadow: var(--glass-shadow);
 }
 
 .stat-card:hover {
-    transform: translateY(-2px);
-    border-color: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    transform: translateY(-5px);
+    border-color: var(--accent);
+    box-shadow: 0 15px 35px rgba(212, 163, 115, 0.15);
 }
 
 .stat-number {
-    font-size: 2.5rem;
+    font-size: 2.8rem;
     font-weight: 700;
     margin-bottom: 0.25rem;
-    color: var(--text-light);
+    color: var(--primary);
+    letter-spacing: -0.02em;
 }
 
 .stat-label {
     font-size: 0.8rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    color: var(--text-muted);
 }
 
-/* --- Buscador Global --- */
 .search-bar-wrapper {
     position: relative;
     max-width: 600px;
@@ -404,34 +393,35 @@
 
 .search-icon {
     position: absolute;
-    left: 1rem;
+    left: 1.2rem;
     top: 50%;
     transform: translateY(-50%);
-    opacity: 0.5;
+    opacity: 0.8;
+    color: var(--primary);
 }
 
 .search-input {
     width: 100%;
-    padding: 0.8rem 1rem 0.8rem 2.8rem;
-    background: #11111a;
-    border: 1px solid #3c2a6b;
+    padding: 1rem 1rem 1rem 3.2rem;
+    background: #FFFFFF;
+    border: 1px solid rgba(50, 73, 64, 0.2);
     border-radius: 50px;
-    color: white;
-    font-size: 0.95rem;
-    transition: all 0.2s;
+    color: var(--text-main);
+    font-size: 1.05rem;
+    transition: all 0.3s;
+    box-shadow: var(--glass-shadow);
 }
 
 .search-input:focus {
     outline: none;
-    box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.3);
-    border-color: #a855f7;
-    background: #1a1a24;
+    box-shadow: 0 0 0 3px rgba(212, 163, 115, 0.2), 0 10px 25px rgba(212, 163, 115, 0.1);
+    border-color: var(--accent);
+    transform: translateY(-2px);
 }
 
-/* --- Árbol Interactivo --- */
 #view-tree {
     position: absolute;
-    top: 70px; /* respeta el header */
+    top: 70px;
     left: 0;
     width: 100%;
     height: calc(100vh - 70px);
@@ -462,11 +452,6 @@
     cursor: grabbing;
 }
 
-#family-tree-canvas {
-    display: block;
-}
-
-/* --- Línea de Tiempo --- */
 .timeline-wrapper {
     position: relative;
     max-width: 800px;
@@ -477,12 +462,12 @@
 .timeline-wrapper::after {
     content: '';
     position: absolute;
-    width: 2px;
-    background-color: var(--glass-border);
+    width: 3px;
+    background: linear-gradient(to bottom, transparent, var(--glass-border), transparent);
     top: 0;
     bottom: 0;
     left: 50%;
-    margin-left: -1px;
+    margin-left: -1.5px;
 }
 
 .timeline-item {
@@ -493,17 +478,19 @@
     box-sizing: border-box;
 }
 
+/* Puntos Terracota para la chispa de color */
 .timeline-item::after {
     content: '';
     position: absolute;
-    width: 16px;
-    height: 16px;
-    right: -8px;
-    background-color: var(--primary);
-    border: 4px solid var(--bg-dark);
+    width: 18px;
+    height: 18px;
+    right: -9px;
+    background-color: var(--accent);
+    border: 4px solid var(--bg-main);
     top: 15px;
     border-radius: 50%;
     z-index: 1;
+    box-shadow: 0 0 10px rgba(212, 163, 115, 0.4);
 }
 
 .timeline-item.left {
@@ -515,7 +502,7 @@
 }
 
 .timeline-item.right::after {
-    left: -8px;
+    left: -9px;
 }
 
 .timeline-content {
@@ -523,10 +510,7 @@
     border-radius: 12px;
 }
 
-
-/* --------------------------------------------------------------------------
-   6. ANIMACIONES Y LOADERS
-   -------------------------------------------------------------------------- */
+/* 6. ANIMACIONES */
 @keyframes fadeInScale {
     from {
         opacity: 0;
@@ -557,8 +541,8 @@
     height: 60px;
     border-radius: 12px;
     margin-bottom: 10px;
-    background: #2a2a35;
-    background-image: linear-gradient(90deg, #2a2a35 0px, #3a3a45 150px, #2a2a35 300px);
+    background: #e0ded5;
+    background-image: linear-gradient(90deg, #e0ded5 0px, #EBE9E3 150px, #e0ded5 300px);
     background-size: 1000px 100%;
     animation: shimmer 2s infinite linear;
 }
@@ -569,8 +553,8 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(10, 10, 12, 0.8);
-    backdrop-filter: blur(8px);
+    background: rgba(244, 242, 224, 0.7);
+    backdrop-filter: blur(12px);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -580,28 +564,21 @@
 .spinner {
     width: 50px;
     height: 50px;
-    border: 4px solid var(--glass-border);
-    border-top-color: var(--primary);
+    border: 4px solid rgba(50, 73, 64, 0.2);
+    border-top-color: var(--accent);
     border-radius: 50%;
     animation: spin 1s infinite linear;
+    box-shadow: 0 0 15px rgba(212, 163, 115, 0.4);
 }
 
-
-/* --------------------------------------------------------------------------
-   7. MEDIA QUERIES (RESPONSIVE & MOBILE FIRST)
-   -------------------------------------------------------------------------- */
-
-/* Asegura que en Desktop, los enlaces de nav se muestren antes que el avatar */
+/* 7. MEDIA QUERIES */
 @media (min-width: 769px) {
     .nav-links-wrapper {
         order: -1;
     }
 }
 
-/* Ajustes para Celulares y Tablets */
 @media (max-width: 768px) {
-
-    /* Nav y Menú Kebab */
     .app-nav-container {
         height: 70px;
         flex-direction: row;
@@ -612,23 +589,24 @@
 
     .mobile-menu-btn {
         display: block !important;
+        color: #F4F2E0 !important;
     }
 
+    /* Menú móvil ahora es oscuro (Fichte) por la cabecera */
     .nav-links-wrapper {
-        display: none !important; /* Oculto por defecto en móvil */
+        display: none !important;
         position: absolute;
         top: 70px;
         left: 0;
         width: 100%;
-        background: rgba(10, 10, 12, 0.95);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border-bottom: 1px solid var(--glass-border);
+        background: var(--primary) !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         flex-direction: column;
         align-items: center;
         padding: 2rem 1rem;
         gap: 1rem;
         z-index: 1000;
+        box-shadow: 0 10px 20px rgba(50, 73, 64, 0.4);
     }
 
     .nav-links-wrapper.active {
@@ -643,7 +621,6 @@
         margin: 0 !important;
     }
 
-    /* Controles de Zoom del Árbol */
     .zoom-controls {
         display: flex;
         gap: 0.8rem;
@@ -655,7 +632,6 @@
         font-size: 1.25rem;
     }
 
-    /* Dashboard */
     .dashboard-header {
         padding: 1.5rem 0;
     }
@@ -679,7 +655,6 @@
         font-size: 2rem;
     }
 
-    /* Formularios y Vistas */
     .glass-panel {
         padding: 1.5rem;
     }
@@ -688,7 +663,6 @@
         flex-direction: column;
     }
 
-    /* Corrección del botón "Agregar" en Manage Family Mobile */
     .flex-between {
         flex-direction: column;
         gap: 1rem;
@@ -699,7 +673,6 @@
         text-align: center;
     }
 
-    /* Línea de Tiempo Móvil */
     .timeline-wrapper::after {
         left: 20px;
     }
@@ -714,12 +687,10 @@
         left: 0;
     }
 
-    .timeline-item.left::after,
-    .timeline-item.right::after {
-        left: 12px;
+    .timeline-item.left::after, .timeline-item.right::after {
+        left: 11px;
     }
 
-    /* Landing Page Mobile */
     .auth-nav {
         display: flex;
         width: 100%;
@@ -733,13 +704,14 @@
     }
 
     .hero-title {
-        font-size: 2.2rem;
-        line-height: 1.2;
+        font-size: 2.8rem;
+        line-height: 1.1;
     }
 
     .hero-subtitle {
         font-size: 1rem;
         margin-bottom: 2rem;
+        color: #EBE9E3;
     }
 
     .hero-actions {
@@ -751,14 +723,12 @@
         width: 100%;
     }
 
-    /* FIX: Aquí es donde forzamos a que las filas se apilen en celular */
     .form-row {
         flex-direction: column;
         gap: 1.25rem;
     }
 }
 
-/* Celulares muy pequeños */
 @media (max-width: 480px) {
     .stat-card {
         flex: 1 1 100%;

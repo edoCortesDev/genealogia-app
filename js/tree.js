@@ -15,7 +15,7 @@ function getFlagEmoji(code) {
 }
 
 class FamilyTree {
-    constructor() { // <-- Fix: Removido el parámetro no usado (containerId)
+    constructor() {
         this.wrapper = document.getElementById('tree-canvas-wrapper');
         this.transformLayer = document.getElementById('tree-transform-layer');
         this.svgLayer = document.getElementById('tree-svg-layer');
@@ -23,7 +23,6 @@ class FamilyTree {
 
         this.nodes = [];
         this.links = [];
-        // Fix: Se eliminó this.nodesMap porque solo se usa localmente
 
         // Cámara
         this.zoom = 1;
@@ -98,12 +97,12 @@ class FamilyTree {
                 const targetEl = document.getElementById(`tree-node-${node.id}`);
                 if (targetEl) {
                     targetEl.style.transition = 'all 0.3s';
-                    targetEl.style.boxShadow = '0 0 50px rgba(168, 85, 247, 0.8), inset 0 0 0 2px #a855f7';
+                    targetEl.style.boxShadow = '0 0 30px rgba(50, 73, 64, 0.4), inset 0 0 0 2px var(--secondary)';
                     targetEl.style.transform = 'translate(-50%, -50%) scale(1.1)';
                     targetEl.style.zIndex = '20';
 
                     setTimeout(() => {
-                        targetEl.style.boxShadow = '0 8px 32px 0 rgba(0, 0, 0, 0.4)';
+                        targetEl.style.boxShadow = 'var(--glass-shadow)';
                         targetEl.style.transform = 'translate(-50%, -50%) scale(1)';
                         targetEl.style.zIndex = '1';
                     }, 2000);
@@ -211,8 +210,8 @@ class FamilyTree {
                     matches.forEach(match => {
                         const div = document.createElement('div');
                         div.innerHTML = `<span style="font-size: 0.8rem; opacity: 0.5; margin-right: 5px;">👤</span> ${match.name}`;
-                        div.style.cssText = 'padding: 0.6rem 1rem; cursor: pointer; color: var(--text-light); font-size: 0.9rem; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s;';
-                        div.onmouseover = () => div.style.background = 'rgba(255,255,255,0.05)';
+                        div.style.cssText = 'padding: 0.6rem 1rem; cursor: pointer; color: var(--text-main); font-size: 0.9rem; border-bottom: 1px solid var(--glass-border); transition: background 0.2s;';
+                        div.onmouseover = () => div.style.background = 'rgba(50,73,64,0.05)';
                         div.onmouseout = () => div.style.background = 'transparent';
 
                         div.addEventListener('click', () => {
@@ -439,7 +438,7 @@ class FamilyTree {
                 const sY = source.y + offsetY;
                 const tY = target.y + offsetY;
 
-                svgContent += `<line x1="${sEdge}" y1="${sY}" x2="${tEdge}" y2="${tY}" stroke="rgba(168, 85, 247, 0.4)" stroke-width="2" stroke-dasharray="6,6" />`;
+                svgContent += `<line x1="${sEdge}" y1="${sY}" x2="${tEdge}" y2="${tY}" stroke="var(--secondary)" stroke-width="2" stroke-dasharray="6,6" />`;
             } else if (link.type === 'parent-child') {
                 let parent = source;
                 let child = target;
@@ -455,19 +454,18 @@ class FamilyTree {
 
                 const midY = sY + (tY - sY) / 2;
 
-                svgContent += `<path d="M ${sX} ${sY} C ${sX} ${midY}, ${tX} ${midY}, ${tX} ${tY}" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="2" />`;
+                svgContent += `<path d="M ${sX} ${sY} C ${sX} ${midY}, ${tX} ${midY}, ${tX} ${tY}" fill="none" stroke="rgba(50, 73, 64, 0.2)" stroke-width="2" />`;
             }
         });
         this.svgLayer.innerHTML = svgContent;
 
         let htmlContent = '';
         this.nodes.forEach(node => {
-            // Fix: Simplificado a booleanos nativos para evitar warning del IDE
             const isDead = !!node.deathDate;
-            const crossSymbol = isDead ? `<span style="color:rgba(255,255,255,0.4); margin-right:4px; font-weight:normal;">†</span>` : '';
+            const crossSymbol = isDead ? `<span style="color:var(--text-muted); margin-right:4px; font-weight:normal;">†</span>` : '';
 
             const flagHTML = getFlagEmoji(node.nationality)
-                ? `<span style="display: block; font-size: 1.1rem; margin-top: 4px; margin-bottom: 2px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));">${getFlagEmoji(node.nationality)}</span>`
+                ? `<span style="display: block; font-size: 1.1rem; margin-top: 4px; margin-bottom: 2px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));">${getFlagEmoji(node.nationality)}</span>`
                 : '';
 
             const photoSrc = node.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(node.name)}&background=random`;
@@ -476,48 +474,49 @@ class FamilyTree {
             let dY = node.deathDate ? node.deathDate.substring(0, 4) : "";
             const dateStr = (bY || dY) ? `${bY || '?'} - ${dY || 'Presente'}` : "Sin fecha";
 
-            let borderColor = 'rgba(255,255,255,0.1)';
-            let glowColor = 'rgba(255,255,255,0.1)';
+            // Colores botánicos suaves para géneros
+            let borderColor = 'rgba(50, 73, 64, 0.1)';
+            let glowColor = 'rgba(50, 73, 64, 0.05)';
             if (node.gender === 'F') {
-                borderColor = 'rgba(236, 72, 153, 0.5)';
-                glowColor = 'rgba(236, 72, 153, 0.2)';
+                borderColor = 'rgba(212, 163, 115, 0.8)'; // Tono cálido tierra
+                glowColor = 'rgba(212, 163, 115, 0.2)';
             } else if (node.gender === 'M') {
-                borderColor = 'rgba(6, 182, 212, 0.5)';
-                glowColor = 'rgba(6, 182, 212, 0.2)';
+                borderColor = 'rgba(107, 142, 110, 0.8)'; // Verde salvia
+                glowColor = 'rgba(107, 142, 110, 0.2)';
             }
 
             const hoverScript = `
                 this.style.transform='translate(-50%, -50%) scale(1.08)'; 
                 this.style.boxShadow='0 10px 30px ${glowColor}, inset 0 0 0 1px ${borderColor}';
                 this.style.zIndex='10';
-                this.style.background='rgba(30, 30, 45, 0.8)';
-                Array.from(this.parentElement.children).forEach(el => { if(el !== this) el.style.opacity = '0.3'; });
+                this.style.background='rgba(255, 255, 255, 0.95)';
+                Array.from(this.parentElement.children).forEach(el => { if(el !== this) el.style.opacity = '0.4'; });
             `;
             const outScript = `
                 this.style.transform='translate(-50%, -50%) scale(1)'; 
-                this.style.boxShadow='0 8px 32px 0 rgba(0, 0, 0, 0.4)';
+                this.style.boxShadow='var(--glass-shadow)';
                 this.style.zIndex='1';
-                this.style.background='rgba(20, 20, 30, 0.6)';
+                this.style.background='rgba(255, 255, 255, 0.6)';
                 Array.from(this.parentElement.children).forEach(el => el.style.opacity = '1');
             `;
 
             htmlContent += `
                 <div id="tree-node-${node.id}" class="tree-node glass-panel" 
                      style="position: absolute; left: ${node.x}px; top: ${node.y}px; transform: translate(-50%, -50%); width: 160px; padding: 15px; text-align: center; cursor: pointer; 
-                            background: rgba(20, 20, 30, 0.6); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); 
-                            border: 1px solid rgba(255,255,255,0.05); border-top: 1px solid rgba(255,255,255,0.1); border-radius: 16px; 
-                            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4); transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); z-index: 1;" 
+                            background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); 
+                            border: 1px solid var(--glass-border); border-top: 1px solid rgba(255,255,255,0.8); border-radius: 16px; 
+                            box-shadow: var(--glass-shadow); transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); z-index: 1;" 
                      onmouseover="${hoverScript.replace(/\n/g, ' ')}" 
                      onmouseout="${outScript.replace(/\n/g, ' ')}"
                      onclick="if(window.openPersonDetails){window.openPersonDetails('${node.id}');}">
                     
-                    <img src="${photoSrc}" alt="Foto de ${node.name}" style="width: 75px; height: 75px; border-radius: 50%; border: 2px solid ${borderColor}; object-fit: cover; margin-bottom: 12px; background: #111; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
+                    <img src="${photoSrc}" alt="Foto de ${node.name}" style="width: 75px; height: 75px; border-radius: 50%; border: 2px solid ${borderColor}; object-fit: cover; margin-bottom: 12px; background: #fff; box-shadow: 0 4px 15px rgba(50,73,64,0.1);">
                     
-                    <span style="display: block; font-weight: 600; font-size: 0.95rem; color: #f8fafc; line-height: 1.2; letter-spacing: -0.01em;">${crossSymbol}${node.name}</span>
+                    <span style="display: block; font-weight: 600; font-size: 0.95rem; color: var(--text-main); line-height: 1.2; letter-spacing: -0.01em;">${crossSymbol}${node.name}</span>
                     
                     ${flagHTML}
                     
-                    <span style="display: block; font-size: 0.75rem; color: #8b8d9b; margin-top: 6px; font-weight: 500; letter-spacing: 0.02em;">${dateStr}</span>
+                    <span style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-top: 6px; font-weight: 500; letter-spacing: 0.02em;">${dateStr}</span>
                     
                 </div>
             `;

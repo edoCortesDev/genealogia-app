@@ -7,9 +7,11 @@
 
 body {
     font-family: var(--font-sans);
-    background: radial-gradient(circle at 50% -20%, #1a1a3a 0%, var(--bg-dark) 50%, #050508 100%);
+    background-color: var(--bg-main);
+    /* Fondo limpio con un halo de luz blanca arriba para volumen */
+    background-image: radial-gradient(circle at 50% 0%, #ffffff 0%, var(--bg-main) 70%);
     background-attachment: fixed;
-    color: var(--text-light);
+    color: var(--text-main);
     line-height: 1.6;
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
@@ -22,25 +24,22 @@ a {
 }
 
 a:hover {
-    color: var(--primary-hover);
+    color: var(--accent); /* Chispa terracota al pasar el mouse */
 }
 
 ul {
     list-style: none;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+h1, h2, h3, h4, h5, h6 {
     font-weight: 600;
     line-height: 1.2;
+    color: var(--primary);
 }
 
 .text-gradient {
-    background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%);
+    /* Degradado vibrante de Fichte a Terracota */
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -50,22 +49,21 @@ h6 {
     display: none !important;
 }
 
-/* Scrollbar styling */
+/* Scrollbar styling elegante */
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-    background: var(--bg-dark);
+    background: var(--bg-main);
 }
 
 ::-webkit-scrollbar-thumb {
-    background: var(--bg-dark-accent);
+    background: rgba(50, 73, 64, 0.2);
     border-radius: 4px;
-    border: 1px solid var(--glass-border);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--primary);
+    background: var(--secondary);
 }
