@@ -39,7 +39,9 @@ function setupUIEvents() {
 
     const btnCancel = document.getElementById('btn-cancel-member');
     const memberForm = document.getElementById('member-form');
+    const manageLayout = document.querySelector('.manage-layout');
 
+    // FIX: Al presionar "Agregar Nuevo"
     if (btnAdd && formPanel) {
         btnAdd.addEventListener('click', () => {
             memberForm.reset();
@@ -49,13 +51,16 @@ function setupUIEvents() {
             if (relContainer) relContainer.innerHTML = '';
             if (evContainer) evContainer.innerHTML = '';
             formPanel.classList.remove('hidden');
+            manageLayout.classList.add('form-open'); // Oculta lista en móvil
         });
     }
 
+    // FIX: Al presionar "Cancelar"
     if (btnCancel && formPanel) {
         btnCancel.addEventListener('click', () => {
             memberForm.removeAttribute('data-edit-id');
             formPanel.classList.add('hidden');
+            manageLayout.classList.remove('form-open'); // Restaura lista en móvil
         });
     }
 
@@ -394,10 +399,8 @@ export async function loadFamilyMembers() {
 
     listContainer.innerHTML = `<div class="skeleton-row"></div><div class="skeleton-row"></div><div class="skeleton-row"></div>`;
 
-    const {
-        data: members,
-        error
-    } = await supabase.from('family_members').select('*').order('created_at', {ascending: true});
+    // FIX ÁRBOL: Recuperamos por orden de creación original para que la 'Raíz' del árbol no se rompa
+    const {data: members, error} = await supabase.from('family_members').select('*').order('created_at', {ascending: true});
 
     if (error) {
         listContainer.innerHTML = `<p class="text-danger">Error: ${error.message}</p>`;
@@ -405,10 +408,11 @@ export async function loadFamilyMembers() {
     }
 
     familyMembers = members || [];
-    renderMembersList();
+
+    renderMembersList(); // Se encarga de ordenar A-Z solo visualmente
 
     if (window.updateDashboardStats) window.updateDashboardStats();
-    if (window.familyTree) window.familyTree.updateData(familyMembers);
+    if (window.familyTree) window.familyTree.updateData(familyMembers); // El árbol recibe el orden original
 
     buildTimeline(familyMembers);
 }
@@ -587,7 +591,14 @@ function renderMembersList() {
         return;
     }
 
-    familyMembers.forEach(mem => {
+    // FIX A-Z: Clonamos el array original y lo ordenamos solo para dibujarlo aquí en la lista.
+    const sortedMembers = [...familyMembers].sort((a, b) => {
+        const nameA = (a.first_name || '').toLowerCase();
+        const nameB = (b.first_name || '').toLowerCase();
+        return nameA.localeCompare(nameB);
+    });
+
+    sortedMembers.forEach(mem => {
         const el = document.createElement('div');
         el.className = 'glass-panel mb-1 flex-between';
         el.style.padding = '1rem';
@@ -668,6 +679,7 @@ function openEditForm(id) {
     memberForm.setAttribute('data-edit-id', id);
     document.getElementById('member-form-title').textContent = "Editar Persona";
     formPanel.classList.remove('hidden');
+    document.querySelector('.manage-layout').classList.add('form-open'); // Activa vista móvil
 }
 
 async function uploadPhoto(file) {
@@ -831,6 +843,7 @@ async function saveMember() {
         memberForm.removeAttribute('data-edit-id');
         document.querySelector('.file-msg').textContent = "Arrastra una foto aquí o haz clic";
         document.getElementById('member-form-panel').classList.add('hidden');
+        document.querySelector('.manage-layout').classList.remove('form-open'); // Cierra vista móvil
 
         await loadFamilyMembers();
 

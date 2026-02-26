@@ -58,6 +58,30 @@
 .manage-layout { display: flex; gap: 2rem; align-items: flex-start; }
 .sidebar-form { width: 350px; flex-shrink: 0; }
 
+/* Cajas de sección Premium dentro del formulario */
+.form-section-box {
+    background: #FFFFFF;
+    border: 1px solid rgba(50, 73, 64, 0.15);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 15px rgba(50, 73, 64, 0.03);
+    transition: all 0.3s ease;
+}
+.form-section-box:hover {
+    border-color: rgba(212, 163, 115, 0.4);
+    box-shadow: 0 8px 25px rgba(50, 73, 64, 0.06);
+}
+.form-section-box h4 {
+    color: var(--primary);
+    margin-bottom: 0.2rem;
+    font-size: 1rem;
+}
+.form-section-box p {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+}
+
 /* 5. VISTAS Y WIDGETS */
 .app-view { padding-top: 1rem; animation: fadeInScale 0.3s ease; }
 
@@ -187,6 +211,10 @@
     .hero-actions { flex-direction: column; width: 100%; }
     .hero-actions .btn { width: 100%; }
     .form-row { flex-direction: column; gap: 1.25rem; }
+    /* MAGIA MÓVIL: Oculta la lista cuando el formulario está abierto */
+    .manage-layout.form-open #members-list-section { display: none; }
+    .sidebar-form { width: 100%; max-height: none; overflow: visible; padding: 1.5rem 1rem; }
+    .manage-layout.form-open { display: block; }
 }
 @media (max-width: 480px) {
     .stat-card { flex: 1 1 100%; }
