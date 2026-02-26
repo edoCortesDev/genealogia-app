@@ -1,4 +1,7 @@
-/* Modals */
+/* ==========================================================================
+   MODALS.CSS - Ventanas Emergentes Premium
+   ========================================================================== */
+
 .modal {
     position: fixed;
     top: 0;
@@ -15,46 +18,88 @@
     display: none !important;
 }
 
+/* Fondo con extra desenfoque para aislar al usuario */
 .modal-overlay {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(50, 73, 64, 0.4);
-    backdrop-filter: blur(8px);
+    background: rgba(50, 73, 64, 0.55); /* Verde Fichte translúcido */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
+/* La tarjeta del formulario */
 .modal-content {
     position: relative;
     width: 100%;
-    max-width: 450px;
+    max-width: 480px;
     z-index: 1001;
-    animation: fadeInScale 0.3s ease;
+    animation: modalSlideUp 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+
     background: var(--bg-panel);
+    border-radius: 24px;
+    padding: 3rem 2.5rem;
+    box-shadow: 0 25px 50px rgba(50, 73, 64, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    border-top: 6px solid var(--accent); /* Corona Terracota */
 }
 
+/* Títulos del modal centralizados y con presencia */
+.modal-content h2 {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--primary);
+    margin-bottom: 2rem;
+    letter-spacing: -0.02em;
+    text-align: center;
+}
+
+/* Botón de cierre circular interactivo */
 .btn-close {
     position: absolute;
-    top: 15px;
+    top: 20px;
     right: 20px;
-    background: transparent;
+    width: 36px;
+    height: 36px;
+    background: rgba(50, 73, 64, 0.05);
+    border-radius: 50%;
     border: none;
     color: var(--text-muted);
-    font-size: 1.5rem;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    transition: color 0.2s;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .btn-close:hover {
+    background: rgba(230, 57, 70, 0.1);
     color: var(--danger);
+    transform: rotate(90deg);
 }
 
+/* Animación fluida de entrada */
+@keyframes modalSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Ajustes para Celulares */
 @media (max-width: 768px) {
     .modal-content {
         width: 90%;
-        padding: 1.5rem;
+        padding: 2.5rem 1.5rem;
         max-height: 90vh;
         overflow-y: auto;
+        border-radius: 20px;
     }
 }

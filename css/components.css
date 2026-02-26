@@ -205,13 +205,18 @@
     .timeline-item.left::after, .timeline-item.right::after { left: 12px; }
     .timeline-item.left::before, .timeline-item.right::before { left: 20px; width: 40px; }
     .auth-nav { display: flex; width: 100%; justify-content: center; gap: 0.5rem; }
-    .hero-content { padding: 2rem 1rem; text-align: center; }
+
+    /* --- FIX: LANDING PAGE MÓVIL --- */
+    .hero-section { flex-direction: column; padding-top: 3rem; padding-bottom: 4rem; min-height: 100vh; }
+    .hero-content { padding: 1rem; text-align: center; }
     .hero-title { font-size: 2.8rem; line-height: 1.1; }
-    .hero-subtitle { font-size: 1rem; margin-bottom: 2rem; color: #EBE9E3; }
+    .hero-subtitle { font-size: 1.1rem; margin-bottom: 2rem; color: var(--text-muted); } /* ¡Color corregido! */
     .hero-actions { flex-direction: column; width: 100%; }
     .hero-actions .btn { width: 100%; }
+    .hero-graphics { display: flex; width: 100%; height: 400px; transform: scale(0.65); transform-origin: top center; margin-top: 2rem; }
+
+    /* Formularios y vistas */
     .form-row { flex-direction: column; gap: 1.25rem; }
-    /* MAGIA MÓVIL: Oculta la lista cuando el formulario está abierto */
     .manage-layout.form-open #members-list-section { display: none; }
     .sidebar-form { width: 100%; max-height: none; overflow: visible; padding: 1.5rem 1rem; }
     .manage-layout.form-open { display: block; }
@@ -299,9 +304,34 @@
     100% { transform: translateY(-20px) rotate(2deg); }
 }
 
-/* Ocultar en móviles para priorizar los botones de login */
+/* Ocultar en móviles para priorizar los botones de login (AHORA ADAPTADO Y VISIBLE) */
 @media (max-width: 768px) {
+    /* 1. Quitamos la guillotina (overflow: visible) y liberamos la altura */
+    .hero-section {
+        flex-direction: column;
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+        min-height: auto !important;
+        overflow: visible !important;
+        justify-content: flex-start;
+    }
+
+    /* 2. Congelamos el texto para que no se estire ni aplaste */
+    .hero-content {
+        flex: none !important;
+        width: 100%;
+        margin-bottom: 1.5rem; /* Espacio respirable antes del 3D */
+        z-index: 10;
+    }
+
+    /* 3. Congelamos los gráficos y los achicamos proporcionalmente */
     .hero-graphics {
-        display: none;
+        display: flex;
+        flex: none !important;
+        width: 100%;
+        height: 420px;
+        transform: scale(0.65);
+        transform-origin: top center;
+        margin-top: 0;
     }
 }
