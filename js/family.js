@@ -11,10 +11,21 @@ let familyMembers = []; // Cache local
 document.addEventListener('DOMContentLoaded', async () => {
     if (!document.getElementById('view-manage')) return;
 
-    currentUser = await checkAuth();
-    if (!currentUser) return;
+    // 1. Verificamos si trae pase de invitado (el enlace de WhatsApp)
+    const urlParams = new URLSearchParams(window.location.search);
+    const sharedUserId = urlParams.get('tree');
 
-    setupUIEvents();
+    // 2. Revisamos si es el dueño logueado
+    currentUser = await checkAuth();
+
+    // 3. El nuevo Guardia: Si NO es dueño Y TAMPOCO es invitado, lo bloqueamos
+    if (!currentUser && !sharedUserId) return;
+
+    // 4. Si pasó alguna de las dos pruebas, cargamos la familia
+    if (!sharedUserId) {
+        // Solo activamos los eventos de los formularios si es el dueño
+        setupUIEvents();
+    }
     await loadFamilyMembers();
 });
 
