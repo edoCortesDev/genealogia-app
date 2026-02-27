@@ -304,6 +304,9 @@ window.closePhotoLightbox = function () {
 
 // --- PERFIL ESTILO WIKIPEDIA ---
 window.openPersonDetails = function (id) {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('tree')) return;
+
     const mem = familyMembers.find(m => m.id === id);
     if (!mem) return;
 

@@ -54,20 +54,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         const sharedTreeId = urlParams.get('tree');
 
         if (sharedTreeId) {
-            // 👁️ MODO SOLO LECTURA (Invitado de WhatsApp)
-            // Ocultamos los botones privados para que no puedan editar nada
+            // 👁️ MODO "SOLO ÁRBOL" ESTRICTO (Invitado de WhatsApp)
             const btnManage = document.getElementById('menu-family');
             const btnProfileBtn = document.getElementById('user-avatar-btn');
             const btnShare = document.getElementById('btn-share-tree');
             const btnMobileMenu = document.getElementById('mobile-menu-toggle');
 
+            // 👇 Agregamos los botones de Inicio y Línea de Tiempo a la lista de ocultos
+            const btnDashboard = document.getElementById('menu-dashboard');
+            const btnTimeline = document.getElementById('menu-timeline');
+
             if(btnManage) btnManage.style.display = 'none';
             if(btnProfileBtn) btnProfileBtn.style.display = 'none';
             if(btnShare) btnShare.style.display = 'none';
             if(btnMobileMenu) btnMobileMenu.style.display = 'none';
+            if(btnDashboard) btnDashboard.style.display = 'none';
+            if(btnTimeline) btnTimeline.style.display = 'none';
 
             setupViewRouter();
-            window.switchView('tree'); // Lo lanzamos directo a ver el árbol asombroso
+            window.switchView('tree'); // Lanzamos directo al árbol
         } else {
             // 👑 MODO DUEÑO (Login Normal)
             const user = await checkAuth();
