@@ -129,6 +129,38 @@
                      class="mt-2"
                      style="max-width: 650px; margin: 1rem auto; text-align: left;"></div>
 
+                <div id="family-insights-panel" style="max-width: 900px; margin: 3rem auto 0; text-align: left; opacity: 0; transition: opacity 0.8s ease;">
+                    <div class="flex-between" style="border-bottom: 2px solid rgba(50,73,64,0.1); padding-bottom: 0.5rem; margin-bottom: 1rem;">
+                        <h3 style="font-size: 1.5rem; color: var(--primary); margin: 0;">🧬 Analíticas de Linaje</h3>
+                        <span class="badge badge-pro" style="font-size: 0.7rem;">Automático</span>
+                    </div>
+                    <p style="color: var(--text-muted); font-size: 0.95rem;">Basado en los registros de tu árbol genealógico.</p>
+
+                    <div class="insights-grid">
+                        <div class="insight-card">
+                            <div class="insight-icon">⏳</div>
+                            <div class="insight-content">
+                                <h4>Promedio de Vida</h4>
+                                <p id="insight-lifespan">Calculando...</p>
+                            </div>
+                        </div>
+                        <div class="insight-card">
+                            <div class="insight-icon">🎂</div>
+                            <div class="insight-content">
+                                <h4>Mes de Nacimientos</h4>
+                                <p id="insight-month">Calculando...</p>
+                            </div>
+                        </div>
+                        <div class="insight-card">
+                            <div class="insight-icon">📜</div>
+                            <div class="insight-content">
+                                <h4>Ancestro más antiguo</h4>
+                                <p id="insight-oldest">Calculando...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </section>

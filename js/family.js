@@ -551,14 +551,11 @@ window.updateDashboardStats = function () {
     familyMembers.forEach(mem => {
         if (mem.photo_url) totalFiles++;
         if (mem.document_links) {
-            try {
-                totalFiles += JSON.parse(mem.document_links).length;
-            } catch (e) {
-                totalFiles++;
-            }
+            try { totalFiles += JSON.parse(mem.document_links).length; } catch (e) { totalFiles++; }
         }
     });
 
+    // Animador de números (Tarjetas Superiores)
     const animateValue = (id, end) => {
         const obj = document.getElementById(id);
         if (!obj) return;
@@ -579,6 +576,81 @@ window.updateDashboardStats = function () {
     animateValue('stat-total', totalMembers);
     animateValue('stat-countries', uniqueCountries.size);
     animateValue('stat-files', totalFiles);
+
+    // =========================================================
+    // 🧬 NUEVO: CÁLCULO DE ANALÍTICAS DE LINAJE (INSIGHTS)
+    // =========================================================
+    let totalLifespan = 0;
+    let deceasedCount = 0;
+    const monthCounts = {};
+    const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+    let oldestPerson = null;
+    let oldestYear = 9999;
+
+    familyMembers.forEach(mem => {
+        // 1. Promedio de Vida
+        if (mem.birth_date && mem.death_date) {
+            const bYear = parseInt(mem.birth_date.split('-')[0]);
+            const dYear = parseInt(mem.death_date.split('-')[0]);
+            if (!isNaN(bYear) && !isNaN(dYear) && dYear >= bYear) {
+                totalLifespan += (dYear - bYear);
+                deceasedCount++;
+            }
+        }
+
+        // 2. Mes con más cumpleaños y Ancestro más Antiguo
+        if (mem.birth_date) {
+            const parts = mem.birth_date.split('-');
+            if (parts.length >= 2) {
+                const month = parseInt(parts[1]);
+                if (!isNaN(month) && month >= 1 && month <= 12) {
+                    monthCounts[month] = (monthCounts[month] || 0) + 1;
+                }
+            }
+            const bYear = parseInt(parts[0]);
+            if (!isNaN(bYear) && bYear < oldestYear) {
+                oldestYear = bYear;
+                oldestPerson = mem;
+            }
+        }
+    });
+
+    // 3. Pintar en el HTML
+    const insightLifespan = document.getElementById('insight-lifespan');
+    const insightMonth = document.getElementById('insight-month');
+    const insightOldest = document.getElementById('insight-oldest');
+    const panel = document.getElementById('family-insights-panel');
+
+    if (insightLifespan && insightMonth && insightOldest && panel) {
+        // Aparecer panel suavemente
+        panel.style.opacity = '1';
+
+        // Pintar Promedio
+        if (deceasedCount > 0) {
+            const avg = Math.round(totalLifespan / deceasedCount);
+            insightLifespan.innerHTML = `<strong style="color:var(--primary); font-size:1.3rem;">${avg}</strong> años aprox.`;
+        } else {
+            insightLifespan.innerHTML = `<span style="font-size: 0.85rem; font-weight: normal; color:var(--text-muted);">Sin fallecimientos registrados</span>`;
+        }
+
+        // Pintar Mes
+        let maxMonth = null, maxCount = 0;
+        for (const [m, count] of Object.entries(monthCounts)) {
+            if (count > maxCount) { maxCount = count; maxMonth = parseInt(m); }
+        }
+        if (maxMonth) {
+            insightMonth.innerHTML = `<strong style="color:var(--primary); font-size:1.3rem;">${monthNames[maxMonth - 1]}</strong> (${maxCount})`;
+        } else {
+            insightMonth.innerHTML = `<span style="font-size: 0.85rem; font-weight: normal; color:var(--text-muted);">Faltan fechas de nacimiento</span>`;
+        }
+
+        // Pintar Ancestro
+        if (oldestPerson) {
+            insightOldest.innerHTML = `<strong style="color:var(--primary);">${oldestPerson.first_name} ${oldestPerson.last_name ? oldestPerson.last_name.split(' ')[0] : ''}</strong> (n. ${oldestYear})`;
+        } else {
+            insightOldest.innerHTML = `<span style="font-size: 0.85rem; font-weight: normal; color:var(--text-muted);">Faltan fechas de nacimiento</span>`;
+        }
+    }
 };
 
 function renderMembersList() {
