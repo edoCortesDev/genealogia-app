@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // --- SISTEMA INICIADO CORRECTAMENTE ---
         setupAdminNavigation();
+        setupAdminTopNav(profile);
         setupAdminEvents();
         await loadDashboardData(supabase);
 
@@ -85,18 +86,71 @@ function setupAdminNavigation() {
 }
 
 function setupAdminEvents() {
-    // Botón de Cerrar Sesión con Feedback Visual
-    const btnLogout = document.querySelector('.sidebar-footer .btn');
-    if (btnLogout) {
-        btnLogout.addEventListener('click', async (e) => {
+    // 🛠️ FIX: Ahora busca todos los botones de cerrar sesión (el del sidebar y el del menú)
+    const btnLogouts = document.querySelectorAll('.btn-logout');
+    btnLogouts.forEach(btn => {
+        btn.addEventListener('click', async (e) => {
             e.preventDefault();
+            btn.innerHTML = '<span class="spinner" style="width: 15px; height: 15px; border-width: 2px; margin-right: 8px; display: inline-block; vertical-align: middle;"></span> Saliendo...';
+            btn.style.opacity = '0.7';
+            btn.style.pointerEvents = 'none';
+            await logout();
+        });
+    });
 
-            // Animación y estado de carga
-            btnLogout.innerHTML = '<span class="spinner" style="width: 15px; height: 15px; border-width: 2px; margin-right: 8px; display: inline-block; vertical-align: middle;"></span> Saliendo...';
-            btnLogout.style.opacity = '0.7';
-            btnLogout.style.pointerEvents = 'none';
+    const btnExport = document.getElementById('btn-export-csv');
+    // ... mantén el resto del código de btnExport igual ...
+    if (btnExport) {
+        btnExport.addEventListener('click', () => {
+            const table = document.querySelector('.admin-table');
+            if (!table) return;
+            let csv = [];
+            for (let i = 0; i < table.rows.length; i++) {
+                let row = [];
+                let cols = table.rows[i].querySelectorAll('td, th');
+                for (let j = 0; j < cols.length; j++) {
+                    let data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, " ").trim();
+                    row.push('"' + data + '"');
+                }
+                csv.push(row.join(','));
+            }
+            const csvString = csv.join('\n');
+            const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", "usuarios_raices_digital.csv");
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+    }
+}
 
-            await logout(); // Ejecuta tu función original
+// 👑 NUEVA FUNCIÓN: Lógica del menú desplegable del CEO
+function setupAdminTopNav(profile) {
+    const btnAvatar = document.getElementById('admin-avatar-btn');
+    const dropdown = document.getElementById('admin-dropdown');
+    const avatarCircle = document.querySelector('.avatar-circle');
+
+    // Ponemos tu inicial real
+    if (profile && profile.first_name) {
+        avatarCircle.textContent = profile.first_name.charAt(0).toUpperCase();
+    }
+
+    if (btnAvatar && dropdown) {
+        btnAvatar.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropdown.classList.toggle('hidden');
+        });
+
+        // Cerrar al hacer clic en cualquier otra parte
+        document.addEventListener('click', (e) => {
+            if (!dropdown.contains(e.target) && !btnAvatar.contains(e.target)) {
+                dropdown.classList.add('hidden');
+            }
         });
     }
 }

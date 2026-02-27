@@ -25,9 +25,11 @@
         <a href="#" class="nav-item">💳 <span>Suscripciones</span></a>
         <a href="#" class="nav-item">🛡️ <span>Seguridad (Logs)</span></a>
     </nav>
-    <div class="sidebar-footer">
-        <button class="btn btn-outline" style="width: 100%; color: white; border-color: rgba(255,255,255,0.2);">
-            Cerrar Sesión
+    <div class="sidebar-footer" style="display: flex; flex-direction: column; gap: 0.8rem;">
+        <a href="app.html" class="btn btn-primary" style="width: 100%; text-align: center; font-weight: 600;">🌳 Mi Árbol</a>
+
+        <button class="btn btn-outline btn-logout"
+                style="width: 100%; color: white; border-color: rgba(255,255,255,0.2);">Cerrar Sesión
         </button>
     </div>
 </aside>
@@ -38,9 +40,20 @@
             <button class="admin-menu-toggle" id="admin-menu-toggle">☰</button>
             <h1 style="margin: 0;">Panel de Control</h1>
         </div>
-        <div class="user-profile" style="display: flex; align-items: center; gap: 0.5rem;">
-            <div class="avatar-circle" style="width: 40px; height: 40px; background: var(--accent);">C</div>
-            <span style="font-weight: 600;">CEO</span>
+
+        <div class="user-menu-container" style="position: relative;">
+            <button class="btn-avatar" id="admin-avatar-btn" style="display: flex; align-items: center; gap: 0.5rem; background: none; border: none; cursor: pointer; padding: 0;">
+                <div class="avatar-circle" style="width: 40px; height: 40px; background: var(--accent); color: white; border: 2px solid white; box-shadow: 0 4px 10px rgba(212, 163, 115, 0.3);">C</div>
+                <span style="font-weight: 600; font-size: 1rem; color: var(--text-main);">CEO <span style="font-size: 0.7em;">▼</span></span>
+            </button>
+
+            <div class="user-dropdown glass-panel hidden" id="admin-dropdown" style="position: absolute; top: calc(100% + 10px); right: 0; min-width: 200px; padding: 0.5rem; z-index: 200; background: white;">
+                <ul style="list-style: none; margin: 0; padding: 0;">
+                    <li><a href="app.html" class="dropdown-item">🌳 Mi Árbol Familiar</a></li>
+                    <li class="divider"></li>
+                    <li><a href="#" class="dropdown-item text-danger btn-logout">Cerrar Sesión</a></li>
+                </ul>
+            </div>
         </div>
     </header>
 

@@ -168,7 +168,8 @@ function setupLandingModals() {
 // ==========================================
 // FUNCIONES DE LA APLICACIÓN (APP.HTML)
 // ==========================================
-function setupAppNav(user) {
+// ui.js - Reemplazar setupAppNav
+async function setupAppNav(user) {
     const btnAvatar = document.getElementById('user-avatar-btn');
     const dropdown = document.getElementById('user-dropdown');
 
@@ -177,6 +178,25 @@ function setupAppNav(user) {
         const initial = user.user_metadata.first_name.charAt(0).toUpperCase();
         const avatarCircle = document.querySelector('.avatar-circle');
         if (avatarCircle) avatarCircle.textContent = initial;
+    }
+
+    // 👑 EL BOTÓN VIP: Consultamos si es Admin para inyectar el enlace de vuelta
+    const supabase = getSupabase();
+    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+
+    if (profile && profile.role && profile.role.toLowerCase().trim() === 'admin') {
+        const ul = dropdown.querySelector('ul');
+        if (ul) {
+            const li = document.createElement('li');
+            li.innerHTML = '<a href="admin.html" class="dropdown-item" style="color: var(--accent); font-weight: bold;">👑 Panel CEO</a>';
+            // Insertamos el botón arriba del todo en el menú de la app
+            ul.insertBefore(li, ul.firstChild);
+
+            // También agregamos un separador
+            const div = document.createElement('li');
+            div.className = 'divider';
+            ul.insertBefore(div, li.nextSibling);
+        }
     }
 
     // Menú desplegable del avatar
