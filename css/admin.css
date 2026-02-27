@@ -1,0 +1,233 @@
+/* ==========================================================================
+   ADMIN.CSS - Panel de Control del CEO
+   ========================================================================== */
+
+.admin-layout {
+    display: flex;
+    min-height: 100vh;
+    background-color: var(--bg-main);
+    margin: 0;
+    font-family: var(--font-sans);
+}
+
+/* Sidebar Fijo y Oscuro */
+.admin-sidebar {
+    width: 280px;
+    background: var(--primary); /* Verde Fichte */
+    color: white;
+    display: flex;
+    flex-direction: column;
+    padding: 2rem 1.5rem;
+    position: fixed;
+    height: 100vh;
+    box-shadow: 4px 0 20px rgba(50, 73, 64, 0.15);
+    z-index: 100;
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 3rem;
+    color: var(--secondary);
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+.nav-item {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.nav-item:hover, .nav-item.active {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.nav-item.active {
+    border-left: 4px solid var(--accent); /* Línea Terracota */
+}
+
+/* Contenedor Principal */
+.admin-main {
+    flex: 1;
+    margin-left: 280px; /* Deja espacio para el sidebar */
+    padding: 2rem 3rem;
+    max-width: 1400px;
+}
+
+.admin-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3rem;
+}
+
+/* KPIs (Sobrescribiendo la grilla de componentes para que quepan 3 o 4) */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.kpi-trend {
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    font-weight: 600;
+}
+
+.kpi-trend.positive {
+    color: #2a9d8f;
+}
+
+/* Tabla de Datos Premium */
+.data-section {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(50, 73, 64, 0.05);
+}
+
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    margin-top: 1.5rem;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.admin-table th {
+    padding: 1rem;
+    border-bottom: 2px solid rgba(50, 73, 64, 0.1);
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.admin-table td {
+    padding: 1.2rem 1rem;
+    border-bottom: 1px solid rgba(50, 73, 64, 0.05);
+    color: var(--text-main);
+    vertical-align: middle;
+}
+
+.admin-table tr:hover td {
+    background-color: rgba(212, 163, 115, 0.05);
+}
+
+/* Etiquetas de Estado (Badges) */
+.badge {
+    padding: 0.3rem 0.8rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.badge-free {
+    background: rgba(50, 73, 64, 0.1);
+    color: var(--primary);
+}
+
+.badge-pro {
+    background: rgba(230, 57, 70, 0.1);
+    color: var(--accent);
+    border: 1px solid rgba(230, 57, 70, 0.2);
+}
+
+.badge-active {
+    background: rgba(42, 157, 143, 0.1);
+    color: #2a9d8f;
+}
+
+/* Responsivo para Tablets (Menú colapsado a íconos) */
+@media (max-width: 1024px) {
+    .admin-sidebar {
+        width: 80px;
+        padding: 2rem 0.5rem;
+        align-items: center;
+    }
+
+    /* Ocultamos el texto y el título */
+    .sidebar-header h2, .nav-item span {
+        display: none;
+    }
+
+    .admin-main {
+        margin-left: 80px;
+        padding: 2rem 1.5rem;
+    }
+}
+
+/* =========================================
+   MEJORAS MOBILE Y NAVEGACIÓN ADMIN
+   ========================================= */
+.admin-view {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+.admin-view.active {
+    display: block;
+}
+
+.admin-menu-toggle {
+    display: none;
+    background: transparent;
+    border: none;
+    color: var(--primary);
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+/* Responsivo para Celulares */
+@media (max-width: 768px) {
+    .admin-menu-toggle {
+        display: block;
+    }
+
+    .admin-sidebar {
+        width: 260px; /* 🛠️ FIX: Recupera el ancho para que quepa el texto */
+        align-items: flex-start; /* 🛠️ FIX: Alinea el menú a la izquierda */
+        padding: 2rem 1.5rem;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+
+    .admin-sidebar.open {
+        transform: translateX(0);
+    }
+
+    .sidebar-header h2, .nav-item span {
+        display: inline-block; /* 🛠️ FIX: Vuelve a mostrar los textos cuando el menú se abre */
+    }
+
+    .admin-main {
+        margin-left: 0;
+        padding: 1rem;
+    }
+
+    .admin-overlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 99;
+        display: none;
+    }
+    .admin-overlay.active {
+        display: block;
+    }
+}

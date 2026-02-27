@@ -1,0 +1,143 @@
+// admin.js
+// Lógica de Panel CEO, Navegación por pestañas y Mobile
+
+import { getSupabase } from './config.js';
+import { checkAuth, logout } from './auth.js';
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const user = await checkAuth();
+
+    if (!user) {
+        window.location.replace('index.html');
+        return;
+    }
+
+    const supabase = getSupabase();
+
+    try {
+        const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single();
+
+        const userRole = profile?.role ? profile.role.toLowerCase().trim() : 'user';
+
+        if (error || userRole !== 'admin') {
+            window.location.replace('app.html');
+            return;
+        }
+
+        // --- SISTEMA INICIADO CORRECTAMENTE ---
+        setupAdminNavigation();
+        setupAdminEvents();
+        await loadDashboardData(supabase);
+
+    } catch (err) {
+        console.error("Error validando admin:", err);
+        window.location.replace('app.html');
+    }
+});
+
+function setupAdminNavigation() {
+    // 1. Lógica de Pestañas (Menú izquierdo)
+    const navItems = document.querySelectorAll('.sidebar-nav .nav-item');
+    const views = document.querySelectorAll('.admin-view');
+
+    navItems.forEach((item, index) => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            // Quitar clase active de todos los botones y vistas
+            navItems.forEach(nav => nav.classList.remove('active'));
+            views.forEach(view => view.classList.remove('active'));
+
+            // Añadir active al clickeado
+            item.classList.add('active');
+
+            // Lógica simple para este ejemplo:
+            // Botón 0 abre view-dashboard, Botón 1 abre view-users
+            if (index === 0) document.getElementById('admin-view-dashboard')?.classList.add('active');
+            else document.getElementById('admin-view-users')?.classList.add('active');
+
+            // Si estamos en móvil, cerrar el menú tras hacer clic
+            closeMobileMenu();
+        });
+    });
+
+    // 2. Lógica para Celulares (Menú Hamburguesa)
+    const btnToggle = document.getElementById('admin-menu-toggle');
+    const sidebar = document.querySelector('.admin-sidebar');
+    const overlay = document.getElementById('admin-overlay');
+
+    const openMobileMenu = () => {
+        sidebar.classList.add('open');
+        overlay.classList.add('active');
+    };
+
+    const closeMobileMenu = () => {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('active');
+    };
+
+    if (btnToggle) btnToggle.addEventListener('click', openMobileMenu);
+    if (overlay) overlay.addEventListener('click', closeMobileMenu);
+}
+
+function setupAdminEvents() {
+    // Botón de Cerrar Sesión con Feedback Visual
+    const btnLogout = document.querySelector('.sidebar-footer .btn');
+    if (btnLogout) {
+        btnLogout.addEventListener('click', async (e) => {
+            e.preventDefault();
+
+            // Animación y estado de carga
+            btnLogout.innerHTML = '<span class="spinner" style="width: 15px; height: 15px; border-width: 2px; margin-right: 8px; display: inline-block; vertical-align: middle;"></span> Saliendo...';
+            btnLogout.style.opacity = '0.7';
+            btnLogout.style.pointerEvents = 'none';
+
+            await logout(); // Ejecuta tu función original
+        });
+    }
+}
+
+// ... Mantén tus funciones loadDashboardData() y loadRecentUsers() exactamente igual que antes ...
+async function loadDashboardData(supabase) {
+    try {
+        const { count: totalUsers, error: errUsers } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
+        if (!errUsers && totalUsers !== null) document.querySelector('.kpi-grid .stat-card:nth-child(1) .stat-number').textContent = totalUsers;
+
+        const { count: totalMembers, error: errMembers } = await supabase.from('family_members').select('*', { count: 'exact', head: true });
+        if (!errMembers && totalMembers !== null) document.querySelector('.kpi-grid .stat-card:nth-child(2) .stat-number').textContent = totalMembers;
+
+        await loadRecentUsers(supabase);
+    } catch (error) {
+        console.error("Error cargando métricas:", error);
+    }
+}
+
+async function loadRecentUsers(supabase) {
+    const { data: perfiles, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false }).limit(5);
+    if (error) return;
+
+    const tbody = document.querySelector('.admin-table tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    perfiles.forEach(perfil => {
+        const fecha = new Date(perfil.created_at).toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric' });
+        const nombre = perfil.first_name ? `${perfil.first_name} ${perfil.last_name || ''}`.trim() : 'Usuario Nuevo';
+        const pais = perfil.country ? `🌍 ${perfil.country}` : 'Oculto';
+        const badgePlan = perfil.role === 'admin' ? '<span class="badge badge-pro">Admin</span>' : '<span class="badge badge-free">Semilla</span>';
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><strong>${nombre}</strong><span style="display: block; font-size: 0.8rem; color: gray;">Se unió: ${fecha}</span></td>
+            <td>${badgePlan}</td>
+            <td>--</td>
+            <td><span style="font-size: 0.8rem; color: gray;">${pais}</span></td>
+            <td><span class="badge badge-active">Activo</span></td>
+        `;
+        tbody.appendChild(tr);
+    });
+}

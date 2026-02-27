@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centro de Mando | Raíces Digital</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/admin.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script type="module" src="js/admin.js" defer></script>
+</head>
+<body class="admin-layout">
+
+<aside class="admin-sidebar">
+    <div class="sidebar-header">
+        <div class="logo-icon">RD</div>
+        <h2>Raíces Admin</h2>
+    </div>
+    <nav class="sidebar-nav">
+        <a href="#" class="nav-item active">📊 <span>Dashboard</span></a>
+        <a href="#" class="nav-item">👥 <span>Usuarios</span></a>
+        <a href="#" class="nav-item">💳 <span>Suscripciones</span></a>
+        <a href="#" class="nav-item">🛡️ <span>Seguridad (Logs)</span></a>
+    </nav>
+    <div class="sidebar-footer">
+        <button class="btn btn-outline" style="width: 100%; color: white; border-color: rgba(255,255,255,0.2);">
+            Cerrar Sesión
+        </button>
+    </div>
+</aside>
+
+<main class="admin-main">
+    <header class="admin-topbar flex-between" style="margin-bottom: 2rem;">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <button class="admin-menu-toggle" id="admin-menu-toggle">☰</button>
+            <h1 style="margin: 0;">Panel de Control</h1>
+        </div>
+        <div class="user-profile" style="display: flex; align-items: center; gap: 0.5rem;">
+            <div class="avatar-circle" style="width: 40px; height: 40px; background: var(--accent);">C</div>
+            <span style="font-weight: 600;">CEO</span>
+        </div>
+    </header>
+
+    <section id="admin-view-dashboard" class="admin-view active">
+        <div class="kpi-grid">
+            <div class="stat-card">
+                <div class="stat-label">USUARIOS TOTALES</div>
+                <div class="stat-number text-primary">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">NODOS CREADOS</div>
+                <div class="stat-number text-secondary">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">INGRESOS ESTIMADOS</div>
+                <div class="stat-number text-accent">$0</div>
+            </div>
+        </div>
+
+        <div class="glass-panel mt-2">
+            <div class="flex-between mb-1">
+                <h3>Actividad Reciente</h3>
+                <button id="btn-export-csv" class="btn btn-outline btn-small">Exportar CSV</button>
+            </div>
+            <div class="table-container">
+                <table class="admin-table">
+                    <thead>
+                    <tr>
+                        <th>Usuario</th>
+                        <th>Plan</th>
+                        <th>Árboles</th>
+                        <th>Ubicación</th>
+                        <th>Estado</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <section id="admin-view-users" class="admin-view">
+        <div class="glass-panel">
+            <h2>Gestión Completa de Usuarios</h2>
+            <p class="text-muted">Aquí irá la tabla completa con paginación y buscador.</p>
+        </div>
+    </section>
+</main>
+
+<div class="admin-overlay" id="admin-overlay"></div>
+
+</body>
+</html>

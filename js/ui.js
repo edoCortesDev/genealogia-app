@@ -1,24 +1,58 @@
 // ui.js
-import {checkAuth, logout, loginUsuario, registrarUsuario} from './auth.js';
+import { checkAuth, logout, loginUsuario, registrarUsuario } from './auth.js';
+import { getSupabase } from './config.js';
+
+// ==========================================
+// 🚦 EL GUARDIA DE TRÁFICO SEGURO
+// ==========================================
+async function safeRouteUser(user) {
+    if (!user) return;
+    const supabase = getSupabase();
+
+    try {
+        const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single();
+
+        // Limpiamos el texto para que coincida exactamente con la lógica de admin.js
+        const userRole = profile?.role ? profile.role.toLowerCase().trim() : 'user';
+
+        // Redirigimos sin dejar historial "basura" en el navegador
+        if (userRole === 'admin') {
+            window.location.replace('admin.html');
+        } else {
+            window.location.replace('app.html');
+        }
+    } catch (err) {
+        console.error("Error enrutando al usuario:", err);
+        window.location.replace('app.html'); // En caso de falla, va a la app normal
+    }
+}
 
 document.addEventListener('DOMContentLoaded', async () => {
-
-    // Si estamos en el index
+    // ==========================================
+    // 1. LÓGICA PARA EL INDEX / LANDING PAGE
+    // ==========================================
     if (document.body.classList.contains('landing-page')) {
+        // Activamos los botones PRIMERO para que el usuario pueda interactuar sin demoras
         setupLandingModals();
 
-        // Si ya estÃ¡ logueado, redirigir a app.html
         const user = await checkAuth();
         if (user) {
-            window.location.href = 'app.html';
+            // Si el usuario entra a la web y ya tenía la sesión iniciada
+            await safeRouteUser(user);
         }
     }
 
-    // Si estamos en la pÃ¡gina de la aplicaciÃ³n, verificamos auth y configuramos UI
+    // ==========================================
+    // 2. LÓGICA PARA LA APP (ÁRBOL GENEALÓGICO)
+    // ==========================================
     if (document.body.classList.contains('app-page')) {
         const user = await checkAuth();
         if (!user) {
-            window.location.href = 'index.html';
+            window.location.replace('index.html');
             return;
         }
 
@@ -27,6 +61,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
+// ==========================================
+// FUNCIONES DE LA LANDING PAGE (INDEX)
+// ==========================================
 function setupLandingModals() {
     const modalLogin = document.getElementById('modal-login');
     const modalRegister = document.getElementById('modal-register');
@@ -38,36 +75,30 @@ function setupLandingModals() {
     const closeBtns = document.querySelectorAll('.btn-close');
     const linkToRegister = document.getElementById('link-to-register');
 
-    // Funciones para abrir
     const openLogin = () => {
-        modalRegister.classList.add('hidden');
-        modalLogin.classList.remove('hidden');
+        if (modalRegister) modalRegister.classList.add('hidden');
+        if (modalLogin) modalLogin.classList.remove('hidden');
     };
     const openRegister = () => {
-        modalLogin.classList.add('hidden');
-        modalRegister.classList.remove('hidden');
+        if (modalLogin) modalLogin.classList.add('hidden');
+        if (modalRegister) modalRegister.classList.remove('hidden');
     };
     const closeAll = () => {
-        modalLogin.classList.add('hidden');
-        modalRegister.classList.add('hidden');
+        if (modalLogin) modalLogin.classList.add('hidden');
+        if (modalRegister) modalRegister.classList.add('hidden');
     };
 
-    if (btnLogin) btnLogin.addEventListener('click', openLogin);
-    if (btnSignup) btnSignup.addEventListener('click', openRegister);
-    if (btnHeroStart) btnHeroStart.addEventListener('click', openRegister);
-    if (linkToRegister) {
-        linkToRegister.addEventListener('click', (e) => {
-            e.preventDefault();
-            openRegister();
-        });
-    }
+    if (btnLogin) btnLogin.addEventListener('click', (e) => { e.preventDefault(); openLogin(); });
+    if (btnSignup) btnSignup.addEventListener('click', (e) => { e.preventDefault(); openRegister(); });
+    if (btnHeroStart) btnHeroStart.addEventListener('click', (e) => { e.preventDefault(); openRegister(); });
+    if (linkToRegister) linkToRegister.addEventListener('click', (e) => { e.preventDefault(); openRegister(); });
 
-    closeBtns.forEach(btn => btn.addEventListener('click', closeAll));
+    closeBtns.forEach(btn => btn.addEventListener('click', (e) => { e.preventDefault(); closeAll(); }));
     document.querySelectorAll('.modal-overlay').forEach(overlay => {
         overlay.addEventListener('click', closeAll);
     });
 
-    // Handle Login Submit
+    // --- Formulario de Login ---
     const formLogin = document.getElementById('form-login');
     if (formLogin) {
         formLogin.addEventListener('submit', async (e) => {
@@ -76,22 +107,26 @@ function setupLandingModals() {
             const password = document.getElementById('login-password').value;
             const errorEl = document.getElementById('login-error');
 
-            errorEl.classList.add('hidden');
+            if (errorEl) errorEl.classList.add('hidden');
             showLoader();
 
-            const {data, error} = await loginUsuario(email, password);
+            const { data, error } = await loginUsuario(email, password);
             hideLoader();
 
             if (error) {
-                errorEl.textContent = error.message;
-                errorEl.classList.remove('hidden');
+                if (errorEl) {
+                    errorEl.textContent = error.message;
+                    errorEl.classList.remove('hidden');
+                }
             } else {
-                window.location.href = 'app.html';
+                // Al loguearse con éxito, el Guardia de Tráfico decide a dónde va
+                const loggedUser = data?.user || await checkAuth();
+                if (loggedUser) await safeRouteUser(loggedUser);
             }
         });
     }
 
-    // Handle Register Submit
+    // --- Formulario de Registro ---
     const formRegister = document.getElementById('form-register');
     if (formRegister) {
         formRegister.addEventListener('submit', async (e) => {
@@ -104,38 +139,50 @@ function setupLandingModals() {
             const errorEl = document.getElementById('reg-error');
             const successEl = document.getElementById('reg-success');
 
-            errorEl.classList.add('hidden');
-            successEl.classList.add('hidden');
+            if (errorEl) errorEl.classList.add('hidden');
+            if (successEl) successEl.classList.add('hidden');
             showLoader();
 
-            const {data, error} = await registrarUsuario(email, password, firstName, lastName);
+            const { data, error } = await registrarUsuario(email, password, firstName, lastName);
             hideLoader();
 
             if (error) {
-                errorEl.textContent = error.message;
-                errorEl.classList.remove('hidden');
+                if (errorEl) {
+                    errorEl.textContent = error.message;
+                    errorEl.classList.remove('hidden');
+                }
             } else {
-                successEl.textContent = "Â¡Registro exitoso! Iniciando sesiÃ³n...";
-                successEl.classList.remove('hidden');
-                setTimeout(() => window.location.href = 'app.html', 1500);
+                if (successEl) {
+                    successEl.textContent = "¡Registro exitoso! Iniciando sesión...";
+                    successEl.classList.remove('hidden');
+                }
+                setTimeout(async () => {
+                    const loggedUser = data?.user || await checkAuth();
+                    if (loggedUser) await safeRouteUser(loggedUser);
+                }, 1500);
             }
         });
     }
 }
 
+// ==========================================
+// FUNCIONES DE LA APLICACIÓN (APP.HTML)
+// ==========================================
 function setupAppNav(user) {
-    // User Dropdown toggle
     const btnAvatar = document.getElementById('user-avatar-btn');
     const dropdown = document.getElementById('user-dropdown');
 
-    // Set user initial
+    // Inicial del usuario en el avatar
     if (user && user.user_metadata && user.user_metadata.first_name) {
         const initial = user.user_metadata.first_name.charAt(0).toUpperCase();
-        document.querySelector('.avatar-circle').textContent = initial;
+        const avatarCircle = document.querySelector('.avatar-circle');
+        if (avatarCircle) avatarCircle.textContent = initial;
     }
 
+    // Menú desplegable del avatar
     if (btnAvatar && dropdown) {
         btnAvatar.addEventListener('click', (e) => {
+            e.preventDefault();
             e.stopPropagation();
             const isHidden = dropdown.classList.contains('hidden');
             if (isHidden) {
@@ -147,25 +194,25 @@ function setupAppNav(user) {
             }
         });
 
-        // Close dropdown when clicking outside
-        document.addEventListener('click', () => {
-            dropdown.classList.add('hidden');
-            btnAvatar.setAttribute('aria-expanded', 'false');
+        document.addEventListener('click', (e) => {
+            if (!dropdown.contains(e.target) && !btnAvatar.contains(e.target)) {
+                dropdown.classList.add('hidden');
+                btnAvatar.setAttribute('aria-expanded', 'false');
+            }
         });
     }
 
-    // Logout
+    // Cerrar sesión
     const btnLogout = document.getElementById('menu-logout');
     if (btnLogout) {
-        btnLogout.addEventListener('click', (e) => {
+        btnLogout.addEventListener('click', async (e) => {
             e.preventDefault();
-            logout();
+            await logout();
         });
     }
 }
 
 function setupViewRouter() {
-    // Definimos las vistas disponibles
     const views = {
         'dashboard': document.getElementById('view-dashboard'),
         'tree': document.getElementById('view-tree'),
@@ -183,21 +230,17 @@ function setupViewRouter() {
             views[viewId].classList.remove('hidden');
         }
 
-        // Hide dropdown on transition
         const dropdown = document.getElementById('user-dropdown');
         if (dropdown) dropdown.classList.add('hidden');
 
-        // Ocultar menÃº mÃ³vil tras navegar
         const mobileMenu = document.getElementById('nav-links-wrapper');
         if (mobileMenu) mobileMenu.classList.remove('active');
 
-        // Si es el Ã¡rbol, necesitamos decirle que se redimensione para que el canvas pinte bien
         if (viewId === 'tree' && window.familyTree) {
             window.familyTree.resize();
         }
     };
 
-    // Botones del Headeer
     const btnHome = document.getElementById('menu-dashboard');
     const btnTree = document.getElementById('menu-tree');
     const btnFamily = document.getElementById('menu-family');
@@ -205,7 +248,6 @@ function setupViewRouter() {
     const btnTimeline = document.getElementById('menu-timeline');
     const logo = document.querySelector('.logo');
 
-    // MenÃº mÃ³vil (Kebab) toggle
     const btnMobileToggle = document.getElementById('mobile-menu-toggle');
     const mobileMenu = document.getElementById('nav-links-wrapper');
     if (btnMobileToggle && mobileMenu) {
@@ -215,36 +257,15 @@ function setupViewRouter() {
         });
     }
 
-    // Asignar listeners
-    if (btnHome) btnHome.addEventListener('click', (e) => {
-        e.preventDefault();
-        switchView('dashboard');
-    });
-    if (logo) logo.addEventListener('click', (e) => {
-        e.preventDefault();
-        switchView('dashboard');
-    });
+    if (btnHome) btnHome.addEventListener('click', (e) => { e.preventDefault(); window.switchView('dashboard'); });
+    if (logo) logo.addEventListener('click', (e) => { e.preventDefault(); window.switchView('dashboard'); });
+    if (btnTree) btnTree.addEventListener('click', (e) => { e.preventDefault(); window.switchView('tree'); });
+    if (btnTimeline) btnTimeline.addEventListener('click', (e) => { e.preventDefault(); window.switchView('timeline'); });
+    if (btnFamily) btnFamily.addEventListener('click', (e) => { e.preventDefault(); window.switchView('manage'); });
+    if (btnProfile) btnProfile.addEventListener('click', (e) => { e.preventDefault(); window.switchView('profile'); });
 
-    if (btnTree) btnTree.addEventListener('click', (e) => {
-        e.preventDefault();
-        switchView('tree');
-    });
-    if (btnTimeline) btnTimeline.addEventListener('click', (e) => {
-        e.preventDefault();
-        switchView('timeline');
-    });
-    if (btnFamily) btnFamily.addEventListener('click', (e) => {
-        e.preventDefault();
-        switchView('manage');
-    });
-    if (btnProfile) btnProfile.addEventListener('click', (e) => {
-        e.preventDefault();
-        switchView('profile');
-    });
-
-    // BotÃ³n volver del detalle
     const btnBack = document.getElementById('btn-back-dashboard');
-    if (btnBack) btnBack.addEventListener('click', () => switchView('dashboard'));
+    if (btnBack) btnBack.addEventListener('click', () => window.switchView('dashboard'));
 }
 
 export function showLoader() {
