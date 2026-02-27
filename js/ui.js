@@ -50,14 +50,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 2. LÓGICA PARA LA APP (ÁRBOL GENEALÓGICO)
     // ==========================================
     if (document.body.classList.contains('app-page')) {
-        const user = await checkAuth();
-        if (!user) {
-            window.location.replace('index.html');
-            return;
-        }
+        const urlParams = new URLSearchParams(window.location.search);
+        const sharedTreeId = urlParams.get('tree');
 
-        setupAppNav(user);
-        setupViewRouter();
+        if (sharedTreeId) {
+            // 👁️ MODO SOLO LECTURA (Invitado de WhatsApp)
+            // Ocultamos los botones privados para que no puedan editar nada
+            const btnManage = document.getElementById('menu-family');
+            const btnProfileBtn = document.getElementById('user-avatar-btn');
+            const btnShare = document.getElementById('btn-share-tree');
+            const btnMobileMenu = document.getElementById('mobile-menu-toggle');
+
+            if(btnManage) btnManage.style.display = 'none';
+            if(btnProfileBtn) btnProfileBtn.style.display = 'none';
+            if(btnShare) btnShare.style.display = 'none';
+            if(btnMobileMenu) btnMobileMenu.style.display = 'none';
+
+            setupViewRouter();
+            window.switchView('tree'); // Lo lanzamos directo a ver el árbol asombroso
+        } else {
+            // 👑 MODO DUEÑO (Login Normal)
+            const user = await checkAuth();
+            if (!user) {
+                window.location.replace('index.html');
+                return;
+            }
+            setupAppNav(user);
+            setupViewRouter();
+        }
     }
 });
 
@@ -168,19 +188,35 @@ function setupLandingModals() {
 // ==========================================
 // FUNCIONES DE LA APLICACIÓN (APP.HTML)
 // ==========================================
-// ui.js - Reemplazar setupAppNav
 async function setupAppNav(user) {
     const btnAvatar = document.getElementById('user-avatar-btn');
     const dropdown = document.getElementById('user-dropdown');
 
-    // Inicial del usuario en el avatar
+    // 🔗 LÓGICA DEL BOTÓN COMPARTIR
+    const btnShare = document.getElementById('btn-share-tree');
+    if (btnShare && user) {
+        btnShare.addEventListener('click', async (e) => {
+            e.preventDefault();
+            // Creamos el enlace único con el ID del usuario
+            const shareUrl = `${window.location.origin}/app.html?tree=${user.id}`;
+            try {
+                await navigator.clipboard.writeText(shareUrl);
+                btnShare.textContent = "✅ ¡Enlace copiado!";
+                setTimeout(() => btnShare.innerHTML = "🔗 Compartir", 3000);
+            } catch (err) {
+                // Plan B por si el navegador bloquea el portapapeles
+                alert("Tu enlace para compartir por WhatsApp es:\n\n" + shareUrl);
+            }
+        });
+    }
+
+    // Inicial del usuario en el avatar... (Mantén el resto de tu código setupAppNav igual desde aquí hacia abajo)
     if (user && user.user_metadata && user.user_metadata.first_name) {
         const initial = user.user_metadata.first_name.charAt(0).toUpperCase();
         const avatarCircle = document.querySelector('.avatar-circle');
         if (avatarCircle) avatarCircle.textContent = initial;
     }
 
-    // 👑 EL BOTÓN VIP: Consultamos si es Admin para inyectar el enlace de vuelta
     const supabase = getSupabase();
     const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
 
@@ -189,40 +225,24 @@ async function setupAppNav(user) {
         if (ul) {
             const li = document.createElement('li');
             li.innerHTML = '<a href="admin.html" class="dropdown-item" style="color: var(--accent); font-weight: bold;">👑 Panel CEO</a>';
-            // Insertamos el botón arriba del todo en el menú de la app
             ul.insertBefore(li, ul.firstChild);
-
-            // También agregamos un separador
             const div = document.createElement('li');
             div.className = 'divider';
             ul.insertBefore(div, li.nextSibling);
         }
     }
 
-    // Menú desplegable del avatar
     if (btnAvatar && dropdown) {
         btnAvatar.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            const isHidden = dropdown.classList.contains('hidden');
-            if (isHidden) {
-                dropdown.classList.remove('hidden');
-                btnAvatar.setAttribute('aria-expanded', 'true');
-            } else {
-                dropdown.classList.add('hidden');
-                btnAvatar.setAttribute('aria-expanded', 'false');
-            }
+            dropdown.classList.toggle('hidden');
         });
-
         document.addEventListener('click', (e) => {
-            if (!dropdown.contains(e.target) && !btnAvatar.contains(e.target)) {
-                dropdown.classList.add('hidden');
-                btnAvatar.setAttribute('aria-expanded', 'false');
-            }
+            if (!dropdown.contains(e.target) && !btnAvatar.contains(e.target)) dropdown.classList.add('hidden');
         });
     }
 
-    // Cerrar sesión
     const btnLogout = document.getElementById('menu-logout');
     if (btnLogout) {
         btnLogout.addEventListener('click', async (e) => {

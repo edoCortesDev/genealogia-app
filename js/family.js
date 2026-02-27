@@ -395,25 +395,39 @@ window.openPersonDetails = function (id) {
 export async function loadFamilyMembers() {
     const supabase = getSupabase();
     const listContainer = document.getElementById('members-list-container');
-    if (!listContainer) return;
+    if (listContainer) listContainer.innerHTML = `<div class="skeleton-row"></div><div class="skeleton-row"></div>`;
 
-    listContainer.innerHTML = `<div class="skeleton-row"></div><div class="skeleton-row"></div><div class="skeleton-row"></div>`;
+    // 1. Detectar si somos un invitado leyendo un enlace de WhatsApp
+    const urlParams = new URLSearchParams(window.location.search);
+    const sharedUserId = urlParams.get('tree');
 
-    // FIX ÁRBOL: Recuperamos por orden de creación original para que la 'Raíz' del árbol no se rompa
-    const {data: members, error} = await supabase.from('family_members').select('*').order('created_at', {ascending: true});
+    let query = supabase.from('family_members').select('*').order('created_at', {ascending: true});
+
+    // 2. FILTRO VITAL: Traer solo el árbol correspondiente
+    if (sharedUserId) {
+        query = query.eq('user_id', sharedUserId); // Árbol del enlace compartido
+    } else if (currentUser) {
+        query = query.eq('user_id', currentUser.id); // Mi propio árbol
+    } else {
+        return; // Sin usuario ni enlace, abortamos
+    }
+
+    const {data: members, error} = await query;
 
     if (error) {
-        listContainer.innerHTML = `<p class="text-danger">Error: ${error.message}</p>`;
+        if (listContainer) listContainer.innerHTML = `<p class="text-danger">Error: ${error.message}</p>`;
         return;
     }
 
     familyMembers = members || [];
 
-    renderMembersList(); // Se encarga de ordenar A-Z solo visualmente
+    // Solo dibujamos la lista de gestión si NO estamos en modo lectura
+    if (!sharedUserId) {
+        renderMembersList();
+    }
 
     if (window.updateDashboardStats) window.updateDashboardStats();
-    if (window.familyTree) window.familyTree.updateData(familyMembers); // El árbol recibe el orden original
-
+    if (window.familyTree) window.familyTree.updateData(familyMembers);
     buildTimeline(familyMembers);
 }
 
