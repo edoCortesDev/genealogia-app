@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
-    <title>Genealogía Moderna - App</title>
+    <title>Raíces Digital - App</title>
     <link rel="preconnect"
           href="https://fonts.googleapis.com">
     <link rel="preconnect"
@@ -15,12 +15,20 @@
           rel="stylesheet">
     <link rel="stylesheet"
           href="css/style.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <meta property="og:title" content="Mi Árbol Genealógico | Raíces Digitales">
-    <meta property="og:description" content="Explora la historia de mi familia, nuestras raíces y nuestro legado a través de esta línea de tiempo interactiva.">
-    <meta property="og:image" content="https://raicesdigital.cl/ruta-a-tu-logo.png">
-    <meta property="og:type" content="website">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
+            defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+            defer></script>
+
+    <meta property="og:title"
+          content="Mi Árbol Genealógico | Raíces Digitales">
+    <meta property="og:description"
+          content="Explora la historia de mi familia, nuestras raíces y nuestro legado a través de esta línea de tiempo interactiva.">
+    <meta property="og:image"
+          content="https://raicesdigital.cl/ruta-a-tu-logo.png">
+    <meta property="og:type"
+          content="website">
 </head>
 
 <body class="app-page">
@@ -29,7 +37,7 @@
     <div class="app-container app-nav-container">
         <div class="logo">
             <div class="logo-icon"></div>
-            <span>Genealogía Moderna</span>
+            <span>Raíces Digital</span>
         </div>
 
         <div class="user-menu-container"
@@ -85,7 +93,9 @@
                         style="border-radius: 20px;">Gestionar Familia
                 </button>
 
-                <button class="btn btn-outline btn-small nav-btn" id="btn-share-tree" style="border-radius: 20px; border-color: var(--accent); color: var(--accent); font-weight: bold;">
+                <button class="btn btn-outline btn-small nav-btn"
+                        id="btn-share-tree"
+                        style="border-radius: 20px; border-color: var(--accent); color: var(--accent); font-weight: bold;">
                     🔗 Compartir
                 </button>
             </div>
@@ -138,12 +148,20 @@
                      class="mt-2"
                      style="max-width: 650px; margin: 1rem auto; text-align: left;"></div>
 
-                <div id="family-insights-panel" style="max-width: 900px; margin: 3rem auto 0; text-align: left; opacity: 0; transition: opacity 0.8s ease;">
-                    <div class="flex-between" style="border-bottom: 2px solid rgba(50,73,64,0.1); padding-bottom: 0.5rem; margin-bottom: 1rem;">
-                        <h3 style="font-size: 1.5rem; color: var(--primary); margin: 0;">🧬 Analíticas de Linaje</h3>
-                        <span class="badge badge-pro" style="font-size: 0.7rem;">Automático</span>
+                <div id="family-insights-panel"
+                     style="max-width: 900px; margin: 3rem auto 0; text-align: left; opacity: 0; transition: opacity 0.8s ease;">
+                    <div class="flex-between"
+                         style="border-bottom: 2px solid rgba(50,73,64,0.1); padding-bottom: 0.5rem; margin-bottom: 1rem;">
+                        <h3 style="font-size: 1.5rem; color: var(--primary); margin: 0;">🧬
+                                                                                         Analíticas
+                                                                                         de
+                                                                                         Linaje</h3>
+                        <span class="badge badge-pro"
+                              style="font-size: 0.7rem;">Automático</span>
                     </div>
-                    <p style="color: var(--text-muted); font-size: 0.95rem;">Basado en los registros de tu árbol genealógico.</p>
+                    <p style="color: var(--text-muted); font-size: 0.95rem;">Basado en los registros
+                                                                             de tu árbol
+                                                                             genealógico.</p>
 
                     <div class="insights-grid">
                         <div class="insight-card">
@@ -213,6 +231,12 @@
                         class="btn-icon"
                         style="border-radius: 50%; width: 40px; height: 40px;"
                         title="Alejar">➖
+                </button>
+
+                <button id="btn-export-pdf"
+                        class="btn-icon"
+                        style="border-radius: 50%; width: 40px; height: 40px;"
+                        title="Exportar Árbol a PDF">📸
                 </button>
             </div>
         </div>
@@ -292,47 +316,73 @@
         </div>
     </section>
 
-    <section id="view-manage" class="app-view hidden app-container">
+    <section id="view-manage"
+             class="app-view hidden app-container">
         <div class="manage-layout mt-2">
 
-            <div class="glass-panel flex-1" id="members-list-section">
+            <div class="glass-panel flex-1"
+                 id="members-list-section">
                 <div class="flex-between mb-2">
                     <h2 style="color: var(--primary);">Miembros de la Familia</h2>
-                    <button class="btn btn-primary" id="btn-add-member">+ Agregar Nuevo</button>
+                    <button class="btn btn-primary"
+                            id="btn-add-member">+ Agregar Nuevo
+                    </button>
                 </div>
-                <div class="members-list" id="members-list-container">
+                <div class="members-list"
+                     id="members-list-container">
                     <div class="skeleton-row"></div>
                     <div class="skeleton-row"></div>
                 </div>
             </div>
 
-            <div class="glass-panel sidebar-form hidden" id="member-form-panel">
-                <h3 id="member-form-title" style="color: var(--primary); margin-bottom: 1.5rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 1rem;">Crear / Editar Persona</h3>
+            <div class="glass-panel sidebar-form hidden"
+                 id="member-form-panel">
+                <h3 id="member-form-title"
+                    style="color: var(--primary); margin-bottom: 1.5rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 1rem;">
+                    Crear / Editar Persona</h3>
 
-                <form id="member-form" class="modern-form">
+                <form id="member-form"
+                      class="modern-form">
                     <div class="form-group">
-                        <label for="mem-system-id" class="text-sm">ID Sistema</label>
-                        <input type="text" id="mem-system-id" placeholder="Autogenerado" disabled style="opacity: 0.6;">
+                        <label for="mem-system-id"
+                               class="text-sm">ID Sistema</label>
+                        <input type="text"
+                               id="mem-system-id"
+                               placeholder="Autogenerado"
+                               disabled
+                               style="opacity: 0.6;">
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="mem-firstname" class="text-sm">Nombres</label>
-                            <input type="text" id="mem-firstname" placeholder="Ej: Juan Andrés" required>
+                            <label for="mem-firstname"
+                                   class="text-sm">Nombres</label>
+                            <input type="text"
+                                   id="mem-firstname"
+                                   placeholder="Ej: Juan Andrés"
+                                   required>
                         </div>
                         <div class="form-group">
-                            <label for="mem-lastname" class="text-sm">Apellidos</label>
-                            <input type="text" id="mem-lastname" placeholder="Ej: Pérez García" required>
+                            <label for="mem-lastname"
+                                   class="text-sm">Apellidos</label>
+                            <input type="text"
+                                   id="mem-lastname"
+                                   placeholder="Ej: Pérez García"
+                                   required>
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="mem-rut" class="text-sm">RUT / Identificación</label>
-                            <input type="text" id="mem-rut" placeholder="Ej: 12.345.678-9">
+                            <label for="mem-rut"
+                                   class="text-sm">RUT / Identificación</label>
+                            <input type="text"
+                                   id="mem-rut"
+                                   placeholder="Ej: 12.345.678-9">
                         </div>
                         <div class="form-group">
-                            <label for="mem-gender" class="text-sm">Sexo</label>
+                            <label for="mem-gender"
+                                   class="text-sm">Sexo</label>
                             <select id="mem-gender">
                                 <option value="">-- Seleccionar --</option>
                                 <option value="M">Masculino</option>
@@ -344,80 +394,165 @@
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="mem-profession" class="text-sm">Profesión / Ocupación</label>
-                            <input type="text" id="mem-profession" placeholder="Ej: Profesor, Agricultor">
+                            <label for="mem-profession"
+                                   class="text-sm">Profesión / Ocupación</label>
+                            <input type="text"
+                                   id="mem-profession"
+                                   placeholder="Ej: Profesor, Agricultor">
                         </div>
                         <div class="form-group">
-                            <label for="mem-nationality" class="text-sm">Nacionalidad (Código)</label>
-                            <input type="text" id="mem-nationality" placeholder="EJ: CL, AR, ES">
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="mem-birth" class="text-sm">Fecha Nacimiento</label>
-                            <input type="date" id="mem-birth">
-                        </div>
-                        <div class="form-group">
-                            <label for="mem-birth-place" class="text-sm">Lugar Nacimiento</label>
-                            <input type="text" id="mem-birth-place" placeholder="Ej: Santiago">
+                            <label for="mem-nationality"
+                                   class="text-sm">Nacionalidad (Código)</label>
+                            <input type="text"
+                                   id="mem-nationality"
+                                   placeholder="EJ: CL, AR, ES">
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="mem-death" class="text-sm">Fecha Fallecimiento</label>
-                            <input type="date" id="mem-death">
+                            <label for="mem-birth"
+                                   class="text-sm">Fecha Nacimiento</label>
+                            <input type="date"
+                                   id="mem-birth">
                         </div>
                         <div class="form-group">
-                            <label for="mem-death-place" class="text-sm">Lugar Fallecimiento</label>
-                            <input type="text" id="mem-death-place" placeholder="Ej: Valparaíso">
+                            <label for="mem-birth-place"
+                                   class="text-sm">Lugar Nacimiento</label>
+                            <input type="text"
+                                   id="mem-birth-place"
+                                   placeholder="Ej: Santiago">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="mem-death"
+                                   class="text-sm">Fecha Fallecimiento</label>
+                            <input type="date"
+                                   id="mem-death">
+                        </div>
+                        <div class="form-group">
+                            <label for="mem-death-place"
+                                   class="text-sm">Lugar Fallecimiento</label>
+                            <input type="text"
+                                   id="mem-death-place"
+                                   placeholder="Ej: Valparaíso">
                         </div>
                     </div>
 
                     <div class="form-group mt-2">
                         <label class="text-sm">Foto de Perfil</label>
-                        <div class="file-drop-area" id="photo-drop-area">
+                        <div class="file-drop-area"
+                             id="photo-drop-area">
                             <span class="file-msg">Arrastra una foto aquí o haz clic</span>
-                            <input class="file-input" type="file" accept="image/*">
+                            <input class="file-input"
+                                   type="file"
+                                   accept="image/*">
                         </div>
                     </div>
 
                     <div class="form-group mt-2">
-                        <label for="mem-bio" class="text-sm">Biografía General</label>
-                        <textarea id="mem-bio" rows="4" placeholder="Historia breve..."></textarea>
+                        <label for="mem-bio"
+                               class="text-sm">Biografía General</label>
+                        <textarea id="mem-bio"
+                                  rows="4"
+                                  placeholder="Historia breve..."></textarea>
                     </div>
 
                     <div class="form-section-box mt-2">
                         <h4>📅 Línea de Tiempo (Eventos)</h4>
                         <p>Agrega hitos históricos (matrimonios, graduaciones, viajes).</p>
-                        <div id="eventsContainer" style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;"></div>
-                        <button type="button" id="btn-add-event" class="btn btn-outline" style="width: 100%; border-style: dashed;">+ Agregar Evento</button>
+                        <div id="eventsContainer"
+                             style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;"></div>
+                        <button type="button"
+                                id="btn-add-event"
+                                class="btn btn-outline"
+                                style="width: 100%; border-style: dashed;">+ Agregar Evento
+                        </button>
                     </div>
 
                     <div class="form-section-box mt-2">
                         <h4>📁 Documentos y Evidencias</h4>
                         <p>Añade links a certificados, actas o escaneos.</p>
-                        <div id="document-list-container" style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;"></div>
-                        <button type="button" id="btn-add-document" class="btn btn-outline" style="width: 100%; border-style: dashed;">+ Adjuntar Documento</button>
+                        <div id="document-list-container"
+                             style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;"></div>
+                        <button type="button"
+                                id="btn-add-document"
+                                class="btn btn-outline"
+                                style="width: 100%; border-style: dashed;">+ Adjuntar Documento
+                        </button>
                     </div>
 
                     <div class="form-section-box mt-2">
                         <h4 style="color: var(--secondary);">🔗 Relaciones Familiares</h4>
                         <p>Arrastra las 3 rayitas (☰) para reordenar a la familia.</p>
-                        <div id="relationsContainer" style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;"></div>
-                        <button type="button" id="btn-add-relation" class="btn btn-outline" style="width: 100%; border-style: dashed;">+ Agregar Familiar</button>
+                        <div id="relationsContainer"
+                             style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;"></div>
+                        <button type="button"
+                                id="btn-add-relation"
+                                class="btn btn-outline"
+                                style="width: 100%; border-style: dashed;">+ Agregar Familiar
+                        </button>
                     </div>
 
                     <div class="flex-between mt-2">
-                        <button type="button" class="btn btn-ghost" id="btn-cancel-member">Cancelar</button>
-                        <button type="submit" class="btn btn-primary" style="flex: 1; margin-left: 1rem;">💾 Guardar Persona</button>
+                        <button type="button"
+                                class="btn btn-ghost"
+                                id="btn-cancel-member">Cancelar
+                        </button>
+                        <button type="submit"
+                                class="btn btn-primary"
+                                style="flex: 1; margin-left: 1rem;">💾 Guardar Persona
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
     </section>
 </main>
+
+<div id="modal-export-pdf" class="modal hidden">
+    <div class="modal-overlay"></div>
+    <div class="modal-content glass-panel" style="max-width: 500px; text-align: center;">
+        <button class="btn-close">&times;</button>
+        <div style="font-size: 3rem; margin-bottom: 0.5rem;">📜</div>
+        <h2 class="mb-1" style="color: var(--primary);">Documento Histórico</h2>
+        <p style="color: var(--text-muted); margin-bottom: 2rem; font-size: 0.95rem;">
+            Personaliza tu póster genealógico antes de generarlo en alta resolución.
+        </p>
+
+        <div class="form-group text-left" style="text-align: left; margin-bottom: 1.5rem;">
+            <label style="color: var(--primary); font-weight: 600;">Título del Documento</label>
+            <input type="text" id="pdf-title" class="modern-form" placeholder="Ej: Familia Pérez García" value="Mi Legado Familiar" style="width: 100%; padding: 0.8rem; font-size: 1rem; border-radius: 8px;">
+        </div>
+
+        <div class="form-row" style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+            <div class="form-group text-left" style="flex: 1; text-align: left;">
+                <label style="color: var(--primary); font-weight: 600;">Estilo Visual</label>
+                <select id="pdf-theme" class="modern-form" style="width: 100%; padding: 0.8rem; font-size: 0.95rem; border-radius: 8px;">
+                    <option value="pergamino">📜 Pergamino Clásico</option>
+                    <option value="boveda">🌌 Bóveda Esmeralda</option>
+                    <option value="minimalista">📄 Minimalista (Blanco)</option>
+                </select>
+            </div>
+
+            <div class="form-group text-left" style="flex: 1; text-align: left;">
+                <label style="color: var(--primary); font-weight: 600;">Tamaño (Horizontal)</label>
+                <select id="pdf-format" class="modern-form" style="width: 100%; padding: 0.8rem; font-size: 0.95rem; border-radius: 8px;">
+                    <option value="a4">Estándar (A4)</option>
+                    <option value="a3">Póster (A3)</option>
+                    <option value="a2">Cuadro (A2)</option>
+                    <option value="a0">Mural (A0)</option>
+                </select>
+            </div>
+        </div>
+
+        <button id="btn-confirm-export" class="btn btn-primary btn-glow mt-1" style="width: 100%; font-size: 1.1rem; padding: 1rem;">
+            Generar Póster Vectorial
+        </button>
+    </div>
+</div>
 
 <div id="photo-lightbox"
      class="hidden"
