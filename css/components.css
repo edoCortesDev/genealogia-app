@@ -3,6 +3,10 @@
    Sistema de diseño modular para Genealogía App
    ========================================================================== */
 
+html {
+    scroll-behavior: smooth;
+}
+
 /* 1. TIPOGRAFÍA Y AYUDANTES */
 .logo { display: flex; align-items: center; gap: 0.75rem; font-size: 1.25rem; font-weight: 700; color: var(--primary); }
 .logo-icon { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, var(--secondary), var(--accent)); box-shadow: 0 4px 10px rgba(212, 163, 115, 0.3); }
