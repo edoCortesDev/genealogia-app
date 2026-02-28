@@ -19,20 +19,23 @@
 
 <body class="landing-page">
 
-<header class="glass-header">
-    <div class="container nav-container">
+<header class="pill-header">
+    <div class="pill-container">
         <div class="logo">
             <div class="logo-icon"></div>
-            <span>Genealogía Moderna</span>
+            <span class="logo-text">Genealogía Moderna</span>
         </div>
-        <nav class="auth-nav">
-            <button class="btn btn-ghost"
-                    id="btn-login">Iniciar Sesión
-            </button>
-            <button class="btn btn-primary"
-                    id="btn-signup">Crear Cuenta
-            </button>
+
+        <nav class="desktop-nav">
+            <a href="#">Características</a>
+            <a href="#">Seguridad</a>
+            <a href="#">Planes</a>
         </nav>
+
+        <div class="auth-nav">
+            <button class="btn btn-ghost btn-small" id="btn-login" style="font-weight: 600;">Acceso</button>
+            <button class="btn btn-primary btn-small" id="btn-signup">Registro</button>
+        </div>
     </div>
 </header>
 
@@ -60,6 +63,202 @@
         </div>
     </section>
 </main>
+
+<section id="features" class="landing-section" style="background-color: var(--bg-main); position: relative; overflow: hidden;">
+    <div class="container split-layout">
+        <div class="split-text">
+            <span class="badge" style="background: rgba(212,163,115,0.15); color: var(--accent); padding: 0.4rem 1rem; border-radius: 50px; font-weight: 700; font-size: 0.85rem; letter-spacing: 0.05em; text-transform: uppercase;">Herramientas Premium</span>
+            <h2 style="font-size: 2.8rem; color: var(--primary); margin: 1.5rem 0; line-height: 1.1; letter-spacing: -0.02em;">Construye tu árbol con precisión de historiador</h2>
+            <p style="color: var(--text-muted); font-size: 1.15rem; line-height: 1.6; margin-bottom: 2.5rem; max-width: 450px;">
+                Nuestra plataforma convierte datos dispersos en un legado visual. Documenta cada nacimiento, matrimonio y anécdota con herramientas diseñadas para perdurar.
+            </p>
+
+            <div class="feature-pro-list">
+                <div class="f-pro-item">
+                    <div class="f-pro-icon">📖</div>
+                    <div>
+                        <h4 style="color: var(--primary); margin: 0 0 0.3rem 0; font-size: 1.1rem;">Perfiles Biográficos</h4>
+                        <p style="color: var(--text-muted); margin: 0; font-size: 0.95rem;">Crea verdaderas páginas de Wikipedia para cada ancestro.</p>
+                    </div>
+                </div>
+                <div class="f-pro-item mt-1">
+                    <div class="f-pro-icon" style="background: rgba(107, 142, 110, 0.15); color: var(--secondary);">⏱️</div>
+                    <div>
+                        <h4 style="color: var(--primary); margin: 0 0 0.3rem 0; font-size: 1.1rem;">Línea de Tiempo Automática</h4>
+                        <p style="color: var(--text-muted); margin: 0; font-size: 0.95rem;">Los eventos se ordenan cronológicamente por arte de magia.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="split-visual pro-composition">
+            <div class="pro-card main-card glass-panel" style="background: rgba(255,255,255,0.9);">
+                <div style="display: flex; gap: 1rem; align-items: center; border-bottom: 1px solid rgba(50,73,64,0.1); padding-bottom: 1rem; margin-bottom: 1rem;">
+                    <img src="https://ui-avatars.com/api/?name=Abuelo&background=9e9f73&color=fff" style="width: 50px; height: 50px; border-radius: 50%;">
+                    <div>
+                        <div style="font-weight: 700; color: var(--primary);">Roberto García</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">1945 - 2021</div>
+                    </div>
+                </div>
+                <div style="height: 8px; width: 100%; background: rgba(50,73,64,0.05); border-radius: 4px; margin-bottom: 8px;"></div>
+                <div style="height: 8px; width: 70%; background: rgba(50,73,64,0.05); border-radius: 4px;"></div>
+            </div>
+
+            <div class="pro-card side-card glass-panel" style="background: var(--primary); color: white;">
+                <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">📄</div>
+                <div style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.2rem;">Acta_Nacimiento.pdf</div>
+                <div style="font-size: 0.75rem; color: rgba(255,255,255,0.6);">Subido y encriptado</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="security" class="landing-section" style="background-color: var(--primary); color: white; position: relative;">
+    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px); background-size: 20px 20px; opacity: 0.5;"></div>
+
+    <div class="container" style="position: relative; z-index: 2; text-align: center;">
+        <span class="badge" style="background: rgba(255,255,255,0.1); color: white; padding: 0.4rem 1rem; border-radius: 50px; font-weight: 600; font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.2);">Seguridad de Datos</span>
+        <h2 style="font-size: 2.8rem; color: white; margin: 1.5rem 0 1rem; letter-spacing: -0.02em;">Privacidad de Grado Bancario</h2>
+        <p style="color: rgba(255,255,255,0.7); font-size: 1.15rem; max-width: 600px; margin: 0 auto 4rem; line-height: 1.6;">
+            Tu historia familiar es estrictamente confidencial. Hemos construido una bóveda digital para que solo tú decidas quién tiene acceso a tus raíces.
+        </p>
+
+        <div class="security-grid-pro">
+            <div class="sec-col-left">
+                <div class="sec-pro-card">
+                    <div class="sec-pro-icon">🔒</div>
+                    <h4 style="color: white;">Datos Encriptados</h4>
+                    <p style="color: rgba(255,255,255,0.6);">Información protegida en servidores seguros.</p>
+                </div>
+                <div class="sec-pro-card">
+                    <div class="sec-pro-icon">🔗</div>
+                    <h4 style="color: white;">Enlaces Controlados</h4>
+                    <p style="color: rgba(255,255,255,0.6);">Modo "Solo Lectura" para compartir por WhatsApp.</p>
+                </div>
+            </div>
+
+            <div class="sec-col-center">
+                <div class="phone-mockup-pro">
+                    <div class="phone-screen-pro">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                            <div style="width: 30px; height: 30px; border-radius: 50%; background: var(--accent);"></div>
+                            <div style="width: 20px; height: 3px; background: rgba(255,255,255,0.2); border-radius: 2px;"></div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.05); height: 60px; border-radius: 12px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.1);"></div>
+                        <div style="background: rgba(255,255,255,0.05); height: 60px; border-radius: 12px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.1);"></div>
+                        <div style="background: rgba(255,255,255,0.05); height: 60px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sec-col-right">
+                <div class="sec-pro-card">
+                    <div class="sec-pro-icon">☁️</div>
+                    <h4 style="color: white;">Respaldo Continuo</h4>
+                    <p style="color: rgba(255,255,255,0.6);">Fotos y documentos respaldados en la nube.</p>
+                </div>
+                <div class="sec-pro-card">
+                    <div class="sec-pro-icon">🛡️</div>
+                    <h4 style="color: white;">Filtro Anti-Robo</h4>
+                    <p style="color: rgba(255,255,255,0.6);">Protección inteligente contra bots maliciosos.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="pricing" class="landing-section container" style="text-align: center;">
+    <h2 style="font-size: 2.5rem; color: var(--primary); margin-bottom: 1rem;">Planes para cada Legado</h2>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin-bottom: 3rem;">Comienza gratis, mejora cuando tu familia crezca.</p>
+
+    <div class="pricing-grid">
+        <div class="pricing-card glass-panel">
+            <h3 class="plan-name">Semilla</h3>
+            <div class="plan-price"><strong>$0</strong><span>/mes</span></div>
+            <p class="plan-desc">Perfecto para empezar a trazar el árbol base.</p>
+            <ul class="plan-features">
+                <li>✓ Hasta 50 familiares</li>
+                <li>✓ Árbol genealógico visual</li>
+                <li>✓ Compartir por WhatsApp</li>
+                <li class="disabled">✗ Exportar a PDF</li>
+            </ul>
+            <button class="btn btn-outline" style="width: 100%; margin-top: auto;">Empezar Gratis</button>
+        </div>
+
+        <div class="pricing-card popular-plan">
+            <div class="popular-badge">Más Elegido</div>
+            <h3 class="plan-name text-accent">Legado</h3>
+            <div class="plan-price"><strong>$6.490</strong><span>/mes</span></div>
+            <p class="plan-desc" style="color: rgba(255,255,255,0.8);">Convierte tu investigación en un documento histórico.</p>
+            <ul class="plan-features" style="color: white; border-top-color: rgba(255,255,255,0.1);">
+                <li>✓ Familiares Ilimitados</li>
+                <li>✓ Subida de Fotos ilimitadas</li>
+                <li>✓ Analíticas de Linaje (ADN)</li>
+                <li>✓ Exportación a PDF (Libro)</li>
+            </ul>
+            <button class="btn btn-primary btn-glow" style="width: 100%; margin-top: auto;">Seleccionar Legado</button>
+        </div>
+
+        <div class="pricing-card glass-panel">
+            <h3 class="plan-name">Dinastía</h3>
+            <div class="plan-price"><strong>$24.990</strong><span>/mes</span></div>
+            <p class="plan-desc">Para historiadores y familias colaborativas.</p>
+            <ul class="plan-features">
+                <li>✓ Todo lo del plan Legado</li>
+                <li>✓ Múltiples administradores</li>
+                <li>✓ Soporte técnico prioritario</li>
+                <li>✓ Marca de agua personalizada</li>
+            </ul>
+            <button class="btn btn-outline" style="width: 100%; margin-top: auto;">Contactar Ventas</button>
+        </div>
+    </div>
+</section>
+
+<footer class="corporate-footer">
+    <div class="footer-container container">
+
+        <div class="footer-col brand-col">
+            <div class="logo logo-light" style="color: white; margin-bottom: 1rem;">
+                <div class="logo-icon" style="box-shadow: none; border: 1px solid rgba(255,255,255,0.2);"></div>
+                <span>Genealogía Moderna</span>
+            </div>
+            <p style="color: rgba(255,255,255,0.7); font-size: 0.95rem; line-height: 1.6; max-width: 300px;">
+                Empoderando a las familias a preservar su historia, documentos y legado generacional con tecnología y privacidad de grado bancario.
+            </p>
+        </div>
+
+        <div class="footer-col">
+            <h4>Plataforma</h4>
+            <a href="#">Inicio</a>
+            <a href="#">Características</a>
+            <a href="#">Seguridad de Datos</a>
+            <a href="#">Precios y Planes</a>
+        </div>
+
+        <div class="footer-col">
+            <h4>Legal</h4>
+            <a href="#">Política de Privacidad</a>
+            <a href="#">Términos de Servicio</a>
+            <a href="#">Cookies</a>
+        </div>
+
+        <div class="footer-col">
+            <h4>Empresa</h4>
+            <a href="#">Sobre Nosotros</a>
+            <a href="#">Contacto Soporte</a>
+            <div class="social-links" style="margin-top: 1rem; display: flex; gap: 1rem;">
+                <span style="font-size: 1.2rem; cursor: pointer;">𝕏</span>
+                <span style="font-size: 1.2rem; cursor: pointer;">in</span>
+                <span style="font-size: 1.2rem; cursor: pointer;">📷</span>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footer-bottom">
+        <p>&copy; 2026 Raíces Digitales. Todos los derechos reservados.</p>
+    </div>
+</footer>
 
 <div id="modal-login"
      class="modal hidden">
