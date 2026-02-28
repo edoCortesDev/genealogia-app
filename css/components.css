@@ -233,7 +233,6 @@
     position: relative;
     width: 400px;
     height: 420px;
-    margin: 0 auto; /* Centrado natural y perfecto */
     flex-shrink: 0;
 }
 
@@ -255,8 +254,11 @@
     stroke-dasharray: 400;
     stroke-dashoffset: 400;
 }
-.path-left, .path-right {
-    animation: drawLine 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards 2.5s;
+.path-left {
+    animation: drawLine 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards 3.2s;
+}
+.path-right {
+    animation: drawLine 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards 7.5s;
 }
 
 /* --- 2. TARJETAS BASE --- */
@@ -274,8 +276,8 @@
     transform: translateY(20px);
 }
 .card-child  { bottom: 20px; left: 120px; animation: cardDrop 0.8s ease forwards 0.2s; }
-.card-father { top: 20px; left: 20px; animation: cardDrop 0.8s ease forwards 3.5s; }
-.card-mother { top: 20px; right: 20px; animation: cardDrop 0.8s ease forwards 3.7s; }
+.card-father { top: 20px; left: 20px; animation: cardDrop 0.8s ease forwards 4.5s; }
+.card-mother { top: 20px; right: 20px; animation: cardDrop 0.8s ease forwards 8.8s; }
 
 /* Flotación continua */
 .card-inner {
@@ -292,8 +294,8 @@
     animation: fadeOut 0.5s ease forwards;
 }
 .card-child .anim-skeleton  { animation-delay: 1.2s; }
-.card-father .anim-skeleton { animation-delay: 4.5s; }
-.card-mother .anim-skeleton { animation-delay: 4.7s; }
+.card-father .anim-skeleton { animation-delay: 5.5s; }
+.card-mother .anim-skeleton { animation-delay: 9.8s; }
 
 .skel-photo { width: 65px; height: 65px; border-radius: 50%; background: rgba(50,73,64,0.08); }
 .skel-line  { height: 10px; border-radius: 5px; background: rgba(50,73,64,0.08); }
@@ -307,8 +309,8 @@
     animation: fadeIn 0.5s ease forwards;
 }
 .card-child .anim-data  { animation-delay: 1.2s; }
-.card-father .anim-data { animation-delay: 4.5s; }
-.card-mother .anim-data { animation-delay: 4.7s; }
+.card-father .anim-data { animation-delay: 5.5s; }
+.card-mother .anim-data { animation-delay: 9.8s; }
 
 /* --- 4. ESTILOS DE LOS DATOS --- */
 .photo-wrapper { position: relative; width: 65px; height: 65px; margin: 0 auto 10px; }
@@ -322,12 +324,73 @@
     animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
-.card-child .anim-flag  { animation-delay: 1.6s; }
-.card-father .anim-flag { animation-delay: 4.9s; }
-.card-mother .anim-flag { animation-delay: 5.1s; }
+/* BASE PARA EL EFECTO ESCRITURA: Ocultar texto y definir cursor */
+.anim-name, .anim-date {
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+    width: 0;
+    border-right: 2px solid transparent;
+}
 
-.anim-name { font-size: 0.95rem; color: var(--primary); margin: 0 0 2px 0; font-weight: 700; letter-spacing: -0.01em; }
-.anim-date { font-size: 0.75rem; color: var(--text-muted); margin: 0; }
+/* ESTILOS DEL NOMBRE */
+.anim-name {
+    font-size: 0.95rem;
+    color: var(--primary);
+    margin: 0 auto 2px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    max-width: fit-content;
+}
+
+/* ESTILOS DE LA FECHA */
+.anim-date {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin: 0 auto;
+    max-width: fit-content;
+}
+
+/* --- ADICIÓN DE LA COREOGRAFÍA DE ESCRITURA --- */
+
+/* 1. ACTO 1: LA HIJA (Sofía) */
+.card-child .anim-name {
+    animation:
+            typewriterName 1s steps(20) forwards 1.2s,
+            blinkCursor 0.5s step-end 4 forwards 1.2s;
+}
+.card-child .anim-date {
+    animation:
+            typewriterDate 0.8s steps(15) forwards 2.3s,
+            blinkCursor 0.5s step-end 3 forwards 2.3s;
+}
+.card-child .anim-flag  { animation-delay: 3.1s; }
+
+/* 2. ACTO 2: EL PADRE (Carlos) - Empieza en 5.5s */
+.card-father .anim-name {
+    animation:
+            typewriterName 1s steps(20) forwards 5.5s,
+            blinkCursor 0.5s step-end 4 forwards 5.5s;
+}
+.card-father .anim-date {
+    animation:
+            typewriterDate 0.8s steps(15) forwards 6.6s,
+            blinkCursor 0.5s step-end 3 forwards 6.6s;
+}
+.card-father .anim-flag { animation-delay: 7.4s; }
+
+/* 3. ACTO 3: LA MADRE (María) - Empieza en 9.8s */
+.card-mother .anim-name {
+    animation:
+            typewriterName 1s steps(20) forwards 9.8s,
+            blinkCursor 0.5s step-end 4 forwards 9.8s;
+}
+.card-mother .anim-date {
+    animation:
+            typewriterDate 0.8s steps(15) forwards 10.9s,
+            blinkCursor 0.5s step-end 3 forwards 10.9s;
+}
+.card-mother .anim-flag { animation-delay: 11.7s; }
 
 /* --- 5. KEYFRAMES --- */
 @keyframes cardDrop {
@@ -363,6 +426,26 @@
         transform: scale(0.72);
         margin-bottom: -3.5rem;
     }
+}
+
+/* --- NUEVOS: KEYFRAMES PARA EL EFECTO MÁQUINA DE ESCRIBIR --- */
+
+/* 1. Anima el ancho del texto de 0 a 100% (Ancho del nombre) */
+@keyframes typewriterName {
+    from { width: 0; }
+    to { width: 100%; }
+}
+
+/* 2. Anima el ancho del texto de 0 a 100% (Ancho de la fecha, más corta) */
+@keyframes typewriterDate {
+    from { width: 0; }
+    to { width: 100%; }
+}
+
+/* 3. Anima el parpadeo del cursor vertical (el borde derecho) */
+@keyframes blinkCursor {
+    from, to { border-color: transparent; }
+    50% { border-color: var(--primary); } /* Color de tu verde oscuro */
 }
 
 /* 9. TARJETAS DE ANALÍTICAS (INSIGHTS) */
