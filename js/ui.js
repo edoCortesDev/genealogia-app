@@ -1,6 +1,6 @@
 // ui.js
-import { checkAuth, logout, loginUsuario, registrarUsuario } from './auth.js';
-import { getSupabase } from './config.js';
+import {checkAuth, logout, loginUsuario, registrarUsuario} from './auth.js';
+import {getSupabase} from './config.js';
 
 // ==========================================
 // 🚦 EL GUARDIA DE TRÁFICO SEGURO
@@ -10,16 +10,15 @@ async function safeRouteUser(user) {
     const supabase = getSupabase();
 
     try {
-        const { data: profile, error } = await supabase
-            .from('profiles')
+        // AHORA BUSCAMOS EN LA BÓVEDA DE ROLES
+        const {data: roleData, error} = await supabase
+            .from('user_roles')
             .select('role')
-            .eq('id', user.id)
+            .eq('user_id', user.id)
             .single();
 
-        // Limpiamos el texto para que coincida exactamente con la lógica de admin.js
-        const userRole = profile?.role ? profile.role.toLowerCase().trim() : 'user';
+        const userRole = roleData?.role ? roleData.role.toLowerCase().trim() : 'user';
 
-        // Redirigimos sin dejar historial "basura" en el navegador
         if (userRole === 'admin') {
             window.location.replace('admin.html');
         } else {
@@ -27,7 +26,7 @@ async function safeRouteUser(user) {
         }
     } catch (err) {
         console.error("Error enrutando al usuario:", err);
-        window.location.replace('app.html'); // En caso de falla, va a la app normal
+        window.location.replace('app.html');
     }
 }
 
@@ -64,12 +63,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             const btnDashboard = document.getElementById('menu-dashboard');
             const btnTimeline = document.getElementById('menu-timeline');
 
-            if(btnManage) btnManage.style.display = 'none';
-            if(btnProfileBtn) btnProfileBtn.style.display = 'none';
-            if(btnShare) btnShare.style.display = 'none';
-            if(btnMobileMenu) btnMobileMenu.style.display = 'none';
-            if(btnDashboard) btnDashboard.style.display = 'none';
-            if(btnTimeline) btnTimeline.style.display = 'none';
+            if (btnManage) btnManage.style.display = 'none';
+            if (btnProfileBtn) btnProfileBtn.style.display = 'none';
+            if (btnShare) btnShare.style.display = 'none';
+            if (btnMobileMenu) btnMobileMenu.style.display = 'none';
+            if (btnDashboard) btnDashboard.style.display = 'none';
+            if (btnTimeline) btnTimeline.style.display = 'none';
 
             setupViewRouter();
             window.switchView('tree'); // Lanzamos directo al árbol
@@ -113,12 +112,27 @@ function setupLandingModals() {
         if (modalRegister) modalRegister.classList.add('hidden');
     };
 
-    if (btnLogin) btnLogin.addEventListener('click', (e) => { e.preventDefault(); openLogin(); });
-    if (btnSignup) btnSignup.addEventListener('click', (e) => { e.preventDefault(); openRegister(); });
-    if (btnHeroStart) btnHeroStart.addEventListener('click', (e) => { e.preventDefault(); openRegister(); });
-    if (linkToRegister) linkToRegister.addEventListener('click', (e) => { e.preventDefault(); openRegister(); });
+    if (btnLogin) btnLogin.addEventListener('click', (e) => {
+        e.preventDefault();
+        openLogin();
+    });
+    if (btnSignup) btnSignup.addEventListener('click', (e) => {
+        e.preventDefault();
+        openRegister();
+    });
+    if (btnHeroStart) btnHeroStart.addEventListener('click', (e) => {
+        e.preventDefault();
+        openRegister();
+    });
+    if (linkToRegister) linkToRegister.addEventListener('click', (e) => {
+        e.preventDefault();
+        openRegister();
+    });
 
-    closeBtns.forEach(btn => btn.addEventListener('click', (e) => { e.preventDefault(); closeAll(); }));
+    closeBtns.forEach(btn => btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeAll();
+    }));
     document.querySelectorAll('.modal-overlay').forEach(overlay => {
         overlay.addEventListener('click', closeAll);
     });
@@ -135,7 +149,7 @@ function setupLandingModals() {
             if (errorEl) errorEl.classList.add('hidden');
             showLoader();
 
-            const { data, error } = await loginUsuario(email, password);
+            const {data, error} = await loginUsuario(email, password);
             hideLoader();
 
             if (error) {
@@ -168,7 +182,7 @@ function setupLandingModals() {
             if (successEl) successEl.classList.add('hidden');
             showLoader();
 
-            const { data, error } = await registrarUsuario(email, password, firstName, lastName);
+            const {data, error} = await registrarUsuario(email, password, firstName, lastName);
             hideLoader();
 
             if (error) {
@@ -223,9 +237,9 @@ async function setupAppNav(user) {
     }
 
     const supabase = getSupabase();
-    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+    const { data: roleData } = await supabase.from('user_roles').select('role').eq('user_id', user.id).single();
 
-    if (profile && profile.role && profile.role.toLowerCase().trim() === 'admin') {
+    if (roleData && roleData.role && roleData.role.toLowerCase().trim() === 'admin') {
         const ul = dropdown.querySelector('ul');
         if (ul) {
             const li = document.createElement('li');
@@ -302,12 +316,30 @@ function setupViewRouter() {
         });
     }
 
-    if (btnHome) btnHome.addEventListener('click', (e) => { e.preventDefault(); window.switchView('dashboard'); });
-    if (logo) logo.addEventListener('click', (e) => { e.preventDefault(); window.switchView('dashboard'); });
-    if (btnTree) btnTree.addEventListener('click', (e) => { e.preventDefault(); window.switchView('tree'); });
-    if (btnTimeline) btnTimeline.addEventListener('click', (e) => { e.preventDefault(); window.switchView('timeline'); });
-    if (btnFamily) btnFamily.addEventListener('click', (e) => { e.preventDefault(); window.switchView('manage'); });
-    if (btnProfile) btnProfile.addEventListener('click', (e) => { e.preventDefault(); window.switchView('profile'); });
+    if (btnHome) btnHome.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.switchView('dashboard');
+    });
+    if (logo) logo.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.switchView('dashboard');
+    });
+    if (btnTree) btnTree.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.switchView('tree');
+    });
+    if (btnTimeline) btnTimeline.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.switchView('timeline');
+    });
+    if (btnFamily) btnFamily.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.switchView('manage');
+    });
+    if (btnProfile) btnProfile.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.switchView('profile');
+    });
 
     const btnBack = document.getElementById('btn-back-dashboard');
     if (btnBack) btnBack.addEventListener('click', () => window.switchView('dashboard'));

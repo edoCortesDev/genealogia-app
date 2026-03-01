@@ -15,18 +15,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     const supabase = getSupabase();
 
     try {
-        const { data: profile, error } = await supabase
-            .from('profiles')
+        // 1. Verificamos el nivel de acceso en la bóveda
+        const { data: roleData, error: roleError } = await supabase
+            .from('user_roles')
             .select('role')
-            .eq('id', user.id)
+            .eq('user_id', user.id)
             .single();
 
-        const userRole = profile?.role ? profile.role.toLowerCase().trim() : 'user';
+        const userRole = roleData?.role ? roleData.role.toLowerCase().trim() : 'user';
 
-        if (error || userRole !== 'admin') {
+        if (roleError || userRole !== 'admin') {
             window.location.replace('app.html');
             return;
         }
+
+        // 2. Traemos el nombre del perfil solo para la interfaz gráfica
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('first_name, last_name')
+            .eq('id', user.id)
+            .single();
 
         // --- SISTEMA INICIADO CORRECTAMENTE ---
         setupAdminNavigation();
